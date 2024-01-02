@@ -24,6 +24,8 @@ The GPT will first build a student profile by asking the student questions and t
 
 **University GPT is more than just an app, it's a transformation in education.** It's about putting students at the center of the learning process and unlocking their full potential.
 
+**University GPT is multi-tanent** You will be able to create many and any kind of university with it.
+
 **Think you're ready to experience the future of education? University GPT is waiting for you.**
 
 ## Gen AI University: Certified Cloud Applied Generative AI Developer
