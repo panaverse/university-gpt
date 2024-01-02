@@ -26,7 +26,7 @@ The GPT will first build a student profile by asking the student questions and t
 
 **Think you're ready to experience the future of education? University GPT is waiting for you.**
 
-**Gen AI University: Certified Cloud Applied Generative AI Developer**
+# **Gen AI University: Certified Cloud Applied Generative AI Developer**
 
 We will use University GPT go lauch a GenAI University which will start by offering a six month "Certified Cloud Applied Genertative AI Developer Program". To begin with we will be using GenAI to teach GenAI development. 
 
