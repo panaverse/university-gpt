@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from quizai.user import User
-from quizai.question_bank import Question, Option, SingleSelectMCQ, MultipleSelectMCQ, CaseStudy
+from university_gpt.student import User
+from university_gpt.question_bank import Question, Option, SingleSelectMCQ, MultipleSelectMCQ, CaseStudy
 
 
 class Quiz:

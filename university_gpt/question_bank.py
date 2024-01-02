@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from quizai.user import User
+from university_gpt.student import Student
 
 class QuestionBank:
-    def __init__(self, questionBankID:str, user: User, subpath: str, questionBankTitle:str) -> None:
+    def __init__(self, questionBankID:str, student: Student, subpath: str, questionBankTitle:str) -> None:
         self.questionBankID:str = questionBankID
-        self.user: User = user
+        self.user: Student = student
         self.subpath: str = subpath
         self.questionBankTitle : str = questionBankTitle
         self.topics: list[Topic]= []
