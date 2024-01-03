@@ -113,3 +113,5 @@ This unique program, powered by University GPT's cutting-edge AI technology, tak
 
 [Top 6 Use Cases of Generative AI in Education in 2024](https://research.aimultiple.com/generative-ai-in-education/)
 
+[AI could finally solve a problem that’s long plagued education](https://www.fastcompany.com/90959893/ai-could-finally-solve-a-problem-thats-long-plagued-education)
+
