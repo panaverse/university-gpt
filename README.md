@@ -115,3 +115,5 @@ This unique program, powered by University GPT's cutting-edge AI technology, tak
 
 [AI could finally solve a problem that’s long plagued education](https://www.fastcompany.com/90959893/ai-could-finally-solve-a-problem-thats-long-plagued-education)
 
+[Articles](https://www.matellio.com/blog/generative-ai-in-education/)
+
