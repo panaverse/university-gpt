@@ -103,3 +103,11 @@ This unique program, powered by University GPT's cutting-edge AI technology, tak
 
 [Personalized learning: How generative AI is revolutionizing education](https://neurosys.com/blog/personalized-learning-how-generative-ai-is-revolutionizing-education)
 
+[AI in Education: Creating Addictive, Personalized Learning Journeys](https://contxto.com/en/human-resources/ai-in-education-creating-addictive-personalized-learning-journeys/)
+
+[GenAI in Education](https://www.matellio.com/blog/generative-ai-in-education/)
+
+[Generative AI Step-by-Step Guide for Educators](https://www.linkedin.com/pulse/generative-ai-step-by-step-guide-educators-processica)
+
+[Generative AI in Education: Know Meaning, Benefits & Challenges](https://www.hurix.com/generative-ai-in-education-know-meaning-benefits-challenges/)
+
