@@ -111,3 +111,5 @@ This unique program, powered by University GPT's cutting-edge AI technology, tak
 
 [Generative AI in Education: Know Meaning, Benefits & Challenges](https://www.hurix.com/generative-ai-in-education-know-meaning-benefits-challenges/)
 
+[Top 6 Use Cases of Generative AI in Education in 2024](https://research.aimultiple.com/generative-ai-in-education/)
+
