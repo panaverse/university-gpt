@@ -97,7 +97,23 @@ This unique program, powered by University GPT's cutting-edge AI technology, tak
 
 **Don't miss this chance to become a Certified Cloud Applied Generative AI Engineer and shape the future of technology.**
 
+## References:
 
+[Generative AI: Transforming education into a personalized, addictive learning experience](https://techcrunch.com/2024/01/02/generative-ai-transforming-education-into-a-personalized-addictive-learning-experience/)
 
+[Personalized learning: How generative AI is revolutionizing education](https://neurosys.com/blog/personalized-learning-how-generative-ai-is-revolutionizing-education)
 
+[AI in Education: Creating Addictive, Personalized Learning Journeys](https://contxto.com/en/human-resources/ai-in-education-creating-addictive-personalized-learning-journeys/)
+
+[GenAI in Education](https://www.matellio.com/blog/generative-ai-in-education/)
+
+[Generative AI Step-by-Step Guide for Educators](https://www.linkedin.com/pulse/generative-ai-step-by-step-guide-educators-processica)
+
+[Generative AI in Education: Know Meaning, Benefits & Challenges](https://www.hurix.com/generative-ai-in-education-know-meaning-benefits-challenges/)
+
+[Top 6 Use Cases of Generative AI in Education in 2024](https://research.aimultiple.com/generative-ai-in-education/)
+
+[AI could finally solve a problem that’s long plagued education](https://www.fastcompany.com/90959893/ai-could-finally-solve-a-problem-thats-long-plagued-education)
+
+[GenAI in Education](https://www.matellio.com/blog/generative-ai-in-education/)
 
