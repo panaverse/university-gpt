@@ -1,8 +1,11 @@
 
 
-University-GPT Project and AI Faculty Training
+University-GPT Project and GenAI Faculty Training
 
+I will be doing coding directly with these developers, they in turn will be connected to all the GenAI students.
 
+University GPT Project:
+https://github.com/panaverse/university-gpt/blob/main/team.md
 
 All Pakistan Project Managers:
 Qasim, Amin, and Hamza from Karachi
@@ -32,7 +35,7 @@ Zeeshan, Lahore
 
 Developers have been selected on the basis of Python Scores or showing AI projects.
 
-We will be selecting 
+We will be adding to this list as we move forward.
 
 
 https://chat.whatsapp.com/DKWImLsfDp35kZzDG7wqwS
