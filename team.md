@@ -39,3 +39,24 @@ We will be adding to this list as we move forward.
 
 
 https://chat.whatsapp.com/DKWImLsfDp35kZzDG7wqwS
+
+
+Junaid From Lahore:
+
+Alhamdulillah sir deployed full ToDo fastapi microservice and nextjs frontend on vercel:
+
+Vercel Deployment:
+
+https://cax.vercel.app/
+
+In Fastapi we have same layered architecture (web, service, data, tests) & tests (unit + e2e). And on frontend we are now dynamic at the speed of static. (All requests are force-cached and revalidated on each action).
+
+In todo project vercel deployment students may face these errors:
+
+a. A Serverless Function has exceeded the unzipped maximum size of 250 MB
+Workaround: Remove ".next" and redeploy.
+
+b. No more than 12 Serverless Functions can be added to a Deployment on the Hobby plan.
+Workaround: In the api folder add "_" prefix with all python files except for fastapi main file.  Else each py file counts as a serverless function.
+
+•⁠  ⁠For vercel deployment the python version is 3.9 but it didn't cause any issue just typing update (using Union instead of '|').

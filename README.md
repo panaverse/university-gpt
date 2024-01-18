@@ -4,7 +4,23 @@
 
 University GPT is a conversational tool and a Generative AI app which personalizes education for each and every student. Students can access it using two kinds of interfaces: Graphic User Interface (GUI) and Conversational User Interface (Conversational UI).
 
-The GUI will be built by using the OpenAI Assistant APIs and Conversational UI by using OpenAI GPTs. Both will be interacting with our University APIs.
+The GUI will be built by using the OpenAI Assistant APIs and Conversational UI by using OpenAI GPTs. Both will be interacting with our University APIs. We will build both but first we will build the University Custom GPT.
+
+## To Get Started Learn about Custom GPTs and Actions
+
+[Introducing Custom GPTs](https://openai.com/blog/introducing-gpts)
+
+[Actions](https://platform.openai.com/docs/actions/introduction)
+
+[GPT Store](https://openai.com/blog/introducing-the-gpt-store)
+
+[GPTs vs Assistants](https://help.openai.com/en/articles/8673914-gpts-vs-assistants)
+
+[Getting Started](https://platform.openai.com/docs/actions/getting-started)
+
+[Action authentication](https://platform.openai.com/docs/actions/authentication)
+
+## Lets Get Started
 
 The GPT will first build a student profile by asking the student questions and taking quizzes in order to construct the student capability matrix. The matrix will continuesly be updated as the learning process moves forward. The contents of the course the students take will be customized for each student given his or her capability matrix. After a topic's content is presented to the student to learn he/she will immediately be required to take a quiz to judge his/her understanding of the subject matter. The next step in the learning process will be generated given the results of the quiz. The results will also be used to update the capability matrix of the student.  
 
