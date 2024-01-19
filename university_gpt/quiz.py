@@ -1,22 +1,20 @@
 from abc import ABC, abstractmethod
-from university_gpt.student import User
-from university_gpt.question_bank import Question, Option, SingleSelectMCQ, MultipleSelectMCQ, CaseStudy
+from university_gpt.user import Student
+from university_gpt.topic import Question, Option, SingleSelectMCQ, MultipleSelectMCQ, CaseStudy
 
 
 class Quiz:
-    def __init__(self, quizID:str, questionBankID:str, user: User, subpath: str, quizTitle:str) -> None:
+    def __init__(self, quizID:str, student: Student, subpath: str, quizTitle:str) -> None:
         self.quizID:str = quizID
-        self.questionBankID = questionBankID
-        self.user: User = user
+        self.student: Student = student
         self.subpath: str = subpath
         self.quizTitle : str = quizTitle
         self.quizTopics: list[QuizTopic]= []
 
 
 class QuizTopic:
-    def __init__(self, quizID: str, questionBankID: str, topicID:str) -> None:
+    def __init__(self, quizID: str, topicID:str) -> None:
         self.quizID = quizID
-        self.questionBankID: str = questionBankID
         self.topicID: str = topicID
         self.subtopics : list[QuizTopic] = []
         self.questions : list[Question] = []
@@ -71,4 +69,7 @@ class CaseStudyAnswer(Answer):
         pass
             
 class FreeTextAnswer(Answer):
+    pass
+
+class CodeAnswer(Answer):
     pass
