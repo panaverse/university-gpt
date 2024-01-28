@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 class User(ABC):
-    def __init__(self, email:str, mobile_number:str, name: str)->None
+    def __init__(self, email:str, mobile_number:str, name: str)->None:
         self.email = email
         self.mobile_number = mobile_number
         self.name = name
