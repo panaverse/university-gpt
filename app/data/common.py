@@ -13,11 +13,17 @@ class UserType(enum.Enum):
     STUDENT = "student"
     INSTRUCTOR = "instructor"    
 
-class QuestionType(enum.Enum):
-    SINGLE_SLETECT = "single_select"
-    MULTIPE_SELECT = "multiple_select"
-    FREE_TEXT = "free_text"
-    CODING = "coding"  
+class QuizStatusEnum(enum.Enum):
+    TO_DO = "TO_DO"
+    IN_PROGRESS = "IN_PROGRESS"
+    SUBMITTED = "SUBMITTED"
+    COMPLETED = "COMPLETED"
+
+
+class QuestionDifficultyEnum(enum.Enum):
+    EASY = "easy"
+    MEDIUM = "medium"
+    HARD = "hard"
 
 class Base(DeclarativeBase, TimestampMixin):
     pass
