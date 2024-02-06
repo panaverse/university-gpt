@@ -9,6 +9,7 @@ sqlmodel = "*"
 uvicorn = "*"
 pydantic-settings = "*"
 psycopg2-binary = "*"
+python-dotenv = "*"
 
 [dev-packages]
 black = "*"
