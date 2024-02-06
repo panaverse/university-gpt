@@ -1,28 +1,29 @@
-from sqlmodel import Session, SQLModel, create_engine
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from contextlib import asynccontextmanager
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv, find_dotenv
+from os import getenv
 
-from api.config import settings
+# Load environment variables
+load_dotenv(find_dotenv())
 
-engine = create_engine(settings.DATABASE_URI, echo=True)
+# Database connection string
+DATABASE_URL = getenv("DATABASE_URL")
+
+# Create an asynchronous engine for the database
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=True,
+    future=True,
+    pool_size=20,
+    max_overflow=20,
+    pool_recycle=3600,
+)
 
 
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
-
-# def get_session():
-#     with Session(engine) as session:
-#         yield session
-
-# Dependency with retry mechanism for OperationalError
-def get_session():
-        db = Session(engine)
-        try:
-            yield db
-        except OperationalError as e:
-            print(f"SSL connection error occurred: {e}, retrying...")
-        except SQLAlchemyError as e:
-            print(f"Database error occurred: {e}")
-        finally:
-            db.close()
+# Ayschronous Context manager for handling database sessions
+@asynccontextmanager
+async def get_session() -> AsyncSession:
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with async_session() as session:
+        yield session
