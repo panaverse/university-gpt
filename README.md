@@ -6,6 +6,22 @@ University GPT is a conversational tool and a Generative AI app which personaliz
 
 The GUI will be built by using the OpenAI Assistant APIs and Conversational UI by using OpenAI GPTs. Both will be interacting with our University APIs. We will build both but first we will build the University Custom GPT.
 
+
+### Quickstart
+1.  <b>Start the App</b>:
+
+    ```
+    pip install pipenv
+    pipenv install uvicorn
+    ```
+  - Using Python:
+    `pipenv run python asgi.py`
+
+  - sing Docker:
+    `docker build -t sqlmodel-api:latest . && docker run -p 8080:8080 sqlmodel-api:latest`
+
+2. <b>Use Openapi at</b>: `http://localhost:8080/#/`
+
 ## To Get Started Learn about Custom GPTs and Actions
 
 [Introducing Custom GPTs](https://openai.com/blog/introducing-gpts)

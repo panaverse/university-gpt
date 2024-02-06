@@ -1,5 +1,0 @@
-setuptools
-python-dotenv
-openai
-psycopg2-binary
-SQLAlchemy
