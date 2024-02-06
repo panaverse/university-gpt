@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
-from sqlmodel import Session
+from typing import Annotated
 
-from api.core.database import get_session
+from api.core.database import get_session, AsyncSession
 from api.quiz.topic.crud import create_topic, read_topics, get_topic_by_id, get_topic_by_name, update_topic, delete_topic
 
 from api.quiz.topic.models import TopicCreate, TopicResponse, TopicUpdate
@@ -13,7 +13,7 @@ logger = logger_config(__name__)
 
 # Create new Recursive Topic
 @router.post("", response_model=TopicResponse)
-def create_a_topic(topic: TopicCreate, db: Session = Depends(get_session)):
+async def create_a_topic(topic: TopicCreate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Create a new recursive topic.
 
@@ -25,14 +25,14 @@ def create_a_topic(topic: TopicCreate, db: Session = Depends(get_session)):
         TopicResponse: The created topic.
     """
     logger.info("%s.create_a_topic: %s", __name__, topic)
-    return create_topic(topic=topic, db=db)
+    return await create_topic(topic=topic, db=db)
 
 # Get all Topics
 @router.get("", response_model=list[TopicResponse])
-def get_topics(
-    offset: int = 0,
-    limit: int = Query(default=100, lte=100),
-    db: Session = Depends(get_session),
+async def get_topics(
+    db: Annotated[AsyncSession, Depends(get_session)],
+    offset: int = Query(default=0, lte=10),
+    limit: int = Query(default=10, lte=100),
 ):
     """
     Get all topics.
@@ -46,11 +46,11 @@ def get_topics(
         list[TopicResponse]: The list of topics.
     """
     logger.info("%s.get_topics: triggered", __name__)
-    return read_topics(offset=offset, limit=limit, db=db)
+    return await read_topics(offset=offset, limit=limit, db=db)
 
 # Get a Topic by ID
 @router.get("/{topic_id}", response_model=TopicResponse)
-def call_get_topic_by_id(topic_id: int, db: Session = Depends(get_session)):
+async def call_get_topic_by_id(topic_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Get a topic by ID.
 
@@ -62,11 +62,11 @@ def call_get_topic_by_id(topic_id: int, db: Session = Depends(get_session)):
         TopicResponse: The topic with the specified ID.
     """
     logger.info("%s.get_topic_by_id: %s", __name__, topic_id)
-    return get_topic_by_id(id=topic_id, db=db)
+    return await get_topic_by_id(id=topic_id, db=db)
 
 # Get a Topic by Name
 @router.get("/name/{name}", response_model=TopicResponse)
-def call_get_topic_by_name(name: str, db: Session = Depends(get_session)):
+async def call_get_topic_by_name(name: str, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Get a topic by name.
 
@@ -78,11 +78,11 @@ def call_get_topic_by_name(name: str, db: Session = Depends(get_session)):
         TopicResponse: The topic with the specified name.
     """
     logger.info("%s.get_topic_by_name: %s", __name__, name)
-    return get_topic_by_name(name=name, db=db)
+    return await get_topic_by_name(name=name, db=db)
 
 # Update a Topic by ID
 @router.patch("/{topic_id}", response_model=TopicResponse)
-def update_topic_by_id(topic_id: int, topic: TopicUpdate, db: Session = Depends(get_session)):
+async def update_topic_by_id(topic_id: int, topic: TopicUpdate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Update a topic by ID.
 
@@ -95,11 +95,11 @@ def update_topic_by_id(topic_id: int, topic: TopicUpdate, db: Session = Depends(
         TopicResponse: The updated topic.
     """
     logger.info("%s.update_topic_by_id: %s", __name__, topic_id)
-    return update_topic(id=topic_id, topic=topic, db=db)
+    return await update_topic(id=topic_id, topic=topic, db=db)
 
 # Delete a Topic by ID
 @router.delete("/{topic_id}")
-def delete_topic_by_id(topic_id: int, db: Session = Depends(get_session)):
+async def delete_topic_by_id(topic_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Delete a topic by ID.
 
@@ -108,4 +108,4 @@ def delete_topic_by_id(topic_id: int, db: Session = Depends(get_session)):
         db (optional) : Database Dependency Injection.
     """
     logger.info("%s.delete_topic_by_id: %s", __name__, topic_id)
-    return delete_topic(id=topic_id, db=db)
+    return await delete_topic(id=topic_id, db=db)

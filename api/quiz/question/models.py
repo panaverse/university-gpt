@@ -2,7 +2,6 @@ from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 from datetime import datetime
 
 from api.core.utils.generic_models import QuestionDifficultyEnum, QuestionTypeEnum
-from typing import Optional
 
 class QuestionBankBase(SQLModel):
     question_text: str
@@ -11,6 +10,18 @@ class QuestionBankBase(SQLModel):
     difficulty: QuestionDifficultyEnum = QuestionDifficultyEnum.easy
     topic_id: int = Field(foreign_key='topic.id')
     question_type: QuestionTypeEnum = Field(default=QuestionTypeEnum.single_select_mcq)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "question_text": "What is the primary purpose of interfaces in TypeScript?",
+                "is_verified": True,
+                "points": 1,
+                "difficulty": "easy",
+                "topic_id": 1,
+                "question_type": "single_select_mcq"
+            }
+        }
 
 
 class QuestionBank(QuestionBankBase, table=True):
@@ -48,10 +59,19 @@ class QuestionBankUpdate(QuestionBankBase):
 
 class MCQOptionBase(SQLModel):
     option_text: str = Field(default=None, max_length=500)
-    is_correct: bool = False
+    is_correct: bool = Field(default=False)
 
     question_id: int = Field(
         foreign_key='questionbank.id')
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "option_text": "The use of interfaces to type-check an object's structure.",
+                "is_correct": True,
+                "question_id": 1
+            }
+        }
 
 class MCQOption(MCQOptionBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -71,7 +91,6 @@ class MCQOptionCreate(MCQOptionBase):
 
 class MCQOptionRead(MCQOptionBase):
     id: int
-    question: QuestionBank | None = None
     created_at: datetime
     updated_at: datetime
 

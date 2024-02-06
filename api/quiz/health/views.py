@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
-from sqlmodel import Session
+from typing import Annotated
 
-from api.core.database import Session, get_session
+from api.core.database import AsyncSession, get_session
 from api.quiz.health.crud import get_health, get_stats
 from api.quiz.health.models import Health, Stats
 from api.core.utils.logger import logger_config
@@ -16,8 +16,8 @@ logger = logger_config(__name__)
     status_code=status.HTTP_200_OK,
     responses={200: {"model": Health}},
 )
-def health(db: Session = Depends(get_session)):
-    return get_health(db=db)
+async def health(db: Annotated[AsyncSession, Depends(get_session)]):
+    return await get_health(db=db)
 
 
 @router.get(
@@ -26,5 +26,5 @@ def health(db: Session = Depends(get_session)):
     status_code=status.HTTP_200_OK,
     responses={200: {"model": Stats}},
 )
-def health_stats(db: Session = Depends(get_session)):
-    return get_stats(db=db)
+async def health_stats(db: Annotated[AsyncSession, Depends(get_session)]):
+    return await get_stats(db=db)

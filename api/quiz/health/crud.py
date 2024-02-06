@@ -1,34 +1,37 @@
-from fastapi import Depends
-from sqlmodel import Session, text
+from sqlmodel import text
 
 from api.config import settings
-from api.core.database import get_session
+from api.core.database import AsyncSession
 from api.quiz.health.models import Health, Stats, Status
 from api.core.utils.logger import logger_config
 
 logger = logger_config(__name__)
 
 
-def get_health(db: Session) -> Health:
-    db_status = health_db(db=db)
+async def get_health(db: AsyncSession) -> Health:
+    db_status = await health_db(db=db)
     logger.info("%s.get_health.db_status: %s", __name__, db_status)
     return Health(app_status=Status.OK, db_status=db_status, environment=settings.ENV)
 
 
-def get_stats(db: Session) -> Stats:
-    stats = Stats(topics=count_from_db("topic", db), questions=count_from_db("questionbank", db))
+async def get_stats(db: AsyncSession) -> Stats:
+    stats = Stats(
+        topics=await count_from_db("topic", db), 
+        questions=await count_from_db("questionbank", db)
+        )
     logger.info("%sget_stats: %s", __name__, stats)
     return stats
 
 
-def count_from_db(table: str, db: Session = Depends(get_session)):
-    teams = db.exec(text(f"SELECT COUNT(id) FROM {table};")).one_or_none()
+async def count_from_db(table: str, db: AsyncSession):
+    results = await db.execute(text(f"SELECT COUNT(id) FROM {table};"))
+    teams = results.scalars().one_or_none()
     return teams[0] if teams else 0
 
 
-def health_db(db: Session = Depends(get_session)) -> Status:
+async def health_db(db: AsyncSession) -> Status:
     try:
-        db.exec(text(f"SELECT COUNT(id) FROM topic;")).one_or_none()
+        await db.execute(text(f"SELECT COUNT(id) FROM topic;"))
         return Status.OK
     except Exception as e:
         logger.exception(e)

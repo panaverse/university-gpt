@@ -8,6 +8,19 @@ The GUI will be built by using the OpenAI Assistant APIs and Conversational UI b
 
 
 ### Quickstart
+
+0. Run Migrations using alembic
+
+In alembic.ini add the same async neon serverless postgress database url to sqlalchemy.url as in .env file.
+
+In migrations folder create a `versions` folder if not present and rm any files present there.
+
+```
+pipenv run alembic revision --autogenerate -m "Add DataLayer v1"
+
+pipenv run alembic upgrade head  
+```
+
 1.  <b>Start the App</b>:
 
     ```

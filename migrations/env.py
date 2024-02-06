@@ -8,6 +8,9 @@ from alembic import context
 from os import getenv
 
 #from services.quiz.university.models import University, Program, Course
+from api.quiz.question.models import QuestionBank, MCQOption
+from api.quiz.topic.models import Topic
+from api.quiz.university.models import University, Program, Course
 
 load_dotenv(find_dotenv())
 DATABASE_URL = getenv("DATABASE_URL")

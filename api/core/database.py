@@ -10,6 +10,9 @@ load_dotenv(find_dotenv())
 # Database connection string
 DATABASE_URL = getenv("DATABASE_URL")
 
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable not set")
+
 # Create an asynchronous engine for the database
 engine = create_async_engine(
     DATABASE_URL,
@@ -22,8 +25,8 @@ engine = create_async_engine(
 
 
 # Ayschronous Context manager for handling database sessions
-@asynccontextmanager
+# @asynccontextmanager #TODO: Do we need this? It was causing errors for db.execute
 async def get_session() -> AsyncSession:
-    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async_session = sessionmaker(engine, class_ = AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session

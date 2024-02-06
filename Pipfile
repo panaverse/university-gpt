@@ -10,6 +10,9 @@ uvicorn = "*"
 pydantic-settings = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
+asyncpg = "*"
+alembic = "*"
+greenlet = "*"
 
 [dev-packages]
 black = "*"

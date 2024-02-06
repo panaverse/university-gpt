@@ -9,7 +9,6 @@ class UniversityBase(SQLModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "id": 1,
                 "name": "PIAIC",
                 "description": "Pakistan's largest AI institute"
                
@@ -18,12 +17,11 @@ class UniversityBase(SQLModel):
 
 class ProgramBase(SQLModel):
     name: str
-    description: str = None
+    description: str | None = None
 
     class Config:
         json_schema_extra = {
             "example": {
-                "id": 1,
                 "name": "AI",
                 "description": "Artificial Intelligence",
                 "university_id": 1
@@ -62,25 +60,25 @@ class UniversityCreate(UniversityBase):
     pass
 
 class ProgramCreate(ProgramBase):
-    pass
+    university_id: int 
 
 class CourseCreate(CourseBase):
-    pass
+    program_id: int
 
 # Models for the request and response reading
 class UniversityRead(UniversityBase):
-    id: int
+    university_id: int
     name: str | None = None
     description: str | None = None
 
 class ProgramRead(ProgramBase):
-    id: int
+    program_id: int
     name: str | None = None
     description: str | None = None
     university_id: int | None = None
 
 class CourseRead(CourseBase):
-    id: int
+    course_id: int
     name: str | None = None
     description: str | None = None
     program_id: int | None = None

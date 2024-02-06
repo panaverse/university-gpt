@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database.db import get_session
-from services.quiz.university.crud import (
+from api.core.database import get_session
+from api.quiz.university.crud import (
     create_university,create_program,create_course,
     read_universities,read_programs,read_courses,
     read_university,read_program,read_course,
     update_university,update_program,update_course,
     delete_university,delete_program,delete_course,
 )
-from services.quiz.university.models import (
+from api.quiz.university.models import (
     UniversityCreate, UniversityRead, UniversityUpdate,
     ProgramCreate, ProgramRead, ProgramUpdate,
     CourseCreate, CourseRead, CourseUpdate,

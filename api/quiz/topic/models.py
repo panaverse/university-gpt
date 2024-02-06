@@ -11,10 +11,17 @@ class TopicBase(SQLModel):
     parent_id: int | None = Field(
         foreign_key='topic.id',  # notice the lowercase "t" to refer to the database table name
         default=None    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "title": "OOPs in Typescript",
+                "description": "Learn OOPS in Typescript 5.0+",
+                "parent_id": 1 # This is Optional for Subtopics
+            }
+        }
 
 # It will include Topics, Subtopics, CaseStudies Given for Assessments
-
-
 class Topic(TopicBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True, index=True)
