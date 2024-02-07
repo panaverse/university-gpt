@@ -25,8 +25,10 @@ async def get_stats(db: AsyncSession) -> Stats:
 
 async def count_from_db(table: str, db: AsyncSession):
     results = await db.execute(text(f"SELECT COUNT(id) FROM {table};"))
+    if results is None:
+        return 0
     teams = results.scalars().one_or_none()
-    return teams[0] if teams else 0
+    return teams if isinstance(teams, int) else teams[0] if teams else 0
 
 
 async def health_db(db: AsyncSession) -> Status:

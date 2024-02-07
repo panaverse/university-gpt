@@ -1,36 +1,59 @@
 from fastapi import HTTPException, status
 from sqlmodel import select, and_
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from api.core.database import AsyncSession
 from api.quiz.topic.models import Topic, TopicCreate, TopicUpdate, Content, ContentCreate, ContentUpdate
+from api.core.utils.logger import logger_config
+
+logger = logger_config(__name__)
 
 # Create a new topic [Recursive Topics]
-async def create_topic(topic: TopicCreate, db: AsyncSession ):
+async def create_topic(topic: TopicCreate, db: AsyncSession) -> Topic:
     """
     Create a new topic or subtopic in the database.
 
     Args:
         topic (TopicCreate): The topic data to be created.
-        db (optional) : Database Dependency Injection.
+        db (AsyncSession): The database session.
 
     Returns:
         Topic: The created topic.
 
     Raises:
-        None
+        ValueError: For data integrity issues.
+        SQLAlchemyError: For database operation errors.
+        Exception: For unexpected errors.
     """
+    try:
+        # Validate and add associated contents if present
+        if topic.contents:
+            topic.contents = [Content.model_validate(content) for content in topic.contents]
 
-    if topic.contents:
-        topic.contents = [Content.model_validate(content) for content in topic.contents]
+        # Transform TopicCreate schema into Topic model instance
+        topic_to_db = Topic.model_validate(topic)
 
-    topic_to_db = Topic.model_validate(topic)
+        # Add the new topic to the database and commit the transaction
+        db.add(topic_to_db)
+        await db.commit()
+        db.refresh(topic_to_db)
+        
+        return topic_to_db
 
+    except IntegrityError as e:
+        await db.rollback()  # Ensure rollback is awaited
+        logger.error(f"CREATE_TOPIC: An integrity error occurred while creating the topic: {e}")
+        raise ValueError("Data integrity issue.") from e
 
-    db.add(topic_to_db)
-    await db.commit()
-    db.refresh(topic_to_db)
-    print(f"TRANSFORMATION CONTENT in Topic TO DB: {topic_to_db.contents}")
-    return topic_to_db
+    except SQLAlchemyError as e:
+        await db.rollback()
+        logger.error(f"CREATE_TOPIC: A database error occurred while creating the topic: {e}")
+        raise SQLAlchemyError("Database operation failed.") from e
+
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"CREATE_TOPIC: An unexpected error occurred: {e}")
+        raise Exception("An unexpected error occurred.") from e
 
 # Get all topics
 async def read_topics(offset: int, limit: int, db: AsyncSession ):
@@ -44,19 +67,67 @@ async def read_topics(offset: int, limit: int, db: AsyncSession ):
 
     Returns:
         List[Topic]: A list of Topic objects.
+    
+    Raises:
+        HTTPException: If no topics are found or for other HTTP-related errors.
+        SQLAlchemyError: For database operation errors.
+        Exception: For unexpected errors.
 
     """
-    result = await db.execute(select(Topic).offset(offset).limit(limit))
-    topics = result.scalars().all()
-    return topics
+    try:
+        result = await db.execute(select(Topic).offset(offset).limit(limit))
+        topics = result.scalars().all()
+        if not topics:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No topics found")
+        return topics
+    except HTTPException as e:
+        await db.rollback()
+        logger.error(f"READ_TOPICS: No topics found: {e}")
+        raise e  # Re-raise the HTTPException with the original status code and detail
+    except SQLAlchemyError as e:
+        await db.rollback()  # Ensure rollback is awaited
+        logger.error(f"READ_TOPICS: A database error occurred while retrieving topics: {e}")
+        raise SQLAlchemyError("Database operation failed.") from e
+    except Exception as e:
+        await db.rollback()  # Ensure rollback is awaited
+        logger.error(f"READ_TOPICS: An unexpected error occurred: {e}")
+        raise Exception("An unexpected error occurred.") from e
 
 # Get a Topic by Name
-async def get_topic_by_name(name: str, db: AsyncSession ):
-    result = await db.execute(select(Topic).where(Topic.title == name))
-    topic = result.scalars().first()
-    if not topic:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
-    return topic
+async def get_topic_by_name(name: str, db: AsyncSession):
+    """
+    Retrieves a topic from the database based on its name.
+
+    Args:
+        name (str): The name of the topic to retrieve.
+        db (AsyncSession): The database session.
+
+    Returns:
+        Topic: The retrieved topic.
+
+    Raises:
+        ValueError: If the topic is not found in the database.
+        SQLAlchemyError: If a database operation fails.
+        Exception: If an unexpected error occurs.
+    """
+    try:
+        result = await db.execute(select(Topic).where(Topic.title == name))
+        topic = result.scalars().first()
+        if not topic:
+            raise ValueError("Topic not found")
+        return topic
+    
+    except ValueError as e:
+        await db.rollback()  # Ensure rollback is awaited
+        raise e
+
+    except SQLAlchemyError as e:
+        await db.rollback()  # Ensure rollback is awaited
+        raise SQLAlchemyError("Database operation failed.") from e
+
+    except Exception as e:
+        await db.rollback()  # Ensure rollback is awaited
+        raise Exception("An unexpected error occurred.") from e
 
 # Get a Topic by ID
 async def get_topic_by_id(id: int, db: AsyncSession ):
@@ -71,12 +142,27 @@ async def get_topic_by_id(id: int, db: AsyncSession ):
         Topic: The retrieved topic.
 
     Raises:
-        HTTPException: If the topic with the given ID is not found.
+       ValueError: If the topic is not found in the database.
+        SQLAlchemyError: If a database operation fails.
+        Exception: If an unexpected error occurs.
     """
-    topic = await db.get(Topic, id)
-    if not topic:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
-    return topic
+    try:
+        topic = await db.get(Topic, id)
+        if not topic:
+            raise ValueError("Topic not found")
+        return topic
+    
+    except ValueError as e:
+        await db.rollback()  # Ensure rollback is awaited
+        raise e
+
+    except SQLAlchemyError as e:
+        await db.rollback()  # Ensure rollback is awaited
+        raise SQLAlchemyError("Database operation failed.") from e
+
+    except Exception as e:
+        await db.rollback()  # Ensure rollback is awaited
+        raise Exception("An unexpected error occurred.") from e
 
 # Update a Topic by ID
 async def update_topic(id: int, topic: TopicUpdate, db: AsyncSession ):
@@ -92,18 +178,31 @@ async def update_topic(id: int, topic: TopicUpdate, db: AsyncSession ):
         Topic: The updated topic.
         
     Raises:
-        HTTPException: If the topic with the given ID is not found.
+        ValueError: If the topic with the given ID is not found.
     """
-    topic_to_update = await db.get(Topic, id)
-    if not topic_to_update:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
-    topic_data = topic.model_dump(exclude_unset=True)
-    for key, value in topic_data.items():
-        setattr(topic_to_update, key, value)
-    db.add(topic_to_update)
-    await db.commit()
-    await db.refresh(topic_to_update)
-    return topic_to_update
+    try:
+        topic_to_update = await db.get(Topic, id)
+        if not topic_to_update:
+            raise ValueError("Topic not found")
+        topic_data = topic.model_dump(exclude_unset=True)
+        for key, value in topic_data.items():
+            setattr(topic_to_update, key, value)
+        db.add(topic_to_update)
+        await db.commit()
+        await db.refresh(topic_to_update)
+        return topic_to_update
+    except ValueError:
+        await db.rollback()
+        logger.error(f"UPDATE_TOPIC: Topic not found")
+        raise ValueError("Topic not found")
+    except SQLAlchemyError as e:
+        await db.rollback()
+        logger.error(f"UPDATE_TOPIC: Error updating topic: {str(e)}")
+        raise SQLAlchemyError("Error updating topic")
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"UPDATE_TOPIC: Error updating topic: {str(e)}")
+        raise Exception("Error updating topic")
 
 # Delete a Topic by ID
 async def delete_topic(id: int, db: AsyncSession ):
@@ -128,8 +227,10 @@ async def delete_topic(id: int, db: AsyncSession ):
         await db.commit()
         return {"message": "Topic deleted successfully"}
     except HTTPException:
-        raise
+        await db.rollback()
+        raise e
     except Exception as e:
+        await db.rollback()
         print(f"Error deleting topic: {str(e)}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error deleting topic")
     
@@ -146,13 +247,38 @@ async def create_new_content(content: ContentCreate, db: AsyncSession ):
         Content: The created content.
 
     Raises:
-        None
+        HTTPException: For specific handled errors such as IntegrityError.
+        Exception: For unexpected errors.
     """
-    content_to_db = Content.model_validate(content)
-    db.add(content_to_db)
-    await db.commit()
-    db.refresh(content_to_db)
-    return content_to_db
+    try:
+        content_to_db = Content.model_validate(content)
+        db.add(content_to_db)
+        await db.commit()
+        await db.refresh(content_to_db)
+        return content_to_db
+    except IntegrityError as e:
+        await db.rollback()
+        # Logging the error might help in debugging, ensure logger is configured properly
+        logger.error(f"CREATE_NEW_CONTENT: Integrity error occurred: {e}")
+        # Raising HTTPException to inform the caller about the specific issue
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Foreign key constraint failed, the topic might not exist."
+        ) from e
+    except SQLAlchemyError as e:
+        await db.rollback()
+        logger.error(f"CREATE_NEW_CONTENT: Database operation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database operation failed."
+        ) from e
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"CREATE_NEW_CONTENT: Unexpected error occurred: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred."
+        ) from e
 
 # Get all content for a topic
 async def read_content_for_topic(topic_id: int, db: AsyncSession ):
@@ -167,9 +293,32 @@ async def read_content_for_topic(topic_id: int, db: AsyncSession ):
         List[Content]: A list of Content objects.
 
     """
-    result = await db.execute(select(Content).where(Content.topic_id == topic_id))
-    content = result.scalars().all()
-    return content
+    try:
+        result = await db.execute(select(Content).where(Content.topic_id == topic_id))
+        content = result.scalars().all()
+        if not content:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No content found")
+        return content
+    except HTTPException as e:
+        await db.rollback()
+        logger.error(f"READ_TOPICS: No topics found: {e}")
+        raise e  # Re-raise the HTTPException with the original status code and detail
+    except IntegrityError as e:
+        await db.rollback()
+        logger.error(f"READ_TOPICS: Integrity error occurred: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Foreign key constraint failed, the topic might not exist."
+        ) from e
+    except SQLAlchemyError as e:
+        await db.rollback()  # Ensure rollback is awaited
+        logger.error(f"READ_TOPICS: A database error occurred while retrieving topics: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database operation failed.") from e
+    except Exception as e:
+        await db.rollback()  # Ensure rollback is awaited
+        logger.error(f"READ_TOPICS: An unexpected error occurred: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred.") from e
+
 
 # Get a Content by ID
 async def get_content_by_id(topic_id: int, content_id: int, db: AsyncSession ):
@@ -188,12 +337,31 @@ async def get_content_by_id(topic_id: int, content_id: int, db: AsyncSession ):
         HTTPException: If the content with the given ID is not found.
     """
 
-    result = await db.execute(select(Content).where(and_(Content.topic_id == topic_id, Content.id == content_id)))
-    content = result.scalars().one()
+    try:
+        result = await db.execute(select(Content).where(and_(Content.topic_id == topic_id, Content.id == content_id)))
+        content = result.scalars().one()
 
-    if not content:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content not found")
-    return content
+        if not content:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content not found")
+        return content
+    
+    except HTTPException as e:
+        await db.rollback()
+        logger.error(f"GET_CONTENT_BY_ID: Content not found: {e}")
+        raise e
+    except IntegrityError as e:
+        await db.rollback()
+        logger.error(f"GET_CONTENT_BY_ID: Integrity error occurred: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Foreign key constraint failed, the topic might not exist.")
+    except SQLAlchemyError as e:
+        await db.rollback()
+        logger.error(f"GET_CONTENT_BY_ID: Database operation failed: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database operation failed.")
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"GET_CONTENT_BY_ID: Unexpected error occurred: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred.")
+
 
 # Update a Content by ID
 async def update_content(id: int, content: ContentUpdate, db: AsyncSession ):
@@ -211,16 +379,34 @@ async def update_content(id: int, content: ContentUpdate, db: AsyncSession ):
     Raises:
         HTTPException: If the content with the given ID is not found.
     """
-    content_to_update = await db.get(Content, id)
-    if not content_to_update:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content not found")
-    content_data = content.model_dump(exclude_unset=True)
-    for key, value in content_data.items():
-        setattr(content_to_update, key, value)
-    db.add(content_to_update)
-    await db.commit()
-    db.refresh(content_to_update)
-    return content_to_update
+    try:
+        content_to_update = await db.get(Content, id)
+        if not content_to_update:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content not found")
+        content_data = content.model_dump(exclude_unset=True)
+        for key, value in content_data.items():
+            setattr(content_to_update, key, value)
+        db.add(content_to_update)
+        await db.commit()
+        await db.refresh(content_to_update)
+        return content_to_update
+    
+    except HTTPException as e:
+        await db.rollback()
+        logger.error(f"UPDATE_CONTENT: Content not found: {e}")
+        raise e
+    except IntegrityError as e:
+        await db.rollback()
+        logger.error(f"UPDATE_CONTENT: Integrity error occurred: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Foreign key constraint failed, the topic might not exist.")
+    except SQLAlchemyError as e:
+        await db.rollback()
+        logger.error(f"UPDATE_CONTENT: Database operation failed: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database operation failed.")
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"UPDATE_CONTENT: Unexpected error occurred: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred.")
 
 
 # Delete a Content by ID
@@ -241,12 +427,14 @@ async def delete_content(id: int, db: AsyncSession ):
     try:
         content = await db.get(Content, id)
         if not content:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content not found")
+            raise ValueError("Content not found")
         await db.delete(content)
         await db.commit()
         return {"message": "Content deleted successfully"}
-    except HTTPException:
-        raise
+    except ValueError:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content not found")
     except Exception as e:
+        await db.rollback()
         print(f"Error deleting content: {str(e)}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error deleting content")

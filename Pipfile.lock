@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d97f3d4a0f6b5d6a71a45e5d48b2836fae4bb67a9c7aa5f7bba1d51e39fd091d"
+            "sha256": "baf6b2ea3ebf6a368be764518069d9e5efe039dd3e0aac3beb95c398bc90e5b0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -88,6 +88,14 @@
             "index": "pypi",
             "markers": "python_full_version >= '3.8.0'",
             "version": "==0.29.0"
+        },
+        "certifi": {
+            "hashes": [
+                "sha256:0569859f95fc761b18b45ef421b1290a0f65f147e92a1e5eb3e635f9a5e4e66f",
+                "sha256:dc383c07b76109f368f6106eee2b593b04a011ea4d55f652c6ca24a754d1cdd1"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==2024.2.2"
         },
         "click": {
             "hashes": [
@@ -179,6 +187,23 @@
             "markers": "python_version >= '3.7'",
             "version": "==0.14.0"
         },
+        "httpcore": {
+            "hashes": [
+                "sha256:096cc05bca73b8e459a1fc3dcf585148f63e534eae4339559c9b8a8d6399acc7",
+                "sha256:9fc092e4799b26174648e54b74ed5f683132a464e95643b226e00c2ed2fa6535"
+            ],
+            "markers": "python_version >= '3.8'",
+            "version": "==1.0.2"
+        },
+        "httpx": {
+            "hashes": [
+                "sha256:451b55c30d5185ea6b23c2c793abf9bb237d2a7dfb901ced6ff69ad37ec1dfaf",
+                "sha256:8915f5a3627c4d47b73e8202457cb28f1266982d1159bd5779d86a80c0eab1cd"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==0.26.0"
+        },
         "idna": {
             "hashes": [
                 "sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca",
@@ -186,6 +211,14 @@
             ],
             "markers": "python_version >= '3.5'",
             "version": "==3.6"
+        },
+        "iniconfig": {
+            "hashes": [
+                "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3",
+                "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==2.0.0"
         },
         "mako": {
             "hashes": [
@@ -260,6 +293,22 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==2.1.5"
+        },
+        "packaging": {
+            "hashes": [
+                "sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5",
+                "sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==23.2"
+        },
+        "pluggy": {
+            "hashes": [
+                "sha256:7db9f7b503d67d1c5b95f59773ebb58a8c1c288129a88665838012cfb07b8981",
+                "sha256:8c85c2876142a764e5b7548e7d9a0e0ddb46f5185161049a79b7e974454223be"
+            ],
+            "markers": "python_version >= '3.8'",
+            "version": "==1.4.0"
         },
         "psycopg2-binary": {
             "hashes": [
@@ -441,6 +490,23 @@
             "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==2.1.0"
+        },
+        "pytest": {
+            "hashes": [
+                "sha256:249b1b0864530ba251b7438274c4d251c58d868edaaec8762893ad4a0d71c36c",
+                "sha256:50fb9cbe836c3f20f0dfa99c565201fb75dc54c8d76373cd1bde06b06657bdb6"
+            ],
+            "markers": "python_version >= '3.8'",
+            "version": "==8.0.0"
+        },
+        "pytest-asyncio": {
+            "hashes": [
+                "sha256:987c3eb0a847268a884a0d26ad0e57e885647e647792f2accc80e01842ed1b68",
+                "sha256:ea37983dbf4391f569183e97fb1c4c2899a3349818f1b338ca91aaa149983cc7"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==0.23.5a0"
         },
         "python-dotenv": {
             "hashes": [

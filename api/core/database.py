@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv, find_dotenv
 from os import getenv
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from typing import AsyncIterator
 
 # Load environment variables
 load_dotenv(find_dotenv())
@@ -26,7 +28,7 @@ engine = create_async_engine(
 
 # Ayschronous Context manager for handling database sessions
 # @asynccontextmanager #TODO: Do we need this? It was causing errors for db.execute
-async def get_session() -> AsyncSession:
-    async_session = sessionmaker(engine, class_ = AsyncSession, expire_on_commit=False)
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async_session = async_sessionmaker(engine, class_ = AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session

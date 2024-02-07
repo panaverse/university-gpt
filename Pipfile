@@ -13,6 +13,8 @@ python-dotenv = "*"
 asyncpg = "*"
 alembic = "*"
 greenlet = "*"
+pytest-asyncio = "*"
+httpx = "*"
 
 [dev-packages]
 black = "*"
