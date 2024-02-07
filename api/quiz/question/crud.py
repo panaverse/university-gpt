@@ -21,11 +21,14 @@ async def add_question(question: QuestionBankCreate, db: AsyncSession):
         QuestionBank: The added question.
 
     """
+    if question.options:
+        question.options = [MCQOption.model_validate(option) for option in question.options]
 
     db_question = QuestionBank.model_validate(question)
+
     db.add(db_question)
     await db.commit()
-    await db.refresh(db_question)
+    db.refresh(db_question)
     return db_question
 
 # Get all Questions

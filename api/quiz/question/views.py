@@ -6,7 +6,7 @@ from api.quiz.question.crud import (add_question, read_questions, read_questions
                                       read_mcq_options, add_mcq_option, delete_mcq_option, update_mcq_option, get_mcq_option_by_id
                                       )
 
-from api.quiz.question.models import QuestionBankCreate, QuestionBankUpdate, QuestionBankRead, MCQOptionCreate, MCQOptionUpdate, MCQOptionRead
+from api.quiz.question.models import QuestionBankCreate, QuestionBankUpdate, QuestionBankRead, MCQOptionCreate, MCQOptionUpdate, MCQOptionRead, QuestionBankReadWithOptions
 from api.core.utils.logger import logger_config
 
 router = APIRouter()
@@ -19,8 +19,8 @@ logger = logger_config(__name__)
 # ------------------------------------------------------
 
 # Add Question to the Database
-@router.post("", response_model=QuestionBankRead)
-async def call_add_question(question: QuestionBankCreate, db: Annotated[AsyncSession, Depends(get_session)]):
+@router.post("", response_model=QuestionBankReadWithOptions)
+async def create_new_question(question: QuestionBankCreate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Add a question to the database.
 
@@ -49,7 +49,8 @@ async def call_read_questions( db: Annotated[AsyncSession, Depends(get_session)]
         list[QuestionBank]: The list of questions.
     """
     logger.info("%s.get_all_questions", __name__)
-    return await read_questions(offset=offset, limit=limit, db=db)
+    all_questions= await read_questions(db=db, offset=offset, limit=limit)
+    return all_questions
 
 # Get all Questions For a Question Type
 @router.get("/read/{question_type}", response_model=list[QuestionBankRead])

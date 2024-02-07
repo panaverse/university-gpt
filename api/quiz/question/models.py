@@ -14,14 +14,15 @@ class QuestionBankBase(SQLModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "question_text": "What is the primary purpose of interfaces in TypeScript?",
+                "question_text": "What is a common cause of syntax errors in TypeScript?",
                 "is_verified": True,
                 "points": 1,
                 "difficulty": "easy",
                 "topic_id": 1,
-                "question_type": "single_select_mcq"
-            }
-        }
+                "question_type": "single_select_mcq",
+                    }
+                }
+
 
 
 class QuestionBank(QuestionBankBase, table=True):
@@ -41,12 +42,48 @@ class QuestionBank(QuestionBankBase, table=True):
         ))
 
 class QuestionBankCreate(QuestionBankBase):
-    pass
+    # pass
+    options: list['MCQOptionCreate'] = []
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "question_text": "What is a common cause of syntax errors in TypeScript?",
+                "is_verified": True,
+                "points": 1,
+                "difficulty": "easy",
+                "topic_id": 1,
+                "question_type": "single_select_mcq",
+                "options": [
+                    { "is_correct": True, "option_text": "Missing semicolons at the end of statements" },
+                    { "is_correct": False, "option_text": "Missing types in function parameters" }
+                ]
+            }
+        }
 
 class QuestionBankRead(QuestionBankBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+class QuestionBankReadWithOptions(QuestionBankRead):
+    options: list['MCQOptionRead'] = []
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "question_text": "What is a common cause of syntax errors in TypeScript?",
+                "is_verified": True,
+                "points": 1,
+                "difficulty": "easy",
+                "topic_id": 1,
+                "question_type": "single_select_mcq",
+                "options": [
+                    { "is_correct": True, "option_text": "Missing semicolons at the end of statements" },
+                    { "is_correct": False, "option_text": "Missing types in function parameters" }
+                ]
+            }
+        }
 
 class QuestionBankUpdate(QuestionBankBase):
     question_text: str | None = None
@@ -61,8 +98,8 @@ class MCQOptionBase(SQLModel):
     option_text: str = Field(default=None, max_length=500)
     is_correct: bool = Field(default=False)
 
-    question_id: int = Field(
-        foreign_key='questionbank.id')
+    question_id: int | None = Field(
+        foreign_key='questionbank.id', default=None)
     
     class Config:
         json_schema_extra = {
