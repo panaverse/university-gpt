@@ -12,7 +12,7 @@ async def create_quiz(quiz_id: int, db: AsyncSession = Depends(get_session)):
     quiz = result.scalars().first()
     return quiz
 
-@router.post("", response_model=QuizTopicRead)
+@router.post("/quiz-topic", response_model=QuizTopicRead)
 async def create_quiz_topic(quiz_topic_id: int, db: AsyncSession = Depends(get_session)):
     result = await db.execute(select(QuizTopic).where(QuizTopic.id == quiz_topic_id))
     quiz_topic = result.scalars().first()
@@ -24,7 +24,7 @@ async def read_quizzes(offset: int = 0, limit: int = 10, db: AsyncSession = Depe
     quizzes = result.scalars().all()
     return quizzes
 
-@router.get("", response_model=list[QuizTopicRead])
+@router.get("/quiz-topic", response_model=list[QuizTopicRead])
 async def read_quiz_topics(offset: int = 0, limit: int = 10, db: AsyncSession = Depends(get_session)):
     result = await db.execute(select(QuizTopic).offset(offset).limit(limit))
     quiz_topics = result.scalars().all()
@@ -36,7 +36,7 @@ async def read_quiz(quiz_id: int, db: AsyncSession = Depends(get_session)):
     quiz = result.scalars().first()
     return quiz
 
-@router.get("/{quiz_topic_id}", response_model=QuizTopicRead)
+@router.get("/quiz-topic/{quiz_topic_id}", response_model=QuizTopicRead)
 async def read_quiz_topic(quiz_topic_id: int, db: AsyncSession = Depends(get_session)):
     result = await db.execute(select(QuizTopic).where(QuizTopic.id == quiz_topic_id))
     quiz_topic = result.scalars().first()
@@ -51,7 +51,7 @@ async def update_quiz(quiz_id: int, quiz: QuizRead, db: AsyncSession = Depends(g
     db.refresh(quiz_to_update)
     return quiz_to_update
 
-@router.patch("/{quiz_topic_id}", response_model=QuizTopicRead)
+@router.patch("/quiz-topic/{quiz_topic_id}", response_model=QuizTopicRead)
 async def update_quiz_topic(quiz_topic_id: int, quiz_topic: QuizTopicRead, db: AsyncSession = Depends(get_session)):
     quiz_topic_to_update = await read_quiz_topic(quiz_topic_id, db)
     for key, value in quiz_topic.model_dump().items() :
@@ -67,7 +67,7 @@ async def delete_quiz(quiz_id: int, db: AsyncSession = Depends(get_session)):
     await db.commit()
     return {"message": "Quiz deleted successfully!"}
 
-@router.delete("/{quiz_topic_id}")
+@router.delete("/quiz-topic/{quiz_topic_id}")
 async def delete_quiz_topic(quiz_topic_id: int, db: AsyncSession = Depends(get_session)):
     quiz_topic_to_delete = await read_quiz_topic(quiz_topic_id, db)
     db.delete(quiz_topic_to_delete)

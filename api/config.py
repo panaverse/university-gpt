@@ -10,8 +10,8 @@ _: bool = load_dotenv(find_dotenv())
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = f"SQLModel API - {os.getenv('ENV', 'development').capitalize()}"
-    DESCRIPTION: str = "A FastAPI + SQLModel production-ready API"
+    PROJECT_NAME: str = f"Quiz GPT API - {os.getenv('ENV', 'development').capitalize()}"
+    DESCRIPTION: str = "Quiz GPT GenAI API Service"
     ENV: Literal["development", "staging", "production"] = "development"
     VERSION: str = "0.1"
     SECRET_KEY: str = secrets.token_urlsafe(32)

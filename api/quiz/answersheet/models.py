@@ -1,12 +1,14 @@
-from sqlmodel import Field, SQLModel, Relationship,DateTime,Column
+from sqlmodel import Field, SQLModel, Relationship, DateTime, Column
 from datetime import datetime
+from api.quiz.user.models import Student
 
-class AnswerSheetBase(SQLModel, table=True):
+
+class AnswerSheetBase(SQLModel):
     quiz_id: int = Field(foreign_key="quiz.id")
-    student_id: Field(foreign_key="student.student_id")
-    #answerJSON: 
-    quiz_start_time: datetime.timestamp
-    quiz_end_time: datetime.timestamp
+    student_id: int = Field(foreign_key="student.student_id")
+    answerJSON: str | None
+    quiz_start_time: datetime
+    quiz_end_time: datetime
 
     class Config:
         json_schema_extra = {
@@ -21,26 +23,30 @@ class AnswerSheetBase(SQLModel, table=True):
 
 class AnswerSheet(AnswerSheetBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    student: 'api.student.models.Student' = Relationship(back_populates="answersheets")
-    
+    student: 'api.student.models.Student' = Relationship(
+        back_populates="answersheets")
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column=Column(
-            DateTime(timezone=True),
-            onupdate=datetime.utcnow,
-            nullable=False,
-        ))
-    
+        DateTime(timezone=True),
+        onupdate=datetime.utcnow,
+        nullable=False,
+    ))
+
+
 class AnswerSheetCreate(AnswerSheetBase):
     pass
+
 
 class AnswerSheetRead(AnswerSheetBase):
     id: int
     created_at: datetime
     updated_at: datetime
 
+
 class AnswerSheetUpdate(AnswerSheetBase):
     quiz_id: int | None = None
     student_id: int | None = None
-    quiz_start_time: datetime.timestamp | None = None
-    quiz_end_time: datetime.timestamp | None = None
-    #answerJSON:  | None = None
+    quiz_start_time: datetime | None = None
+    quiz_end_time: datetime | None = None
+    answerJSON: str | None = None
