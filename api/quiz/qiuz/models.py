@@ -5,19 +5,22 @@ from datetime import datetime
 class QuizTopicBase(SQLModel):
     quiz_topic_title: str
     quiz_topic_description: str
+    quiz_id: int = Field(foreign_key="quiz.id")
+
+    topic_id: int = Field(foreign_key="topic.id")
 
     class Config:
         json_schema_extra = {
             "example": {
                 "quiz_topic_title": "TypeScript Basics",
-                "quiz_topic_description": "This quiz is about the basics of TypeScript"
+                "quiz_topic_description": "This quiz is about the basics of TypeScript",
+                "quiz_id": "1"
             }
         }
 
 
 class QuizTopic(QuizTopicBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    quiz_id: int = Field(foreign_key="quiz.id")
     quiz: 'Quiz' = Relationship(back_populates="quiz_topic")
 
     created_at: datetime = Field(default_factory=datetime.utcnow)

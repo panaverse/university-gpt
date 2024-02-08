@@ -31,9 +31,9 @@ async def read_quiz(quiz_id: int, db: AsyncSession = Depends(get_session)):
 
 async def update_quiz(quiz_id: int, quiz: QuizCreate, db: AsyncSession = Depends(get_session)):
     quiz_to_update = await read_quiz(quiz_id, db)
-    for key, value in quiz.model_dump().items() :
+    for key, value in quiz.model_dump(exclude_unset=True).items() :
         setattr(quiz_to_update, key, value)
-    await db.commit()
+    await db.commit(quiz_to_update)
     db.refresh(quiz_to_update)
     return quiz_to_update
 

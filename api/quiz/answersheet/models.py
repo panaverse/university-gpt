@@ -1,6 +1,5 @@
 from sqlmodel import Field, SQLModel, Relationship, DateTime, Column
 from datetime import datetime
-from api.quiz.user.models import Student
 
 
 class AnswerSheetBase(SQLModel):
@@ -23,7 +22,7 @@ class AnswerSheetBase(SQLModel):
 
 class AnswerSheet(AnswerSheetBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    student: 'api.student.models.Student' = Relationship(
+    student: 'api.quiz.user.models.Student' = Relationship(
         back_populates="answersheets")
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
