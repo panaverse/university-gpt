@@ -1,27 +1,37 @@
 from fastapi import HTTPException, status
 
-from sqlmodel import select, and_
+from sqlmodel import select, and_, delete
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from api.core.utils.logger import logger_config
-from api.quiz.quiz.models import (Quiz, QuizCreate, QuizUpdate,
-                                  QuizTopic, QuizTopicCreate, QuizTopicUpdate,
-                                QuizQuestionInstances, QuizQuestionInstancesCreate, QuizQuestionInstancesUpdate
-
-                                  )
 from api.quiz.topic.models import Topic
-from api.quiz.question.models import QuestionBank
+from api.quiz.question.models import QuestionBank, QuestionBankCreate, MCQOption
+from api.quiz.quiz.models import (Quiz, QuizCreate, QuizUpdate,
+                                  QuizUpdate, QuizQuestion, QuizQuestionUpdate)
 
 logger = logger_config(__name__)
 
 # Create Quiz
+
+
 async def create_quiz(quiz: QuizCreate, db: AsyncSession):
     try:
 
-        if quiz.quiz_topics:
-            quiz.quiz_topics = [QuizTopic.model_validate(quiz_topic) for quiz_topic in quiz.quiz_topics]
+        # Validate Any New Topics
+        if quiz.topics:
+            quiz.topics = [Topic.model_validate(
+                new_topic) for new_topic in quiz.topics]
+
+        # Get all topics if topic_ids are provided and append to quiz.topics
+        if quiz.topic_ids:
+            result = await db.execute(select(Topic).where(Topic.id.in_(quiz.topic_ids)))
+            topics = result.scalars().all()
+            if not topics:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="All Incorrect Topic Ids Provided")
+            quiz.topics.extend(topics)
 
         quiz_to_db = Quiz.model_validate(quiz)
 
@@ -29,7 +39,25 @@ async def create_quiz(quiz: QuizCreate, db: AsyncSession):
         await db.commit()
         db.refresh(quiz_to_db)
 
+        # Associate questions with the quiz based on provided topic_ids
+        # TODO: Topics are recusrisve, so we need to update to get questions for subtopics
+        for topic_id in quiz.topic_ids:
+            questions_result = await db.execute(select(QuestionBank).where(QuestionBank.topic_id == topic_id))
+            questions = questions_result.scalars().all()
+            for question in questions:
+                # Create QuizQuestion link instances for each question
+                quiz_question = QuizQuestion(
+                    quiz_id=quiz_to_db.id, question_id=question.id)
+                db.add(quiz_question)
+
+        await db.commit()
+
         return quiz_to_db
+
+    except HTTPException as http_err:
+        await db.rollback()
+        logger.error(f"create_quiz Error: {http_err}")
+        raise http_err
 
     except IntegrityError as e:
         await db.rollback()
@@ -49,9 +77,10 @@ async def create_quiz(quiz: QuizCreate, db: AsyncSession):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Error in creating Quiz")
 
+
 async def read_all_quizzes(db: AsyncSession, offset: int, limit: int):
     try:
-        result = await db.execute(select(Quiz).offset(offset).limit(limit))
+        result = await db.execute(select(Quiz).options(selectinload(Quiz.topics)).offset(offset).limit(limit))
         quizzes = result.scalars().all()
         if not quizzes:
             raise HTTPException(
@@ -72,12 +101,14 @@ async def read_all_quizzes(db: AsyncSession, offset: int, limit: int):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Error in fetching Quizzes")
 
+
 async def read_quiz_by_id(quiz_id: int, db: AsyncSession):
     try:
         # quiz = await db.get(Quiz, quiz_id)
         result = await db.execute(
-            select(Quiz).options(selectinload(Quiz.quiz_topics)).where(Quiz.id == quiz_id)
-            )
+            select(Quiz).options(selectinload(Quiz.topics), selectinload(
+                Quiz.quiz_questions).joinedload(QuizQuestion.question)).where(Quiz.id == quiz_id)
+        )
         quiz = result.scalars().one()
         if not quiz:
             raise ValueError("Quiz not found")
@@ -98,49 +129,97 @@ async def read_quiz_by_id(quiz_id: int, db: AsyncSession):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Error in fetching Quiz")
 
-async def update_quiz(quiz_id: int, quiz: QuizUpdate, db: AsyncSession):
+
+async def update_quiz(quiz_id: int, quiz_update_data: QuizUpdate, db: AsyncSession):
 
     try:
         quiz_to_update = await read_quiz_by_id(quiz_id, db)
 
-        if quiz.quiz_topics:
-            quiz.quiz_topics = [QuizTopic.model_validate(each_quiz_topic) for each_quiz_topic in quiz.quiz_topics]
-            # Append new topics to existing topics
-            # quiz_to_update.quiz_topics.extend(quiz.quiz_topics)
-            # This replaces the existing quiz_topics with the new list
-            quiz_to_update.quiz_topics.clear()  # Clear the existing items
-            quiz_to_update.quiz_topics.extend(quiz.quiz_topics)  # Add new items
+        # Validate Any New Topics Ids and Append to quiz.topics if valid
+        if quiz_update_data.add_topic_ids:
+            result = await db.execute(select(Topic).where(Topic.id.in_(quiz_update_data.add_topic_ids)))
+            topics_to_add = result.scalars().all()
+            if not topics_to_add:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="All Incorrect Topic Ids Provided")
+            # It's safer to use a set to avoid duplicates
+            current_topic_ids = {topic.id for topic in quiz_to_update.topics}
+            for topic in topics_to_add:
+                if topic.id not in current_topic_ids:
+                    quiz_to_update.topics.append(topic)
 
-
-
-
-
-        for key, value in quiz.model_dump(exclude_unset=True, exclude={'quiz_topics'}).items():
+        # Update Quiz Data Fields
+        for key, value in quiz_update_data.model_dump(exclude_unset=True, exclude={"add_topic_ids", "remove_topic_ids"}).items():
             setattr(quiz_to_update, key, value)
 
-        logger.info(f"AFTER Updating Quiz: {quiz_to_update}")
-        logger.info(f"AFTER Updating Quiz: {quiz_to_update.quiz_topics}")
-
         db.add(quiz_to_update)
-        await db.commit()
+
+        await db.commit()  # Commit quiz updates
+
+        # Add new questions to the quiz based on the new topic Ids
+        if quiz_update_data.add_topic_ids:
+            # Query all questions linked to the new topics in one go
+            questions_result = await db.execute(select(QuestionBank).where(QuestionBank.topic_id.in_(quiz_update_data.add_topic_ids)))
+            all_questions = questions_result.scalars().all()
+            
+            # Loop through the results to create QuizQuestion link instances
+            quiz_questions_to_add = [QuizQuestion(quiz_id=quiz_to_update.id, question_id=question.id) for question in all_questions]
+
+            # Add all new QuizQuestion instances to the session
+            db.add_all(quiz_questions_to_add)
+
+            await db.commit()
+
+        # Remove topics from the quiz and associated questions from QuizQuestion table if remove_topic_ids are provided
+        if quiz_update_data.remove_topic_ids:
+            # Remove topics from the quiz
+            quiz_to_update.topics = [topic for topic in quiz_to_update.topics if topic.id not in quiz_update_data.remove_topic_ids]
+
+            # Remove Linked Topic Questions from the Quiz
+            # First, find all questions linked to these topics
+            questions_to_remove_result = await db.execute(
+                select(QuestionBank.id)
+                .where(QuestionBank.topic_id.in_(quiz_update_data.remove_topic_ids))
+            )
+            question_ids_to_remove = questions_to_remove_result.scalars().all()
+
+            if question_ids_to_remove:
+                # Construct the delete statement for QuizQuestion and Execute it
+                await db.execute(delete(QuizQuestion).where(
+                    and_(
+                        QuizQuestion.question_id.in_(question_ids_to_remove),
+                        QuizQuestion.quiz_id == quiz_id
+                    )
+                ))
+                # Commit the changes to the database
+                await db.commit()
+
+
         db.refresh(quiz_to_update)
+        db.expire_all()  # Invalidate all session data
+        quiz_to_update = await read_quiz_by_id(quiz_id, db)  # Re-fetch the quiz
+
         return quiz_to_update
 
-    except IntegrityError as e:
+    except HTTPException as http_err:
+        logger.error(f"HTTPException update_quiz Error: {http_err}")
         await db.rollback()
-        logger.error(f"update_quiz Error: {e}")
+        raise http_err
+    except IntegrityError as e:
+        logger.error(f"IntegrityError update_quiz Error: {e}")
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz Already Exists")
     except SQLAlchemyError as e:
+        logger.error(f"SQLAlchemyError update_quiz Error: {e}")
         await db.rollback()
-        logger.error(f"update_quiz Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Error in updating Quiz")
     except Exception as e:
+        logger.error(f"Exception update_quiz Error: {e}")
         await db.rollback()
-        logger.error(f"update_quiz Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Error in updating Quiz")
+
 
 async def delete_quiz(quiz_id: int, db: AsyncSession):
     try:
@@ -154,7 +233,8 @@ async def delete_quiz(quiz_id: int, db: AsyncSession):
     except ValueError as e:
         await db.rollback()
         logger.error(f"delete_quiz Error: {e}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
     except SQLAlchemyError as e:
         await db.rollback()
         logger.error(f"delete_quiz Error: {e}")
@@ -167,260 +247,99 @@ async def delete_quiz(quiz_id: int, db: AsyncSession):
             status_code=status.HTTP_400_BAD_REQUEST, detail="Error in deleting Quiz")
 
 # -----------------------------
-# Quiz Topics
+# Quiz Questions
 # -----------------------------
-
-async def create_quiz_topic(quiz_topic: QuizTopicCreate, db: AsyncSession):
+    
+# 1. Create Quiz Question
+async def create_quiz_question(quiz_id: int, quiz_question_create_data: QuestionBankCreate, db: AsyncSession):
     try:
-        quiz_topic_to_db = QuizTopic.model_validate(quiz_topic)
+        # 1. Get the quiz to link the question to
+        quiz = await db.get(Quiz, quiz_id)
+        if not quiz:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
         
-        db.add(quiz_topic_to_db)
+        # 2. Add Question to the QuestionBank then link to the Quiz using QuizQuestion Model
+        if quiz_question_create_data.options:
+            quiz_question_create_data.options = [MCQOption.model_validate(option) for option in quiz_question_create_data.options]
+
+        question_to_db = QuestionBank.model_validate(quiz_question_create_data)
+
+        quiz_question_link = QuizQuestion(quiz=quiz, question=question_to_db)
+
+        db.add(quiz_question_link)
         await db.commit()
-        db.refresh(quiz_topic_to_db)
-        
-        return quiz_topic_to_db
-    except IntegrityError as e:
-        await db.rollback()
-        logger.error(f"create_quiz_topic Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz Topic Already Exists")
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"create_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in creating Quiz Topic")
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"create_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in creating Quiz Topic")
+        db.refresh(quiz_question_link)
 
-async def read_quiz_topics_for_quiz(quiz_id:int, offset: int, limit: int, db: AsyncSession):
-    try:
-        result = await db.execute(select(QuizTopic).where(QuizTopic.quiz_id == quiz_id).offset(offset).limit(limit))
-        quiz_topics = result.scalars().all()
-        if not quiz_topics:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Quiz Topics not found")
-        return quiz_topics
+        return quiz_question_link
+    
     except HTTPException as e:
         await db.rollback()
-        logger.error(f"read_all_quiz_topics Error: {e}")
+        logger.error(f"create_quiz_question Error: {e}")
         raise e
+    except IntegrityError as e:
+        await db.rollback()
+        logger.error(f"create_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz Question Already Exists")
     except SQLAlchemyError as e:
         await db.rollback()
-        logger.error(f"read_all_quiz_topics Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Topics")
+        logger.error(f"create_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in creating Quiz Question")
     except Exception as e:
         await db.rollback()
-        logger.error(f"read_all_quiz_topics Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Topics")
+        logger.error(f"create_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in creating Quiz Question")
 
-async def read_quiz_topic(quiz_topic_id: int, db: AsyncSession):
+# Mute Quiz Question 
+async def mute_quiz_question(quiz_id: int, quiz_question_id: int, quiz_question_update_data: QuizQuestionUpdate, db: AsyncSession):
     try:
-        # quiz_topic = await db.get(QuizTopic, quiz_topic_id)
-        result = await db.execute(
-            select(QuizTopic).options(selectinload(QuizTopic.topic).selectinload(Topic.questions).selectinload(QuestionBank.options)).where(QuizTopic.id == quiz_topic_id)
-            )
-        quiz_topic = result.scalars().one()
-        if not quiz_topic:
-            raise ValueError("Quiz Topic not found")
+        quiz_question_to_update_result = await db.execute(select(QuizQuestion).where(and_(QuizQuestion.quiz_id == quiz_id, QuizQuestion.question_id == quiz_question_id)))
+        quiz_question_to_update = quiz_question_to_update_result.scalars().one()
+        if not quiz_question_to_update:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz Question not found")
         
-        logger.info(f"FETCHED QUIZ TOPIC: {quiz_topic.topic.questions[0].options}")
-        if quiz_topic.topic:
-            questions_info = [str(question) for question in quiz_topic.topic.questions]  # Adjust according to how you want to represent a question
-            logger.info(f"FETCHED QUIZ TOPIC QUESTIONS: {questions_info}")
-        else:
-            logger.info(f"Quiz topic with ID {quiz_topic_id} has no associated topic.")
+        for key, value in quiz_question_update_data.model_dump(exclude_unset=True).items():
+            setattr(quiz_question_to_update, key, value)
 
-        return quiz_topic
-    except ValueError as e:
-        await db.rollback()
-        logger.error(f"read_quiz_topic Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz Topic not found")
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"read_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Topic")
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"read_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Topic")
-
-async def update_quiz_topic(quiz_topic_id: int, quiz_topic: QuizTopicUpdate, db: AsyncSession):
-    try:
-        quiz_topic_to_update = await read_quiz_topic(quiz_topic_id, db)
-        for key, value in quiz_topic.model_dump(exclude_unset=True).items():
-            setattr(quiz_topic_to_update, key, value)
-        db.add(quiz_topic_to_update)
+        db.add(quiz_question_to_update)
         await db.commit()
-        db.refresh(quiz_topic_to_update)
-        return quiz_topic_to_update
-    except IntegrityError as e:
-        await db.rollback()
-        logger.error(f"update_quiz_topic Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz Topic Already Exists")
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"update_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in updating Quiz Topic")
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"update_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in updating Quiz Topic")
-
-async def delete_quiz_topic(quiz_topic_id: int, db: AsyncSession):
-    try:
-        quiz_topic_to_delete = await db.get(QuizTopic, quiz_topic_id)
-        if not quiz_topic_to_delete:
-            raise ValueError("Quiz Topic not found")
-        await db.delete(quiz_topic_to_delete)
-        await db.commit()
-        return {"message": "Quiz Topic deleted successfully!"}
-    except ValueError as e:
-        await db.rollback()
-        logger.error(f"delete_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Quiz Topic not found")
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"delete_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in deleting Quiz Topic")
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"delete_quiz_topic Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in deleting Quiz Topic")
-
-# -----------------------------
-# Quiz Question Instances
-# -----------------------------
-    
-async def create_quiz_question_instance(quiz_question_instance: QuizQuestionInstancesCreate, db: AsyncSession):
-    try:
-        quiz_question_instance_to_db = QuizQuestionInstances.model_validate(quiz_question_instance)
-        db.add(quiz_question_instance_to_db)
-        await db.commit()
-        db.refresh(quiz_question_instance_to_db)
-        return quiz_question_instance_to_db
-    except IntegrityError as e:
-        await db.rollback()
-        logger.error(f"create_quiz_question_instance Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz Question Instance Already Exists")
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"create_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in creating Quiz Question Instance")
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"create_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in creating Quiz Question Instance")
-    
-async def read_quiz_question_instances_for_quiz(quiz_id:int, offset: int, limit: int, db: AsyncSession):
-    try:
-        result = await db.execute(select(QuizQuestionInstances).where(QuizQuestionInstances.quiz_id == quiz_id).offset(offset).limit(limit))
-        quiz_question_instances = result.scalars().all()
-        if not quiz_question_instances:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Quiz Question Instances not found")
-        return quiz_question_instances
+        db.refresh(quiz_question_to_update)
+        return quiz_question_to_update
     except HTTPException as e:
         await db.rollback()
-        logger.error(f"read_all_quiz_question_instances Error: {e}")
+        logger.error(f"mute_quiz_question Error: {e}")
         raise e
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"read_all_quiz_question_instances Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Question Instances")
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"read_all_quiz_question_instances Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Question Instances")
-    
-async def read_quiz_question_instance(quiz_question_instance_id: int, db: AsyncSession):
-    try:
-        quiz_question_instance = await db.get(QuizQuestionInstances, quiz_question_instance_id)
-        if not quiz_question_instance:
-            raise ValueError("Quiz Question Instance not found")
-        return quiz_question_instance
-    except ValueError as e:
-        await db.rollback()
-        logger.error(f"read_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Quiz Question Instance not found")
-    
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"read_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Question Instance")
-    
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"read_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in fetching Quiz Question Instance")
-    
-async def update_quiz_question_instance(quiz_question_instance_id: int, quiz_question_instance: QuizQuestionInstancesUpdate, db: AsyncSession):
-    try:
-        quiz_question_instance_to_update = await read_quiz_question_instance(quiz_question_instance_id, db)
-        for key, value in quiz_question_instance.model_dump(exclude_unset=True).items():
-            setattr(quiz_question_instance_to_update, key, value)
-        db.add(quiz_question_instance_to_update)
-        await db.commit()
-        db.refresh(quiz_question_instance_to_update)
-        return quiz_question_instance_to_update
     except IntegrityError as e:
         await db.rollback()
-        logger.error(f"update_quiz_question_instance Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz Question Instance Already Exists")
+        logger.error(f"mute_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz Question Already Exists")
     except SQLAlchemyError as e:
         await db.rollback()
-        logger.error(f"update_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in updating Quiz Question Instance")
+        logger.error(f"mute_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in updating Quiz Question")
     except Exception as e:
         await db.rollback()
-        logger.error(f"update_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in updating Quiz Question Instance")
-    
-async def delete_quiz_question_instance(quiz_question_instance_id: int, db: AsyncSession):
+        logger.error(f"mute_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in updating Quiz Question")
+
+# Remove a Quiz Question
+async def remove_quiz_question(quiz_id: int, quiz_question_id: int, db: AsyncSession):
     try:
-        quiz_question_instance_to_delete = await db.get(QuizQuestionInstances, quiz_question_instance_id)
-        if not quiz_question_instance_to_delete:
-            raise ValueError("Quiz Question Instance not found")
-        await db.delete(quiz_question_instance_to_delete)
+        quiz_question_to_delete = await db.get(QuizQuestion, (quiz_id, quiz_question_id))
+        if not quiz_question_to_delete:
+            raise ValueError("Quiz Question not found")
+        await db.delete(quiz_question_to_delete)
         await db.commit()
-        return {"message": "Quiz Question Instance deleted successfully!"}
+        return {"message": "Quiz Question deleted successfully!"}
     except ValueError as e:
         await db.rollback()
-        logger.error(f"delete_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Quiz Question Instance not found")
+        logger.error(f"remove_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz Question not found")
     except SQLAlchemyError as e:
         await db.rollback()
-        logger.error(f"delete_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in deleting Quiz Question Instance")
+        logger.error(f"remove_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in deleting Quiz Question")
     except Exception as e:
         await db.rollback()
-        logger.error(f"delete_quiz_question_instance Error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Error in deleting Quiz Question Instance")
-    
+        logger.error(f"remove_quiz_question Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in deleting Quiz Question")
+

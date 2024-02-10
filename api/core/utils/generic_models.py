@@ -12,7 +12,3 @@ class QuestionTypeEnum(str, enum.Enum):
     single_select_mcq = "single_select_mcq"
     # Multiple Select MCQ
     multiple_select_mcq = "multiple_select_mcq"
-    # Free Text
-    free_text = "free_text"
-    # Coding Problem
-    coding_problem = "coding_problem"

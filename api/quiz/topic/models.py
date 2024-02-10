@@ -1,9 +1,10 @@
 from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 from datetime import datetime
+from typing import Optional
 
 from api.quiz.question.models import QuestionBank, QuestionBankReadWithOptions
+from api.quiz.quiz.link_models import QuizTopic
 
-from typing import Optional
 
 
 class ContentBase(SQLModel):
@@ -89,7 +90,7 @@ class Topic(TopicBase, table=True):
     contents: list['Content'] = Relationship(back_populates='topic', sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
     # Relationship with QuizTopic
-    quiz_topics: list['api.quiz.quiz.models.QuizTopic'] = Relationship(back_populates="topic", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    quizzes: list['api.quiz.quiz.models.Quiz'] = Relationship(back_populates="topics", link_model=QuizTopic)
 
 
 class TopicCreate(TopicBase):

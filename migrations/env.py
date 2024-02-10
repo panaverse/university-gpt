@@ -12,7 +12,8 @@ from api.quiz.question.models import QuestionBank, MCQOption
 from api.quiz.topic.models import Topic, Content
 from api.quiz.university.models import University, Program, Course
 from api.quiz.user.models import Student
-from api.quiz.quiz.models import QuizTopic, Quiz, QuizQuestionInstances
+from api.quiz.quiz.link_models import QuizTopic
+from api.quiz.quiz.models import Quiz, QuizQuestion
 from api.quiz.answersheet.models import AnswerSheet
 
 load_dotenv(find_dotenv())

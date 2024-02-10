@@ -84,8 +84,8 @@ class QuestionBank(QuestionBankBase, table=True):
     # MCQ Options Relationship
     options: list['MCQOption'] = Relationship(back_populates='question')
 
-    # Quiz Question Instances Relationship
-    quiz_question_instances: list['api.quiz.quiz.models.QuizQuestionInstances'] = Relationship(back_populates='question')
+    # QuizQuestion Many to Many Relationship with Join Table
+    quiz_questions: list['api.quiz.quiz.models.QuizQuestion'] = Relationship(back_populates="question", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
 class QuestionBankCreate(QuestionBankBase):
     # pass
