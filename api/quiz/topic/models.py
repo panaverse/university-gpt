@@ -1,7 +1,7 @@
 from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 from datetime import datetime
 
-from api.quiz.question.models import QuestionBank
+from api.quiz.question.models import QuestionBank, QuestionBankReadWithOptions
 
 from typing import Optional
 
@@ -88,6 +88,9 @@ class Topic(TopicBase, table=True):
     # Content Table relationship to store the content of the topic
     contents: list['Content'] = Relationship(back_populates='topic', sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
+    # Relationship with QuizTopic
+    quiz_topics: list['api.quiz.quiz.models.QuizTopic'] = Relationship(back_populates="topic", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+
 
 class TopicCreate(TopicBase):
     # pass
@@ -125,13 +128,12 @@ class TopicUpdate(TopicBase):
             "example": {
                 "title": "OOP Paradigm",
                 "description": "Learn OOPS in Typescript 5.0+",
-                "parent_id": 1, # This is Optional for Subtopics
-                "contents": [
-                    {"content_text": "OOP is a programming paradigm based on classes and objects rather."},
-                    {"content_text": "OOP Pillars: Encapsulation, Inheritance and Polymorphism, and Abstraction."}
-                ]
+                "parent_id": 1 # This is Optional for Subtopics
             }
         }
 
 class TopicResponseWithContent(TopicResponse):
     contents: list['ContentResponse'] = []
+
+class TopicResponseWithQuestions(TopicResponse):
+    questions: list[QuestionBankReadWithOptions] = []

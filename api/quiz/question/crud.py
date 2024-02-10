@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlmodel import select
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.orm import selectinload
 
 from api.core.database import AsyncSession
 from api.quiz.question.models import QuestionBank, QuestionBankCreate, QuestionBankUpdate ,MCQOption, MCQOptionCreate, MCQOptionUpdate
@@ -133,7 +134,9 @@ async def get_question_by_id(id: int, db: AsyncSession ):
     """
 
     try:
-        question = await db.get(QuestionBank, id)
+        # question = await db.get(QuestionBank, id)
+        result = await db.execute(select(QuestionBank).options(selectinload(QuestionBank.options)).where(QuestionBank.id == id))
+        question = result.scalars().first()
         if not question:
             raise ValueError("Question not found")
         return question

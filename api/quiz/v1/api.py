@@ -4,7 +4,7 @@ from api.auth import authent
 from api.quiz.topic import views as topics
 from api.quiz.question import views as questions
 from api.quiz.user import views as users
-from api.quiz.qiuz import views as quizzes
+from api.quiz.quiz import views as quizzes
 from api.quiz.answersheet import views as answersheets
 
 router = APIRouter(prefix="/v1",)

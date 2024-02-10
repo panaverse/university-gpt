@@ -83,7 +83,7 @@ async def call_read_questions_by_type(question_type: str, db: Annotated[AsyncSes
         raise HTTPException(status_code=500, detail=str(e))
 
 # Get a Question by ID
-@router.get("/{question_id}", response_model=QuestionBankRead)
+@router.get("/{question_id}", response_model=QuestionBankReadWithOptions)
 async def call_get_question_by_id(question_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Get a question by its ID from the database.

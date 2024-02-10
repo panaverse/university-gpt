@@ -70,12 +70,6 @@ class QuestionBankBase(SQLModel):
 
 class QuestionBank(QuestionBankBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    # topic Relationship
-    topic: 'api.quiz.topic.models.Topic' = Relationship(
-        back_populates='questions')
-
-    # MCQ Options Relationship
-    options: list['MCQOption'] = Relationship(back_populates='question')
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column=Column(
@@ -83,6 +77,15 @@ class QuestionBank(QuestionBankBase, table=True):
             onupdate=datetime.utcnow,
             nullable=False,
         ))
+    
+    # topic Relationship
+    topic: 'api.quiz.topic.models.Topic' = Relationship(back_populates='questions')
+
+    # MCQ Options Relationship
+    options: list['MCQOption'] = Relationship(back_populates='question')
+
+    # Quiz Question Instances Relationship
+    quiz_question_instances: list['api.quiz.quiz.models.QuizQuestionInstances'] = Relationship(back_populates='question')
 
 class QuestionBankCreate(QuestionBankBase):
     # pass
