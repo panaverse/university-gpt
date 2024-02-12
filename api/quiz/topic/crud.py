@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlmodel import select, and_
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.orm import selectinload
 
 from api.core.database import AsyncSession
 from api.quiz.topic.models import Topic, TopicCreate, TopicUpdate, Content, ContentCreate, ContentUpdate
@@ -93,44 +94,8 @@ async def read_topics(offset: int, limit: int, db: AsyncSession ):
         logger.error(f"READ_TOPICS: An unexpected error occurred: {e}")
         raise Exception("An unexpected error occurred.") from e
 
-# Get a Topic by Name
-async def get_topic_by_name(name: str, db: AsyncSession):
-    """
-    Retrieves a topic from the database based on its name.
-
-    Args:
-        name (str): The name of the topic to retrieve.
-        db (AsyncSession): The database session.
-
-    Returns:
-        Topic: The retrieved topic.
-
-    Raises:
-        ValueError: If the topic is not found in the database.
-        SQLAlchemyError: If a database operation fails.
-        Exception: If an unexpected error occurs.
-    """
-    try:
-        result = await db.execute(select(Topic).where(Topic.title == name))
-        topic = result.scalars().first()
-        if not topic:
-            raise ValueError("Topic not found")
-        return topic
-    
-    except ValueError as e:
-        await db.rollback()  # Ensure rollback is awaited
-        raise e
-
-    except SQLAlchemyError as e:
-        await db.rollback()  # Ensure rollback is awaited
-        raise SQLAlchemyError("Database operation failed.") from e
-
-    except Exception as e:
-        await db.rollback()  # Ensure rollback is awaited
-        raise Exception("An unexpected error occurred.") from e
-
 # Get a Topic by ID
-async def get_topic_by_id(id: int, db: AsyncSession ):
+async def read_topic_by_id(id: int, db: AsyncSession ):
     """
     Retrieve a topic by its ID.
 
@@ -142,30 +107,64 @@ async def get_topic_by_id(id: int, db: AsyncSession ):
         Topic: The retrieved topic.
 
     Raises:
-       ValueError: If the topic is not found in the database.
-        SQLAlchemyError: If a database operation fails.
-        Exception: If an unexpected error occurs.
+       HTTPException
     """
     try:
-        topic = await db.get(Topic, id)
+        # topic = await db.get(Topic, id)
+        result = await db.execute(select(Topic).options(selectinload(Topic.contents)).where(Topic.id == id))
+        topic = result.scalars().one()
         if not topic:
             raise ValueError("Topic not found")
         return topic
     
     except ValueError as e:
         await db.rollback()  # Ensure rollback is awaited
-        raise e
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     except SQLAlchemyError as e:
         await db.rollback()  # Ensure rollback is awaited
-        raise SQLAlchemyError("Database operation failed.") from e
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)) from e
 
     except Exception as e:
         await db.rollback()  # Ensure rollback is awaited
-        raise Exception("An unexpected error occurred.") from e
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)) from e
+
+
+# Read Topic & all its Subtopics
+async def read_topic_and_subtopics(id: int, db: AsyncSession ):
+    try:
+        topic_result = await db.execute(select(Topic).options(selectinload(Topic.children_topics), selectinload(Topic.parent_topic)).where(Topic.id == id))
+        topic = topic_result.scalars().first()
+
+        if not topic:
+            raise ValueError(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
+
+        parent_topic_id = topic.parent_topic.id if topic.parent_topic else None
+        children_topic_ids = [child.id for child in topic.children_topics]
+        children_topics = [child for child in topic.children_topics]
+
+        return {
+            "topic_id": topic.id,
+            "title": topic.title,
+            "description": topic.description,
+            "parent_topic_id": parent_topic_id,
+            "children_topic_ids": children_topic_ids,
+            "children_topic": children_topics
+        }
+
+    except ValueError as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except SQLAlchemyError as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 # Update a Topic by ID
 async def update_topic(id: int, topic: TopicUpdate, db: AsyncSession ):
+
     """
     Update a topic in the database.
 

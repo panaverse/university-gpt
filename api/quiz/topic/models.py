@@ -67,9 +67,9 @@ class Topic(TopicBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True, index=True)
 
-    children_topic: list['Topic'] = Relationship(back_populates='parent_topic')
+    children_topics: list['Topic'] = Relationship(back_populates='parent_topic')
     parent_topic: Optional['Topic'] = Relationship(
-        back_populates='children_topic',
+        back_populates='children_topics',
         sa_relationship_kwargs=dict(
             remote_side='Topic.id'  # notice the uppercase "T" to refer to this table class
         )

@@ -4,13 +4,14 @@ from typing import Annotated
 
 from api.core.database import get_session
 from api.core.utils.logger import logger_config
-from api.quiz.question.models import  QuestionBankCreate
-from api.quiz.quiz.models import ( QuizCreate, QuizUpdate, QuizReadWithTopics, QuizUpdate,  QuizQuestionUpdate, QuizReadWithQuestionsAndTopics, QuizQuestionReadQuestionBank, QuizQuestionRead)
-from api.quiz.quiz.crud import(create_quiz, read_all_quizzes, delete_quiz, read_quiz_by_id, update_quiz,
-                               create_quiz_question, mute_quiz_question, remove_quiz_question
-                               )
+from api.quiz.question.models import QuestionBankCreate
+from api.quiz.quiz.models import (QuizCreate, QuizUpdate, QuizReadWithTopics, QuizUpdate,  QuizQuestionUpdate,
+                                  QuizReadWithQuestionsAndTopics, QuizQuestionReadQuestionBank, QuizQuestionRead, RuntimeQuizGenerated)
+from api.quiz.quiz.crud import (create_quiz, read_all_quizzes, delete_quiz, read_quiz_by_id, update_quiz,
+                                create_quiz_question, update_quiz_question, remove_quiz_question, generate_quiz
+                                )
 
-router = APIRouter()    
+router = APIRouter()
 
 logger = logger_config(__name__)
 
@@ -18,7 +19,8 @@ logger = logger_config(__name__)
 # Quiz Router Endpoints
 # ------------------------------
 
-@router.post("", response_model=QuizReadWithTopics)
+
+@router.post("", response_model=QuizReadWithQuestionsAndTopics)
 async def create_new_quiz(quiz: QuizCreate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Create a new Quiz
@@ -37,13 +39,15 @@ async def create_new_quiz(quiz: QuizCreate, db: Annotated[AsyncSession, Depends(
 
     try:
         return await create_quiz(quiz=quiz, db=db)
-    
+
     except HTTPException as http_err:
         logger.error(f"create_new_quiz Error: {http_err}")
         raise http_err
     except Exception as err:
         logger.error(f"create_new_quiz Error: {err}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in creating Quiz")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Error in creating Quiz")
+
 
 @router.get("", response_model=list[QuizReadWithTopics])
 async def call_read_all_quizzes(db: Annotated[AsyncSession, Depends(get_session)], offset: int = Query(default=0, lte=10), limit: int = Query(default=10, lte=100)):
@@ -65,13 +69,15 @@ async def call_read_all_quizzes(db: Annotated[AsyncSession, Depends(get_session)
 
     try:
         return await read_all_quizzes(db=db, offset=offset, limit=limit)
-    
+
     except HTTPException as http_err:
         logger.error(f"read_all_quizzes Error: {http_err}")
         raise http_err
     except Exception as err:
         logger.error(f"read_all_quizzes Error: {err}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in fetching Quizzes")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Error in fetching Quizzes")
+
 
 @router.get("/{quiz_id}", response_model=QuizReadWithQuestionsAndTopics)
 async def call_read_quiz_by_id(quiz_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
@@ -91,17 +97,19 @@ async def call_read_quiz_by_id(quiz_id: int, db: Annotated[AsyncSession, Depends
     logger.info(f"Reading Quiz by ID: {__name__}, {quiz_id}")
 
     try:
-    
-        quiz_called= await read_quiz_by_id(quiz_id=quiz_id, db=db)
+
+        quiz_called = await read_quiz_by_id(quiz_id=quiz_id, db=db)
         return quiz_called
-    
+
     except HTTPException as http_err:
         logger.error(f"read_quiz_by_id Error: {http_err}")
         raise http_err
     except Exception as err:
         logger.error(f"read_quiz_by_id Error: {err}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
-    
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
+
+
 @router.patch("/{quiz_id}", response_model=QuizReadWithQuestionsAndTopics)
 async def update_existing_quiz(quiz_id: int, quiz: QuizUpdate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
@@ -118,18 +126,21 @@ async def update_existing_quiz(quiz_id: int, quiz: QuizUpdate, db: Annotated[Asy
         HTTPException: Quiz not found
     """
 
-    logger.info(f"Updating existing Quiz:, {__name__}, quiz_id: {quiz_id}, quiz: {quiz}")
+    logger.info(f"Updating existing Quiz:, {
+                __name__}, quiz_id: {quiz_id}, quiz: {quiz}")
 
     try:
         return await update_quiz(quiz_id, quiz, db)
-    
+
     except HTTPException as http_err:
         logger.error(f"update_existing_quiz Error: {http_err}")
         raise http_err
     except Exception as err:
         logger.error(f"update_existing_quiz Error: {err}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
-    
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
+
+
 @router.delete("/{quiz_id}")
 async def delete_existing_quiz(quiz_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
@@ -154,12 +165,14 @@ async def delete_existing_quiz(quiz_id: int, db: Annotated[AsyncSession, Depends
         raise http_err
     except Exception as err:
         logger.error(f"delete_existing_quiz Error: {err}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
 
 # ------------------------------
 # Quiz Question Router Endpoints
 # ------------------------------
-    
+
+
 @router.post("/{quiz_id}/quiz-question", response_model=QuizQuestionReadQuestionBank)
 async def create_new_quiz_question(quiz_id: int, quiz_question_data: QuestionBankCreate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
@@ -176,22 +189,25 @@ async def create_new_quiz_question(quiz_id: int, quiz_question_data: QuestionBan
         HTTPException: Error in creating Quiz Question
     """
 
-    logger.info(f"Creating new Quiz Question: {__name__}, {quiz_question_data}")
+    logger.info(f"Creating new Quiz Question: {
+                __name__}, {quiz_question_data}")
 
     try:
         return await create_quiz_question(quiz_id=quiz_id, quiz_question_create_data=quiz_question_data, db=db)
-    
+
     except HTTPException as http_err:
         logger.error(f"create_new_quiz_question Error: {http_err}")
         raise http_err
     except Exception as err:
         logger.error(f"create_new_quiz_question Error: {err}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in creating Quiz Question")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Error in creating Quiz Question")
+
 
 @router.patch("{quiz_id}/quiz-question/{quiz_question_id}", response_model=QuizQuestionRead)
-async def call_mute_quiz_question(quiz_id: int, quiz_question_id: int, quiz_mute_data: QuizQuestionUpdate,  db: Annotated[AsyncSession, Depends(get_session)]):
+async def call_update_quiz_question(quiz_id: int, quiz_question_id: int, quiz_data: QuizQuestionUpdate,  db: Annotated[AsyncSession, Depends(get_session)]):
     """
-    Mute an existing Quiz Question
+    Add Instructor Comment/Feedback to an existing Quiz Question
 
     Args:
         quiz_question_id (int): ID of the Quiz Question
@@ -203,16 +219,18 @@ async def call_mute_quiz_question(quiz_id: int, quiz_question_id: int, quiz_mute
         HTTPException: Quiz Question not found
     """
 
-    logger.info(f"Muting existing Quiz Question: {__name__}, quiz_question_id: {quiz_question_id}")
+    logger.info(f"Muting existing Quiz Question: {__name__}")
 
     try:
-        return await mute_quiz_question(quiz_id=quiz_id, quiz_question_id=quiz_question_id, quiz_question_update_data=quiz_mute_data, db=db)
+        return await update_quiz_question(quiz_id=quiz_id, quiz_question_id=quiz_question_id, quiz_question_update_data=quiz_data, db=db)
     except HTTPException as http_err:
-        logger.error(f"mute_quiz_question Error: {http_err}")
+        logger.error(f"call_update_quiz_question Error: {http_err}")
         raise http_err
     except Exception as err:
-        logger.error(f"mute_quiz_question Error: {err}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz Question not found")
+        logger.error(f"call_update_quiz_question Error: {err}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Quiz Question not found")
+
 
 @router.delete("{quiz_id}/quiz-question/{quiz_question_id}")
 async def call_remove_quiz_question(quiz_id: int, quiz_question_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
@@ -229,7 +247,7 @@ async def call_remove_quiz_question(quiz_id: int, quiz_question_id: int, db: Ann
         HTTPException: Quiz Question not found
     """
 
-    logger.info(f"Removing existing Quiz Question: {__name__}, quiz_question_id: {quiz_question_id}")
+    logger.info(f"Removing existing Quiz Question: {__name__}")
 
     try:
         return await remove_quiz_question(quiz_id=quiz_id, quiz_question_id=quiz_question_id, db=db)
@@ -238,4 +256,33 @@ async def call_remove_quiz_question(quiz_id: int, quiz_question_id: int, db: Ann
         raise http_err
     except Exception as err:
         logger.error(f"remove_quiz_question Error: {err}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz Question not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Quiz Question not found")
+
+# ------------------------------
+# Quiz Generation Endpoint
+# ------------------------------
+
+# Take Quiz ID and Generate Quiz For Student
+# 1. Verify Student ID & Quiz ID are valid & Quiz is between Start & End Date
+# 2. Generate Quiz with Randomly Shuffled Questions
+# 3. Return Quiz with Questions
+@router.get("/{quiz_id}/generate-runtime-quiz", response_model=RuntimeQuizGenerated)
+async def generate_runtime_quiz_for_student(quiz_id: int, student_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
+
+    logger.info(f"Generating Quiz for Student: {__name__}, quiz_id: {quiz_id}")
+
+    try:
+        runtime_quiz = await generate_quiz(quiz_id=quiz_id, student_id=student_id, db=db)
+
+        # 1 TODO: Add quiz.id & student.id & quiz_questions to QuizAttempt/AnswerSheet Table
+        
+        return runtime_quiz
+
+    except HTTPException as http_err:
+        logger.error(f"generate_quiz Error: {http_err}")
+        raise http_err
+    except Exception as err:
+        logger.error(f"generate_quiz Error: {err}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")

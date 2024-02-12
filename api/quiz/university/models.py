@@ -1,5 +1,5 @@
-from  sqlmodel import SQLModel, Field, ForeignKey
-
+from  sqlmodel import SQLModel, Field, ForeignKey, Relationship
+from api.quiz.quiz.models import Quiz
 
 # Base classes for the models
 class UniversityBase(SQLModel):
@@ -53,6 +53,8 @@ class Program(ProgramBase, table=True):
 class Course(CourseBase, table=True):
     course_id: int | None = Field(default=None, primary_key=True)
     program_id: int = Field(foreign_key="program.program_id")
+
+    quizzes: list['Quiz'] = Relationship(back_populates="course")
 
 
 # Models for the request and response creation

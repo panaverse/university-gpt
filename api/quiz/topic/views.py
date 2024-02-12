@@ -3,8 +3,10 @@ from typing import Annotated
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.core.database import get_session, AsyncSession
-from api.quiz.topic.crud import (create_topic, read_topics, get_topic_by_id, get_topic_by_name, update_topic, delete_topic,
-                                 create_new_content, read_content_for_topic, get_content_by_id, update_content, delete_content)
+from api.quiz.topic.crud import (create_topic, read_topics, read_topic_by_id, update_topic, delete_topic,
+                                 create_new_content, read_content_for_topic, get_content_by_id, update_content, delete_content,
+                                 read_topic_and_subtopics
+                                 )
 
 from api.quiz.topic.models import TopicCreate, TopicResponse, TopicUpdate, TopicResponseWithContent, ContentCreate, ContentResponse, ContentUpdate
 from api.core.utils.logger import logger_config
@@ -15,7 +17,7 @@ logger = logger_config(__name__)
 
 # Create new Recursive Topic
 @router.post("", response_model=TopicResponseWithContent)
-async def create_a_topic(topic: TopicCreate, db: Annotated[AsyncSession, Depends(get_session)]):
+async def create_new_topic(topic: TopicCreate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Create a new recursive topic.
 
@@ -41,7 +43,7 @@ async def create_a_topic(topic: TopicCreate, db: Annotated[AsyncSession, Depends
 
 # Get all Topics
 @router.get("", response_model=list[TopicResponse])
-async def get_topics(
+async def get_all_topics(
     db: Annotated[AsyncSession, Depends(get_session)],
     offset: int = Query(default=0, lte=10),
     limit: int = Query(default=10, lte=100),
@@ -73,35 +75,12 @@ async def get_topics(
         logger.error(f"Unexpected error retrieving topics: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve topics.")
 
-# Get a Topic by Name
-@router.get("/name/{name}", response_model=TopicResponse)
-async def call_get_topic_by_name(name: str, db: Annotated[AsyncSession, Depends(get_session)]):
-    """
-    Get a topic by name.
-
-    Args:
-        name (str): The name of the topic.
-
-    Returns:
-        TopicResponse: The topic with the specified name.
-    Raises:
-        HTTPException: If the topic is not found or other HTTP-related errors occur.
-    """
-    logger.info("%s.get_topic_by_name: %s", __name__, name)
-    try:
-        return await get_topic_by_name(name=name, db=db)
-    except ValueError as e:  
-        logger.error(f"Error retrieving topic: {e}")
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:  
-        logger.error(f"Unexpected error retrieving topic: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve topic.")
 
 # Get a Topic by ID
-@router.get("/{topic_id}", response_model=TopicResponse)
-async def call_get_topic_by_id(topic_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
+@router.get("/{topic_id}", response_model=TopicResponseWithContent)
+async def get_topic_and_its_content_by_id(topic_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
-    Get a topic by ID.
+    Get a Topic and its Content by ID.
 
     Args:
         topic_id (int): The ID of the topic.
@@ -111,13 +90,26 @@ async def call_get_topic_by_id(topic_id: int, db: Annotated[AsyncSession, Depend
     """
     logger.info("%s.get_topic_by_id: %s", __name__, topic_id)
     try:
-        return await get_topic_by_id(id=topic_id, db=db)
-    except ValueError as e:  
-        logger.error(f"Error retrieving topic: {e}")
-        raise HTTPException(status_code=404, detail=str(e))
+        return await read_topic_by_id(id=topic_id, db=db)
+    except HTTPException as http_err:
+        logger.error(f"Error retrieving topic: {http_err}")
+        raise http_err
     except Exception as e:  
         logger.error(f"Unexpected error retrieving topic: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve topic.")
+
+# Get all topics and subtopics
+@router.get("/{topic_id}/subtopics")
+async def get_topic_and_subtopics(topic_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
+    logger.info("%s.get_topic_and_subtopics: %s", __name__, topic_id)
+    try:
+        return await read_topic_and_subtopics(id=topic_id, db=db)
+    except HTTPException as http_err:
+        logger.error(f"Error retrieving topics: {http_err}")
+        raise http_err
+    except Exception as e:
+        logger.error(f"Unexpected error retrieving topics: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve topics.")
 
 
 # Update a Topic by ID
