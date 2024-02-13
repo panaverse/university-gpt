@@ -92,8 +92,6 @@ class QuizReadWithTopics(QuizRead):
     topics: list['Topic'] = []
 
 
-class QuizReadWithQuestionsAndTopics(QuizReadWithTopics):
-    quiz_questions: list['QuizQuestionReadQuestionBank'] = []
 
 
 class QuizUpdate(QuizBase):
@@ -176,6 +174,10 @@ class QuizQuestionRead(QuizQuestionBase):
 
 class QuizQuestionReadQuestionBank(QuizQuestionBase):
     question: QuestionBankRead
+
+class QuizReadWithQuestionsAndTopics(QuizReadWithTopics):
+    quiz_questions: list['QuizQuestionReadQuestionBank'] = []
+
 
 # ----------------------------
 # ----- Runtime Quiz Models for Validation & Serialization
