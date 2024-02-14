@@ -6,6 +6,7 @@ from api.quiz.question import views as questions
 from api.quiz.user import views as users
 from api.quiz.quiz import views as quizzes
 from api.quiz.answersheet import views as answersheets
+from api.quiz.grade import views as grades
 
 router = APIRouter(prefix="/v1",)
 
@@ -40,5 +41,12 @@ router.include_router(
     answersheets.router,
     prefix="/answersheet",
     tags=["AnswerSheet"],
+    # dependencies=[Depends(authent)], # Reference to enable after auth2 is implemented
+)
+
+router.include_router(
+    grades.router,
+    prefix="/grade",
+    tags=["Grade"],
     # dependencies=[Depends(authent)], # Reference to enable after auth2 is implemented
 )
