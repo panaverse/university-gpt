@@ -5,7 +5,7 @@ from app.quiz.question import views as questions
 from app.quiz.user import views as users
 from app.quiz.quiz import views as quizzes
 from app.quiz.answersheet import views as answersheets
-from app.quiz.grade import views as grades
+# from app.quiz.grade import views as grades
 
 router = APIRouter(prefix="/v1",)
 
@@ -27,9 +27,7 @@ router.include_router(
     tags=["User"],
 )
 router.include_router(
-    quizzes.router,
-    prefix="/quiz",
-    tags=["Quiz"],
+    quizzes.router
 )
 
 router.include_router(
@@ -38,8 +36,8 @@ router.include_router(
     tags=["AnswerSheet"],
 )
 
-router.include_router(
-    grades.router,
-    prefix="/grade",
-    tags=["Grade"],
-)
+# router.include_router(
+#     grades.router,
+#     prefix="/grade",
+#     tags=["Grade"],
+# )

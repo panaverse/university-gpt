@@ -1,8 +1,8 @@
-"""Add DataLayer v2
+"""Add DataLayer v1
 
-Revision ID: f6004a9a8e09
+Revision ID: ea0f8a0b43c8
 Revises: 
-Create Date: 2024-02-26 13:29:52.579368
+Create Date: 2024-02-26 20:01:44.102602
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f6004a9a8e09'
+revision: str = 'ea0f8a0b43c8'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,18 +25,6 @@ def upgrade() -> None:
     sa.Column('student_id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('student_id')
     )
-    op.create_table('topic',
-    sa.Column('title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('parent_id', sa.Integer(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['parent_id'], ['topic.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_topic_id'), 'topic', ['id'], unique=False)
-    op.create_index(op.f('ix_topic_title'), 'topic', ['title'], unique=False)
     op.create_table('university',
     sa.Column('university_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('university_desc', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
@@ -46,17 +34,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_university_id'), 'university', ['id'], unique=False)
-    op.create_table('content',
-    sa.Column('topic_id', sa.Integer(), nullable=True),
-    sa.Column('content_text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['topic_id'], ['topic.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_content_id'), 'content', ['id'], unique=False)
-    op.create_index(op.f('ix_content_topic_id'), 'content', ['topic_id'], unique=False)
     op.create_table('program',
     sa.Column('program_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('program_desc', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
@@ -68,20 +45,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_program_id'), 'program', ['id'], unique=False)
-    op.create_table('questionbank',
-    sa.Column('question_text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('is_verified', sa.Boolean(), nullable=False),
-    sa.Column('points', sa.Integer(), nullable=False),
-    sa.Column('difficulty', sa.Enum('easy', 'medium', 'hard', name='questiondifficultyenum'), nullable=False),
-    sa.Column('topic_id', sa.Integer(), nullable=False),
-    sa.Column('question_type', sa.Enum('single_select_mcq', 'multiple_select_mcq', name='questiontypeenum'), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['topic_id'], ['topic.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_questionbank_id'), 'questionbank', ['id'], unique=False)
     op.create_table('course',
     sa.Column('course_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('course_desc', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
@@ -93,22 +56,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_course_id'), 'course', ['id'], unique=False)
-    op.create_table('mcqoption',
-    sa.Column('option_text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('is_correct', sa.Boolean(), nullable=False),
-    sa.Column('question_id', sa.Integer(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['question_id'], ['questionbank.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_mcqoption_id'), 'mcqoption', ['id'], unique=False)
     op.create_table('quiz',
     sa.Column('quiz_title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('difficulty_level', sa.Enum('easy', 'medium', 'hard', name='questiondifficultyenum'), nullable=False),
     sa.Column('random_flag', sa.Boolean(), nullable=False),
-    sa.Column('total_points', sa.Integer(), nullable=False),
+    sa.Column('total_points', sa.Integer(), nullable=True),
     sa.Column('course_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -118,10 +70,23 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_quiz_id'), 'quiz', ['id'], unique=False)
     op.create_index(op.f('ix_quiz_quiz_title'), 'quiz', ['quiz_title'], unique=False)
+    op.create_table('topic',
+    sa.Column('title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('parent_id', sa.Integer(), nullable=True),
+    sa.Column('course_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['course_id'], ['course.id'], ),
+    sa.ForeignKeyConstraint(['parent_id'], ['topic.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_topic_id'), 'topic', ['id'], unique=False)
+    op.create_index(op.f('ix_topic_title'), 'topic', ['title'], unique=False)
     op.create_table('answersheet',
     sa.Column('student_id', sa.Integer(), nullable=False),
     sa.Column('quiz_id', sa.Integer(), nullable=False),
-    sa.Column('attempted_date', sa.DateTime(), nullable=False),
     sa.Column('time_limit', sa.Interval(), nullable=False),
     sa.Column('time_start', sa.DateTime(), nullable=True),
     sa.Column('time_finish', sa.DateTime(), nullable=True),
@@ -137,22 +102,35 @@ def upgrade() -> None:
     op.create_index(op.f('ix_answersheet_id'), 'answersheet', ['id'], unique=False)
     op.create_index(op.f('ix_answersheet_quiz_id'), 'answersheet', ['quiz_id'], unique=False)
     op.create_index(op.f('ix_answersheet_student_id'), 'answersheet', ['student_id'], unique=False)
-    op.create_table('quizquestion',
-    sa.Column('quiz_id', sa.Integer(), nullable=False),
-    sa.Column('question_id', sa.Integer(), nullable=False),
-    sa.Column('topic_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['question_id'], ['questionbank.id'], ),
-    sa.ForeignKeyConstraint(['quiz_id'], ['quiz.id'], ),
+    op.create_table('content',
+    sa.Column('topic_id', sa.Integer(), nullable=True),
+    sa.Column('content_text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['topic_id'], ['topic.id'], ),
-    sa.PrimaryKeyConstraint('quiz_id', 'question_id', 'topic_id')
+    sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_quizquestion_question_id'), 'quizquestion', ['question_id'], unique=False)
-    op.create_index(op.f('ix_quizquestion_quiz_id'), 'quizquestion', ['quiz_id'], unique=False)
-    op.create_index(op.f('ix_quizquestion_topic_id'), 'quizquestion', ['topic_id'], unique=False)
+    op.create_index(op.f('ix_content_id'), 'content', ['id'], unique=False)
+    op.create_index(op.f('ix_content_topic_id'), 'content', ['topic_id'], unique=False)
+    op.create_table('questionbank',
+    sa.Column('question_text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
+    sa.Column('points', sa.Integer(), nullable=False),
+    sa.Column('difficulty', sa.Enum('easy', 'medium', 'hard', name='questiondifficultyenum'), nullable=False),
+    sa.Column('topic_id', sa.Integer(), nullable=False),
+    sa.Column('question_type', sa.Enum('single_select_mcq', 'multiple_select_mcq', name='questiontypeenum'), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['topic_id'], ['topic.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_questionbank_id'), 'questionbank', ['id'], unique=False)
     op.create_table('quizsetting',
     sa.Column('quiz_id', sa.Integer(), nullable=False),
     sa.Column('instructions', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('duration_minutes', sa.Integer(), nullable=False),
+    sa.Column('time_limit', sa.Interval(), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=True),
     sa.Column('end_time', sa.DateTime(), nullable=True),
     sa.Column('quiz_key', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -187,6 +165,29 @@ def upgrade() -> None:
     op.create_index(op.f('ix_answerslot_id'), 'answerslot', ['id'], unique=False)
     op.create_index(op.f('ix_answerslot_question_id'), 'answerslot', ['question_id'], unique=False)
     op.create_index(op.f('ix_answerslot_quiz_answer_sheet_id'), 'answerslot', ['quiz_answer_sheet_id'], unique=False)
+    op.create_table('mcqoption',
+    sa.Column('option_text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('is_correct', sa.Boolean(), nullable=False),
+    sa.Column('question_id', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['question_id'], ['questionbank.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_mcqoption_id'), 'mcqoption', ['id'], unique=False)
+    op.create_table('quizquestion',
+    sa.Column('quiz_id', sa.Integer(), nullable=False),
+    sa.Column('question_id', sa.Integer(), nullable=False),
+    sa.Column('topic_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['question_id'], ['questionbank.id'], ),
+    sa.ForeignKeyConstraint(['quiz_id'], ['quiz.id'], ),
+    sa.ForeignKeyConstraint(['topic_id'], ['topic.id'], ),
+    sa.PrimaryKeyConstraint('quiz_id', 'question_id', 'topic_id')
+    )
+    op.create_index(op.f('ix_quizquestion_question_id'), 'quizquestion', ['question_id'], unique=False)
+    op.create_index(op.f('ix_quizquestion_quiz_id'), 'quizquestion', ['quiz_id'], unique=False)
+    op.create_index(op.f('ix_quizquestion_topic_id'), 'quizquestion', ['topic_id'], unique=False)
     op.create_table('answerslotoption',
     sa.Column('quiz_answer_slot_id', sa.Integer(), nullable=False),
     sa.Column('option_id', sa.Integer(), nullable=False),
@@ -204,6 +205,12 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(op.f('ix_answerslotoption_id'), table_name='answerslotoption')
     op.drop_table('answerslotoption')
+    op.drop_index(op.f('ix_quizquestion_topic_id'), table_name='quizquestion')
+    op.drop_index(op.f('ix_quizquestion_quiz_id'), table_name='quizquestion')
+    op.drop_index(op.f('ix_quizquestion_question_id'), table_name='quizquestion')
+    op.drop_table('quizquestion')
+    op.drop_index(op.f('ix_mcqoption_id'), table_name='mcqoption')
+    op.drop_table('mcqoption')
     op.drop_index(op.f('ix_answerslot_quiz_answer_sheet_id'), table_name='answerslot')
     op.drop_index(op.f('ix_answerslot_question_id'), table_name='answerslot')
     op.drop_index(op.f('ix_answerslot_id'), table_name='answerslot')
@@ -213,32 +220,26 @@ def downgrade() -> None:
     op.drop_table('quiztopic')
     op.drop_index(op.f('ix_quizsetting_id'), table_name='quizsetting')
     op.drop_table('quizsetting')
-    op.drop_index(op.f('ix_quizquestion_topic_id'), table_name='quizquestion')
-    op.drop_index(op.f('ix_quizquestion_quiz_id'), table_name='quizquestion')
-    op.drop_index(op.f('ix_quizquestion_question_id'), table_name='quizquestion')
-    op.drop_table('quizquestion')
+    op.drop_index(op.f('ix_questionbank_id'), table_name='questionbank')
+    op.drop_table('questionbank')
+    op.drop_index(op.f('ix_content_topic_id'), table_name='content')
+    op.drop_index(op.f('ix_content_id'), table_name='content')
+    op.drop_table('content')
     op.drop_index(op.f('ix_answersheet_student_id'), table_name='answersheet')
     op.drop_index(op.f('ix_answersheet_quiz_id'), table_name='answersheet')
     op.drop_index(op.f('ix_answersheet_id'), table_name='answersheet')
     op.drop_table('answersheet')
-    op.drop_index(op.f('ix_quiz_quiz_title'), table_name='quiz')
-    op.drop_index(op.f('ix_quiz_id'), table_name='quiz')
-    op.drop_table('quiz')
-    op.drop_index(op.f('ix_mcqoption_id'), table_name='mcqoption')
-    op.drop_table('mcqoption')
-    op.drop_index(op.f('ix_course_id'), table_name='course')
-    op.drop_table('course')
-    op.drop_index(op.f('ix_questionbank_id'), table_name='questionbank')
-    op.drop_table('questionbank')
-    op.drop_index(op.f('ix_program_id'), table_name='program')
-    op.drop_table('program')
-    op.drop_index(op.f('ix_content_topic_id'), table_name='content')
-    op.drop_index(op.f('ix_content_id'), table_name='content')
-    op.drop_table('content')
-    op.drop_index(op.f('ix_university_id'), table_name='university')
-    op.drop_table('university')
     op.drop_index(op.f('ix_topic_title'), table_name='topic')
     op.drop_index(op.f('ix_topic_id'), table_name='topic')
     op.drop_table('topic')
+    op.drop_index(op.f('ix_quiz_quiz_title'), table_name='quiz')
+    op.drop_index(op.f('ix_quiz_id'), table_name='quiz')
+    op.drop_table('quiz')
+    op.drop_index(op.f('ix_course_id'), table_name='course')
+    op.drop_table('course')
+    op.drop_index(op.f('ix_program_id'), table_name='program')
+    op.drop_table('program')
+    op.drop_index(op.f('ix_university_id'), table_name='university')
+    op.drop_table('university')
     op.drop_table('student')
     # ### end Alembic commands ###

@@ -5,10 +5,11 @@ from typing import Optional, TYPE_CHECKING
 from app.core.utils.generic_models import BaseIdModel
 from app.quiz.question.models import QuestionBank, QuestionBankRead
 from app.quiz.quiz.link_models import QuizTopic
-from app.quiz.quiz.models import QuizQuestion
 
 if TYPE_CHECKING:
     from app.quiz.quiz.models import Quiz
+    from app.quiz.quiz.models import QuizQuestion
+    from app.quiz.university.models import Course
 
 #-------------------------------------------
             # Content Model
@@ -74,12 +75,14 @@ class ContentUpdate(ContentBase):
 example_topic_input = {
     "parent_id": None, # "None" for root topic
     "title": "Python",
+    "course_id": 1,
     "description": "Python programming language"
 }
 
 example_topic_input_with_content = {
                 "title": "OOP Paradigm",
                 "description": "Learn OOPS in Python12",
+                "course_id": 1,
                 "parent_id": 1,  # This is Optional for Subtopics
                 "contents": [
                     {"content_text": "OOP is a programming paradigm based on classes and objects rather."},
@@ -93,6 +96,9 @@ class TopicBase(SQLModel):
     parent_id: int | None = Field(
         foreign_key='topic.id',  # notice the lowercase "t" to refer to the database table name
         default=None)
+    # Relationship with Course
+    course_id: int = Field(foreign_key="course.id", default=None)
+
 
     class Config:
         json_schema_extra = example_topic_input
@@ -126,6 +132,8 @@ class Topic(BaseIdModel, TopicBase, table=True):
     quiz_questions: list['QuizQuestion'] = Relationship(
         back_populates="topic", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     
+    course: Optional['Course'] = Relationship(back_populates="topics")
+    
 
 
 class TopicCreate(TopicBase):
@@ -139,7 +147,8 @@ class TopicCreate(TopicBase):
 
 class TopicResponse(TopicBase):
     id: int
-    parent_id: int | None = None
+    parent_id: int | None = None,
+    course_id: int 
     created_at: datetime
     updated_at: datetime
 
@@ -148,13 +157,16 @@ class TopicUpdate(TopicBase):
     title: str | None = None
     description: str | None = None
     parent_id: int | None = None
+    course_id: int 
+
 
     class Config:
         json_schema_extra = {
             "example": {
                 "title": "OOP Paradigm",
                 "description": "Learn OOPS in Typescript 5.0+",
-                "parent_id": 1  # This is Optional for Subtopics
+                "parent_id": 1,  # This is Optional for Subtopics
+                "course_id": 1
             }
         }
 

@@ -21,7 +21,7 @@ router_uni = APIRouter()
 
 # Endpoints for creating a new University
 @router_uni.post("", response_model=UniversityRead)
-async def create_new_university(university: UniversityCreate)-> UniversityRead:
+async def create_new_university(university: UniversityCreate, db: AsyncSession = Depends(get_session) )-> UniversityRead:
     """
     Create a new University in the database
 
@@ -31,7 +31,7 @@ async def create_new_university(university: UniversityCreate)-> UniversityRead:
     (Returns):
         University: University that was created (with Id and timestamps included)
     """
-    return await create_university_db(university)
+    return await create_university_db(university, db=db)
 
 # Endpoints for getting all Universities
 @router_uni.get("", response_model=list[UniversityRead])
@@ -98,7 +98,7 @@ router_prog = APIRouter()
 
 # Endpoints for creating a new Program
 @router_prog.post("", response_model=ProgramRead)
-async def create_new_program(program: ProgramCreate)-> ProgramRead:
+async def create_new_program(program: ProgramCreate,  db: AsyncSession = Depends(get_session))-> ProgramRead:
     """
     Create a new Program in the database
 
@@ -108,7 +108,7 @@ async def create_new_program(program: ProgramCreate)-> ProgramRead:
     (Returns):
         Program: Program that was created (with Id and timestamps included)
     """
-    return await create_program_db(program)
+    return await create_program_db(program, db=db)
 
 # Endpoints for getting all Programs
 @router_prog.get("", response_model=list[ProgramRead])
@@ -175,7 +175,7 @@ router_course = APIRouter()
 
 # Endpoints for creating a new Course
 @router_course.post("", response_model=CourseRead)
-async def create_new_course(course: CourseCreate)-> CourseRead:
+async def create_new_course(course: CourseCreate, db: AsyncSession = Depends(get_session))-> CourseRead:
     """
     Create a new Course in the database
 
@@ -185,7 +185,7 @@ async def create_new_course(course: CourseCreate)-> CourseRead:
     (Returns):
         Course: Course that was created (with Id and timestamps included)
     """
-    return await create_course_db(course)
+    return await create_course_db(course, db=db)
 
 # Endpoints for getting all Courses
 @router_course.get("", response_model=list[CourseRead])

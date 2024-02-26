@@ -80,7 +80,7 @@ example_output_question_bank = {
     "topic_id": 1,
     "question_type": "single_select_mcq",
     "options": [
-                    {"is_correct": True," option_text": "Missing semicolons at the end of statements"},
+                    {"is_correct": True, "option_text": "Missing semicolons at the end of statements"},
                     {"is_correct": False, "option_text": "Missing types in function parameters"}],
     "created_at": "2021-07-10T14:48:00.000Z",
     "updated_at": "2021-07-10T14:48:00.000Z"

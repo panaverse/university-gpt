@@ -23,10 +23,11 @@ async def create_university_db(university: UniversityCreate, db: AsyncSession) -
     Returns:
     University: University that was created (with Id and timestamps included)
     """
-    db.add(university)
+    obj_in = University.model_validate(university)
+    db.add(obj_in)
     await db.commit()
-    await db.refresh(university)
-    return university
+    await db.refresh(obj_in)
+    return obj_in
 
 # Get all Universities
 async def get_all_universities_db(db: AsyncSession, offset: int, limit: int) -> list[UniversityRead]:
@@ -112,10 +113,11 @@ async def create_program_db(program: ProgramCreate, db: AsyncSession) -> Program
     Returns:
     Program: Program that was created (with Id and timestamps included)
     """
-    db.add(program)
+    obj_in = Program.model_validate(program)
+    db.add(obj_in)
     await db.commit()
-    await db.refresh(program)
-    return program
+    await db.refresh(obj_in)
+    return obj_in
 
 # Get all Programs
 async def get_all_programs_db(db: AsyncSession, offset: int, limit: int) -> list[ProgramRead]:
@@ -201,10 +203,11 @@ async def create_course_db(course: CourseCreate, db: AsyncSession) -> CourseRead
     Returns:
     Course: Course that was created (with Id and timestamps included)
     """
-    db.add(course)
+    obj_in = Course.model_validate(course)
+    db.add(obj_in)
     await db.commit()
-    await db.refresh(course)
-    return course
+    await db.refresh(obj_in)
+    return obj_in
 
 # Get all Courses
 async def get_all_courses_db(db: AsyncSession, offset: int, limit: int) -> list[CourseRead]:

@@ -3,7 +3,7 @@ from sqlmodel import Field, SQLModel, Relationship
 from datetime import timedelta, datetime
 from typing import TYPE_CHECKING, Optional
 
-from app.core.utils.generic_models import QuestionDifficultyEnum, QuestionTypeEnum, BaseIdModel
+from app.core.utils.generic_models import QuestionTypeEnum, BaseIdModel
 
 if TYPE_CHECKING:
     # Avoid circular imports at runtime
@@ -15,11 +15,13 @@ if TYPE_CHECKING:
 # ---------------------
 
 
-# Quiz Attempt Table:
+# ---------------------
+# Answer Sheet
+# ---------------------
+
 class AnswerSheetBase(SQLModel):
     student_id: int = Field(index=True)
     quiz_id: int = Field(index=True, foreign_key="quiz.id")
-    attempted_date: datetime = Field()
 
     time_limit: timedelta = Field()
     time_start: datetime | None = Field(default=None)
@@ -35,12 +37,31 @@ class AnswerSheet(BaseIdModel, AnswerSheetBase, table=True):
     quiz_answers: list["AnswerSlot"] = Relationship(back_populates="answer_sheet")
 
     # Relationship to Quiz
-    quiz: "Quiz" = Relationship(back_populates="quiz_answer_sheets")
+    quiz: "Quiz" = Relationship(back_populates="answer_sheets")
 
     # TODO: quiz_grades: list["QuizGrade"] = Relationship(back_populates="quiz_attempt")
 
+class AnswerSheetCreate(SQLModel):
+    student_id: int 
+    quiz_id: int 
+    time_limit: timedelta
+    time_start: datetime 
+    total_points: int
+    quiz_key: str 
 
+
+class AnswerSheetUpdate(SQLModel):
+    time_finish: datetime | None = None
+    attempt_score: float | None = None
+
+
+class AnswerSheetRead(AnswerSheetBase):
+    id: int
+
+# ---------------------
 # Quiz Answer Slot: Save each User Answer and check to update the points awarded
+# ---------------------
+    
 class AnswerSlotBase(SQLModel):
     quiz_answer_sheet_id: int = Field(index=True, foreign_key="answersheet.id")
     question_id: int = Field(index=True, foreign_key="questionbank.id")
@@ -56,6 +77,18 @@ class AnswerSlot(BaseIdModel, AnswerSlotBase, table=True):
     selected_options: list["AnswerSlotOption"] = Relationship(
         back_populates="quiz_answer_slot", sa_relationship_kwargs={"lazy": "selectin"})
 
+class AnswerSlotCreate(AnswerSlotBase):
+    # We will sanitize, append to a new list to extend .selected_options
+    selected_options_ids: list[int] = []
+    
+
+class AnswerSlotRead(AnswerSlotBase):
+    id: int
+    selected_options: list["AnswerSlotOptionBase"] = []
+
+class AnswerSlotUpdate(SQLModel):    
+    answer_slot_id: int | None = None
+    points_awarded: float | None = None
 
 class AnswerSlotOptionBase(SQLModel):
     quiz_answer_slot_id: int = Field(foreign_key="answerslot.id")
@@ -66,3 +99,9 @@ class AnswerSlotOption(BaseIdModel, AnswerSlotOptionBase, table=True):
     # Relationship back to the AnswerSlot
     quiz_answer_slot: "AnswerSlot" = Relationship(
         back_populates="selected_options", sa_relationship_kwargs={"lazy": "joined"})
+
+
+class AttemptQuizRequest(SQLModel):
+    student_id: int
+    quiz_id: int
+    quiz_key: str

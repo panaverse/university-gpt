@@ -3,11 +3,7 @@ from sqlmodel import SQLModel, Field
 from datetime import datetime
 
 class BaseIdModel(SQLModel):
-    id: int = Field(
-        primary_key=True,
-        index=True,
-        nullable=False,
-    )
+    id: int | None = Field(default=None, primary_key=True, index=True)
     created_at: datetime | None = Field(default_factory=datetime.utcnow)
     updated_at: datetime | None = Field(
         default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow}

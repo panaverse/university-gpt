@@ -153,7 +153,7 @@ async def get_question_by_id(id: int, db: AsyncSession):
 
     try:
         # question = await db.get(QuestionBank, id)
-        result = await db.execute(select(QuestionBank).options(selectinload(QuestionBank.options)).where(QuestionBank.id == id))
+        result = await db.execute(select(QuestionBank).where(QuestionBank.id == id))
         question = result.scalars().first()
         if not question:
             raise ValueError("Question not found")
@@ -171,8 +171,6 @@ async def get_question_by_id(id: int, db: AsyncSession):
         raise Exception("An unexpected error occurred.") from e
 
 # Update a Question by ID
-
-
 async def update_question(id: int, question: QuestionBankUpdate, db: AsyncSession):
     """
     Update a question by its ID in the database.

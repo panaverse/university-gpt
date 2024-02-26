@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from app.core.utils.generic_models import BaseIdModel
 if TYPE_CHECKING:
     from app.quiz.topic.models import Topic # Avoid circular imports at runtime
-
+    from app.quiz.quiz.models import Quiz
 #------------------------------------------------
             #University Model
 #------------------------------------------------
@@ -52,6 +52,7 @@ class UniversityRead(UniversityBase):
     created_at: datetime (required): Date and time when the University was created
     updated_at: datetime (required): Date and time when the University was last updated
     """
+    id: int
     class Config:
         json_schema_extra = {
             "example": example_output_uni
@@ -91,6 +92,7 @@ class UniversityUpdate(SQLModel):
 #------------------------------------------------
         
 example_input_prog = {
+    "university_id": 1,
     "program_name": "Artificial Intelligence",
     "program_desc": "The program of Artificial Intelligence is a leading educational program in Pakistan."
 }
@@ -144,6 +146,7 @@ class ProgramRead(ProgramBase):
     created_at: datetime (required): Date and time when the Program was created
     updated_at: datetime (required): Date and time when the Program was last updated
     """
+    id: int
     class Config:
         json_schema_extra = {
             "example": example_output_prog
@@ -158,6 +161,7 @@ class ProgramCreate(ProgramBase):
     program_desc (optional): str: Description of the Program
     university_id (required): int: ID of the University
     """
+    university_id: int
     class Config:
         json_schema_extra = {
             "example": example_input_prog
@@ -184,6 +188,7 @@ class ProgramUpdate(SQLModel):
 #------------------------------------------------
 
 example_input_course = {
+    "program_id": 1,
     "course_name": "Python Programming",
     "course_desc": "The course of Python Programming is a leading educational course in Pakistan."
 }
@@ -224,7 +229,8 @@ class Course(BaseIdModel, CourseBase, table=True):
     program: "Program" = Relationship(back_populates="courses")
     #2. Relationship with Topic
     topics: list["Topic"] = Relationship(back_populates="course")
-    
+    #  3. Relationship to Quiz
+    quizzes: list["Quiz"] = Relationship(back_populates="course")
 # Model for reading a Course from the database
 # this will be send as response back to the client
 class CourseRead(CourseBase):
@@ -236,6 +242,7 @@ class CourseRead(CourseBase):
     created_at: datetime (required): Date and time when the Course was created
     updated_at: datetime (required): Date and time when the Course was last updated
     """
+    id: int
     class Config:
         json_schema_extra = {
             "example": example_output_course
@@ -250,6 +257,7 @@ class CourseCreate(CourseBase):
     course_desc (optional): str: Description of the Course
     program_id (required): int: ID of the Program
     """
+    program_id: int
     class Config:
         json_schema_extra = {
             "example": example_input_course

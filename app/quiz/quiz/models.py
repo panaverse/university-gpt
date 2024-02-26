@@ -1,14 +1,15 @@
 from sqlmodel import Field, SQLModel, Relationship
-from pydantic import validator
+from pydantic import validator, field_validator, root_validator
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from app.core.utils.generic_models import QuestionTypeEnum, BaseIdModel, QuestionDifficultyEnum
 from app.quiz.quiz.link_models import QuizTopic
 from app.quiz.question.models import QuestionBankRead
+from app.quiz.topic.models import Topic, TopicBase
+from app.quiz.answersheet.models import AnswerSheetRead
 
 if TYPE_CHECKING:
-    from app.quiz.topic.models import Topic, TopicBase
     from app.quiz.question.models import QuestionBank
     from app.quiz.university.models import Course
     from app.quiz.answersheet.models import AnswerSheet
@@ -56,7 +57,7 @@ class QuizBase(SQLModel):
     difficulty_level: QuestionDifficultyEnum = Field(
         default=QuestionDifficultyEnum.easy)
     random_flag: bool = Field(default=False)
-    total_points: int = Field(default=0)
+    total_points: int | None = Field(default=0)
     course_id: int | None = Field(foreign_key="course.id", default=None)
 
     class Config:
@@ -76,7 +77,7 @@ class Quiz(BaseIdModel, QuizBase, table=True):
         back_populates="quiz", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
     quiz_settings: list['QuizSetting'] = Relationship(
-        back_populates="quiz", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+        back_populates="quiz", sa_relationship_kwargs={"cascade": "all, delete-orphan", "lazy": "selectin"})
 
     answer_sheets: list['AnswerSheet'] = Relationship(back_populates="quiz")
 
@@ -124,16 +125,16 @@ class QuizUpdate(QuizBase):
 example_quiz_setting_input = {
     "quiz_id": 1,
     "instructions": "Read the questions carefully.",
-    "duration_minutes": 10,
-    "start_time": "2021-07-10T14:48:00.000Z",
-    "end_time": "2021-07-10T14:48:00.000Z",
+    "time_limit": "P3D",
+    "start_time": "2023-02-26T14:56:46.277Z",
+    "end_time": "2025-02-26T14:56:46.277Z",
     "quiz_key": "BAT_Q1TS278"
 }
 
 example_quiz_setting_output = {
     "quiz_id": 1,
     "instructions": "Read the questions carefully.",
-    "duration_minutes": 10,
+    "time_limit": "P3D",
     "start_time": "2021-07-10T14:48:00.000Z",
     "end_time": "2021-07-10T14:48:00.000Z",
     "quiz_key": "BAT_Q1TS278",
@@ -147,7 +148,7 @@ example_quiz_setting_output = {
 class QuizSettingBase(SQLModel):
     quiz_id: int = Field(foreign_key="quiz.id")
     instructions: str = Field(default=None)
-    duration_minutes: int = Field(default=0)
+    time_limit: timedelta = Field()
     start_time: datetime | None = Field(default=None)
     end_time: datetime | None = Field(default=None)
     quiz_key: str = Field(max_length=160)
@@ -157,17 +158,14 @@ class QuizSettingBase(SQLModel):
 
 class QuizSetting(BaseIdModel, QuizSettingBase, table=True):
     # 1. Relationship with Quiz
-    quiz: Quiz = Relationship(back_populates="quiz_settings")
+    quiz: Quiz = Relationship(back_populates="quiz_settings", sa_relationship_kwargs={"lazy": "joined"})
 
 # Model for creating a QuizSetting
 
 
 class QuizSettingCreate(QuizSettingBase):
-    class Config:
-        json_schema_extra = {
-            "example": example_quiz_setting_input
-        }
-
+    pass
+        
 
 class QuizSettingRead(QuizSettingBase):
     class Config:
@@ -181,7 +179,7 @@ class QuizSettingRead(QuizSettingBase):
 class QuizSettingUpdate(SQLModel):
     quiz_id: int | None = None
     instructions: str | None = None
-    duration_minutes: int | None = None
+    time_limit: int | None = None
     start_time: datetime | None = None
     end_time: datetime | None = None
     quiz_key: str | None = None
@@ -224,8 +222,10 @@ class QuizQuestion(QuizQuestionBase, table=True):
     question: 'QuestionBank' = Relationship(back_populates="quiz_questions")
     topic: 'Topic' = Relationship(back_populates="quiz_questions")
 
+
 class QuizQuestionRead(QuizQuestionBase):
     pass
+
 
 class QuizQuestionReadQuestionBank(QuizQuestionBase):
     question: QuestionBankRead
@@ -258,15 +258,14 @@ class QuestionRuntimeQuiz(SQLModel):
 class RuntimeQuizGenerated(SQLModel):
     id: int
     title: str
-    description: str
-    duration: timedelta
     course_id: int
     instructions: str
-    total_points: int
-    quiz_key: str
     quiz_questions: list[QuestionRuntimeQuiz] = []
 
+    answer_sheet: AnswerSheetRead  # Add this line
+
     # Custom validator to directly include question data
+
     @validator('quiz_questions', pre=True, each_item=True)
     def unpack_question_data(cls, v):
         # Assuming 'v' is an instance of QuizQuestionFormating or similar

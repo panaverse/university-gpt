@@ -6,7 +6,7 @@ from app.quiz.question.crud import (add_question, read_questions, read_questions
                                     read_mcq_options, add_mcq_option, delete_mcq_option, update_mcq_option, get_mcq_option_by_id
                                     )
 
-from app.quiz.question.models import QuestionBankCreate, QuestionBankUpdate, QuestionBankRead, MCQOptionCreate, MCQOptionUpdate, MCQOptionRead, QuestionBankReadWithOptions
+from app.quiz.question.models import QuestionBankCreate, QuestionBankUpdate, QuestionBankRead, MCQOptionCreate, MCQOptionUpdate, MCQOptionRead
 from app.core.utils.logger import logger_config
 
 router = APIRouter()
@@ -20,7 +20,7 @@ logger = logger_config(__name__)
 # Add Question to the Database
 
 
-@router.post("", response_model=QuestionBankReadWithOptions)
+@router.post("", response_model=QuestionBankRead)
 async def create_new_question(question: QuestionBankCreate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Add a question to the database.
@@ -91,7 +91,7 @@ async def call_read_questions_by_type(question_type: str, db: Annotated[AsyncSes
 # Get a Question by ID
 
 
-@router.get("/{question_id}", response_model=QuestionBankReadWithOptions)
+@router.get("/{question_id}", response_model=QuestionBankRead)
 async def call_get_question_by_id(question_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Get a question by its ID from the database.
