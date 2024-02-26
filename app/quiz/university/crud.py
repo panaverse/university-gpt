@@ -69,10 +69,11 @@ async def update_university_db(university_id: int, university: UniversityUpdate,
     Returns:
     University: University that was updated (with Id and timestamps included)
     """
-    db_university = db.get(University, university_id)
+    db_university =await db.get(University, university_id)
     if not db_university:
-        raise HTTPException(status_code=404, detail="StudentGrade not found")
+        raise HTTPException(status_code=404, detail="university not found")
     university_data = university.model_dump(exclude_unset=True)
+    print(university_data)
     for key, value in university_data.items():
         setattr(db_university, key, value)
     db.add(db_university)
@@ -159,7 +160,7 @@ async def update_program_db(program_id: int, program: ProgramUpdate, db: AsyncSe
     Returns:
     Program: Program that was updated (with Id and timestamps included)
     """
-    db_program = db.get(Program, program_id)
+    db_program =await db.get(Program, program_id)
     if not db_program:
         raise HTTPException(status_code=404, detail="Program not found")
     program_data = program.model_dump(exclude_unset=True)
@@ -249,7 +250,7 @@ async def update_course_db(course_id: int, course: CourseUpdate, db: AsyncSessio
     Returns:
     Course: Course that was updated (with Id and timestamps included)
     """
-    db_course = db.get(Course, course_id)
+    db_course =await db.get(Course, course_id)
     if not db_course:
         raise HTTPException(status_code=404, detail="Course not found")
     course_data = course.model_dump(exclude_unset=True)
