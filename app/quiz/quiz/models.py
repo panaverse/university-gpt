@@ -1,84 +1,93 @@
-from sqlmodel import Field, SQLModel, Relationship, Column, DateTime
-from datetime import timedelta
-from datetime import datetime
-from app.quiz.quiz.link_models import QuizTopic
-from app.quiz.topic.models import Topic, TopicBase
-from app.quiz.question.models import QuestionBank, QuestionBankRead
-from app.core.utils.generic_models import QuestionTypeEnum
+from sqlmodel import Field, SQLModel, Relationship
 from pydantic import validator
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
+
+from app.core.utils.generic_models import QuestionTypeEnum, BaseIdModel, QuestionDifficultyEnum
+from app.quiz.quiz.link_models import QuizTopic
+from app.quiz.question.models import QuestionBankRead
+
+if TYPE_CHECKING:
+    from app.quiz.topic.models import Topic, TopicBase
+    from app.quiz.question.models import QuestionBank
+    from app.quiz.university.models import Course
+    from app.quiz.answersheet.models import AnswerSheet
+
+# -------------------------------------------
+    # Quiz Models
+# -------------------------------------------
+# Response model
+example_quiz_input = {
+    "quiz_title": "TypeScript Quiz",
+    "difficulty_level": "easy",
+    "random_flag": True,
+    "course_id": 1
+}
+
+example_quiz_input_create = {
+    "quiz_title": "TypeScript Quiz",
+    "difficulty_level": "easy",
+    "random_flag": True,
+    "course_id": 1,
+    "add_topic_ids": [1],
+}
+
+example_quiz_input_update = {
+    "quiz_title": "TypeScript Quiz",
+    "difficulty_level": "easy",
+    "random_flag": True,
+    "course_id": 1,
+    "add_topic_ids": [1, 2, 3],
+    "remove_topic_ids": [4]
+}
+
+example_quiz_output = {
+    "quiz_title": "TypeScript Quiz",
+    "difficulty_level": "easy",
+    "random_flag": True,
+    "course_id": 1,
+    "created_at": "2021-07-10T14:48:00.000Z",
+    "updated_at": "2021-07-10T14:48:00.000Z"
+}
 
 
 class QuizBase(SQLModel):
-    title: str = Field(max_length=160, index=True)
-    description: str | None = None
-    duration: timedelta = Field(default=timedelta(minutes=0))
-    course_id: int | None = Field(foreign_key="course.course_id", default=None)
-
-    start_date: datetime | None = None
-    end_date: datetime | None = None
-    instructions: str | None = None
-
+    quiz_title: str = Field(max_length=160, index=True)
+    difficulty_level: QuestionDifficultyEnum = Field(
+        default=QuestionDifficultyEnum.easy)
+    random_flag: bool = Field(default=False)
     total_points: int = Field(default=0)
-
-    quiz_key: str | None = Field(max_length=160, nullable=True)
+    course_id: int | None = Field(foreign_key="course.id", default=None)
 
     class Config:
         json_schema_extra = {
-            "example": {
-                "title": "TypeScript",
-                "description": "This quiz is about TypeScript",
-                "duration": 30,
-                "course_id": 1,
-                "quiz_key": "TS123",
-                "start_date": "2021-08-01T00:00:00",
-                "end_date": "2021-08-09T23:59:59"
-            }
+            "example": example_quiz_input
         }
 
 
-class Quiz(QuizBase, table=True):
-    id: int | None = Field(default=None, primary_key=True, index=True)
-
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column=Column(
-        DateTime(timezone=True), onupdate=datetime.utcnow, nullable=False))
+class Quiz(BaseIdModel, QuizBase, table=True):
 
     topics: list['Topic'] = Relationship(
         back_populates="quizzes", link_model=QuizTopic)
 
-    course: 'app.quiz.university.models.Course' = Relationship(
-        back_populates="quizzes")
+    course: 'Course' = Relationship(back_populates="quizzes")
 
     quiz_questions: list['QuizQuestion'] = Relationship(
         back_populates="quiz", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
+    quiz_settings: list['QuizSetting'] = Relationship(
+        back_populates="quiz", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+
+    answer_sheets: list['AnswerSheet'] = Relationship(back_populates="quiz")
+
 
 class QuizCreate(QuizBase):
     # topic ids to fetch and add existing topics to the quiz
-    topic_ids: list[int] = []
-
-    # Add New Topics to the Quiz
-    topics: list[TopicBase] = []
+    add_topic_ids: list[int] = []
 
     class Config:
         json_schema_extra = {
-            "example": {
-                "title": "TypeScript Quiz",
-                "description": "This quiz is about TypeScript Basics & OOP",
-                "duration": 30,
-                "course_id": 1,
-                "quiz_key": "TS123",
-                "start_date": "2021-08-01T00:00:00",
-                "end_date": "2021-08-09T23:59:59",
-                "instructions": "Read the instructions carefully before starting the quiz.",
-                "topic_ids": [1, 2, 3],
-                "topics": [
-                    {"title": "OPTIONALLY ADD A TOPIC",
-                        "description": "OR Add id of the existing topic in topic_ids"},
-                    {"title": "OOP Paradigm:",
-                        "description": "Learn about OOP Paradigm", "parent_id": 1}
-                ]
-            }
+            "example": example_quiz_input_create
         }
 
 
@@ -93,34 +102,105 @@ class QuizReadWithTopics(QuizRead):
 
 
 class QuizUpdate(QuizBase):
-    title: str | None = None
-    duration: timedelta | None = None
-    description: str | None = None
-    course_id: int | None = None
-    start_date: datetime | None = None
-    end_date: datetime | None = None
-    instructions: str | None = None
+    quiz_title: str | None = None
+    difficulty_level: QuestionDifficultyEnum | None = None
+    random_flag: bool | None = None
     total_points: int | None = None
-    quiz_key: str | None = None
+    course_id: int | None = None
 
     add_topic_ids: list[int] = []
-
     remove_topic_ids: list[int] = []
 
     class Config:
         json_schema_extra = {
-            "example": {
-                "title": "TypeScript Quiz",
-                "description": "This quiz is about TypeScript Basics & OOP",
-                "duration": 30,
-                "course_id": 1,
-                "start_date": "2021-08-01T00:00:00",
-                "end_date": "2021-08-09T23:59:59",
-                "instructions": "Read the instructions carefully before starting the quiz.",
-                "add_topic_ids": [1, 2, 3],
-                "remove_topic_ids": [4]
-            }
+            "example": example_quiz_input_update
         }
+
+
+# -------------------------------------------
+        # QuizSetting Models
+# -------------------------------------------
+# Response model
+example_quiz_setting_input = {
+    "quiz_id": 1,
+    "instructions": "Read the questions carefully.",
+    "duration_minutes": 10,
+    "start_time": "2021-07-10T14:48:00.000Z",
+    "end_time": "2021-07-10T14:48:00.000Z",
+    "quiz_key": "BAT_Q1TS278"
+}
+
+example_quiz_setting_output = {
+    "quiz_id": 1,
+    "instructions": "Read the questions carefully.",
+    "duration_minutes": 10,
+    "start_time": "2021-07-10T14:48:00.000Z",
+    "end_time": "2021-07-10T14:48:00.000Z",
+    "quiz_key": "BAT_Q1TS278",
+    "created_at": "2021-07-10T14:48:00.000Z",
+    "updated_at": "2021-07-10T14:48:00.000Z"
+}
+
+# Model for QuizSettingsBase with common fields
+
+
+class QuizSettingBase(SQLModel):
+    quiz_id: int = Field(foreign_key="quiz.id")
+    instructions: str = Field(default=None)
+    duration_minutes: int = Field(default=0)
+    start_time: datetime | None = Field(default=None)
+    end_time: datetime | None = Field(default=None)
+    quiz_key: str = Field(max_length=160)
+
+# Model for creating a QuizSettings in the database
+
+
+class QuizSetting(BaseIdModel, QuizSettingBase, table=True):
+    # 1. Relationship with Quiz
+    quiz: Quiz = Relationship(back_populates="quiz_settings")
+
+# Model for creating a QuizSetting
+
+
+class QuizSettingCreate(QuizSettingBase):
+    class Config:
+        json_schema_extra = {
+            "example": example_quiz_setting_input
+        }
+
+
+class QuizSettingRead(QuizSettingBase):
+    class Config:
+        json_schema_extra = {
+            "example": example_quiz_setting_output
+        }
+
+# Model for updating a QuizSetting in the database
+
+
+class QuizSettingUpdate(SQLModel):
+    quiz_id: int | None = None
+    instructions: str | None = None
+    duration_minutes: int | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    quiz_key: str | None = None
+
+    class Config:
+        json_schema_extra = {
+            "example": example_quiz_setting_input
+        }
+
+
+# -------------------------------------------
+        # QuizQuestion Models
+# -------------------------------------------
+
+example_quiz_question_input = {
+    "quiz_id": 1,
+    "question_id": 1,
+    "topic_id": 1
+}
 
 
 class QuizQuestionBase(SQLModel):
@@ -128,48 +208,24 @@ class QuizQuestionBase(SQLModel):
         foreign_key="quiz.id", index=True, primary_key=True, default=None)
     question_id: int | None = Field(
         foreign_key="questionbank.id", index=True, primary_key=True, default=None)
-    instructor_comment: str | None = None
+    topic_id: int = Field(
+        foreign_key="topic.id", index=True, primary_key=True, default=None)
 
     class Config:
         json_schema_extra = {
-            "example": {
-                "quiz_id": 1,
-                "question_id": 1,
-                "instructor_comment": "Defaults to None"
-            }
+            "example": example_quiz_question_input
         }
 
 
 class QuizQuestion(QuizQuestionBase, table=True):
 
-    # RelationShips Here as we have extra fields
+    # RelationShips
     quiz: 'Quiz' = Relationship(back_populates="quiz_questions")
     question: 'QuestionBank' = Relationship(back_populates="quiz_questions")
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "quiz_id": 1,
-                "question_id": 1,
-                "instructor_comment": "Defaults to None"
-            }
-        }
-
-
-class QuizQuestionUpdate(SQLModel):
-    instructor_comment: str | None = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "instructor_comment": "This Question tests the student understanding about OOP"
-            }
-        }
-
+    topic: 'Topic' = Relationship(back_populates="quiz_questions")
 
 class QuizQuestionRead(QuizQuestionBase):
     pass
-
 
 class QuizQuestionReadQuestionBank(QuizQuestionBase):
     question: QuestionBankRead
@@ -179,6 +235,7 @@ class QuizReadWithQuestionsAndTopics(QuizReadWithTopics):
     quiz_questions: list['QuizQuestionReadQuestionBank'] = []
 
 
+# TODO: Review when create quiz apis - LEAVING AS IT IS THE BELOW Models
 # ----------------------------
 # ----- Runtime Quiz Models for Validation & Serialization
 # ----------------------------

@@ -1,9 +1,14 @@
-from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
+from sqlmodel import Field, Relationship, SQLModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
 from app.core.utils.generic_models import BaseIdModel
-from app.quiz.question.models import QuestionBank, QuestionBankReadWithOptions
+from app.quiz.question.models import QuestionBank, QuestionBankRead
 from app.quiz.quiz.link_models import QuizTopic
+from app.quiz.quiz.models import QuizQuestion
+
+if TYPE_CHECKING:
+    from app.quiz.quiz.models import Quiz
 
 #-------------------------------------------
             # Content Model
@@ -25,14 +30,13 @@ example_output_content = {
 
 class ContentBase(SQLModel):
 
-    topic_id: int | None = Field(
-        foreign_key='topic.id', default=None, index=True)
+    topic_id: int | None = Field(foreign_key='topic.id', default=None, index=True)
     content_text: str
 
 
 class Content(BaseIdModel, ContentBase, table=True):
     # Topic Relationship
-    topic: "Topic" = Relationship(back_populates='contents')  # type: ignore
+    topic: "Topic" = Relationship(back_populates='contents', sa_relationship_kwargs={"lazy": "joined"})  # type: ignore
 
 
 class ContentCreate(ContentBase):
@@ -73,7 +77,15 @@ example_topic_input = {
     "description": "Python programming language"
 }
 
-
+example_topic_input_with_content = {
+                "title": "OOP Paradigm",
+                "description": "Learn OOPS in Python12",
+                "parent_id": 1,  # This is Optional for Subtopics
+                "contents": [
+                    {"content_text": "OOP is a programming paradigm based on classes and objects rather."},
+                    {"content_text": "OOP Pillars: Encapsulation, Inheritance and Polymorphism, and Abstraction."}
+                ]
+            }
 
 class TopicBase(SQLModel):
     title: str = Field(max_length=160, index=True)
@@ -105,11 +117,15 @@ class Topic(BaseIdModel, TopicBase, table=True):
 
     # Content Table relationship to store the content of the topic
     contents: list['Content'] = Relationship(
-        back_populates='topic', sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+        back_populates='topic', sa_relationship_kwargs={"cascade": "all, delete-orphan", "lazy": "selectin"})
 
     # Relationship with QuizTopic
-    quizzes: list['app.quiz.quiz.models.Quiz'] = Relationship(
+    quizzes: list['Quiz'] = Relationship(
         back_populates="topics", link_model=QuizTopic)
+    
+    quiz_questions: list['QuizQuestion'] = Relationship(
+        back_populates="topic", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    
 
 
 class TopicCreate(TopicBase):
@@ -117,15 +133,7 @@ class TopicCreate(TopicBase):
 
     class Config:
         json_schema_extra = {
-            "example": {
-                "title": "OOP Paradigm",
-                "description": "Learn OOPS in Typescript 5.0+",
-                "parent_id": 1,  # This is Optional for Subtopics
-                "contents": [
-                    {"content_text": "OOP is a programming paradigm based on classes and objects rather."},
-                    {"content_text": "OOP Pillars: Encapsulation, Inheritance and Polymorphism, and Abstraction."}
-                ]
-            }
+            "example": example_topic_input_with_content
         }
 
 
@@ -156,4 +164,4 @@ class TopicResponseWithContent(TopicResponse):
 
 
 class TopicResponseWithQuestions(TopicResponse):
-    questions: list[QuestionBankReadWithOptions] = []
+    questions: list[QuestionBankRead] = []

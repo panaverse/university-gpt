@@ -1,188 +1,278 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
 from app.quiz.university.models import (
-    UniversityCreate, UniversityRead, UniversityUpdate, University,
-    ProgramCreate, ProgramRead, ProgramUpdate, Program,
-    CourseCreate, CourseRead, CourseUpdate, Course
+    University, UniversityCreate, UniversityRead, UniversityUpdate,
+    Program, ProgramCreate, ProgramRead, ProgramUpdate,
+    Course, CourseCreate, CourseRead, CourseUpdate
 )
 
-# function to create a university, program, and course
 
+#------------------------------------------------
+            #University CRUD
+#------------------------------------------------
 
-async def create_university(university: UniversityCreate, db: AsyncSession = Depends(get_session)):
-    uni_to_db = University.model_validate(university)
-    db.add(uni_to_db)
+# Create a new University
+async def create_university_db(university: UniversityCreate, db: AsyncSession) -> UniversityRead:
+    """
+    Create a new University in the database
+    Args:
+    university: UniversityCreate: New University to create (from request body)
+    db: AsyncSession: Database session
+    Returns:
+    University: University that was created (with Id and timestamps included)
+    """
+    db.add(university)
     await db.commit()
-    db.refresh(uni_to_db)
-    return uni_to_db
-
-
-async def create_program(program: ProgramCreate, db: AsyncSession = Depends(get_session)):
-    program_to_db = Program.model_validate(program)
-    db.add(program_to_db)
-    await db.commit()
-    db.refresh(program_to_db)
-    return program_to_db
-
-
-async def create_course(course: CourseCreate, db: AsyncSession = Depends(get_session)):
-    course_to_db = Course.model_validate(course)
-    db.add(course_to_db)
-    await db.commit()
-    db.refresh(course_to_db)
-    return course_to_db
-
-# function to read universities, programs, and courses
-
-
-async def read_universities(offset: int = 0, limit: int = 10, db: AsyncSession = Depends(get_session)):
-    async with db as session:
-        result = await session.execute(select(University).offset(offset).limit(limit))
-        universities = result.scalars().all()
-        return universities
-
-
-async def read_programs(offset: int = 0, limit: int = 10, db: AsyncSession = Depends(get_session)):
-    result = await db.execute(select(Program).offset(offset).limit(limit))
-    programs = result.scalars().all()
-    return programs
-
-
-async def read_courses(offset: int = 0, limit: int = 10, db: AsyncSession = Depends(get_session)):
-    result = await db.execute(select(Course).offset(offset).limit(limit))
-    courses = result.scalars().all()
-    return courses
-
-# function to read a university, program, and course
-
-
-async def read_university(university_id: int, db: AsyncSession = Depends(get_session)):
-    university = await db.get(University, university_id)
-    if not University:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"University not found with id: {university_id}",
-        )
+    await db.refresh(university)
     return university
 
+# Get all Universities
+async def get_all_universities_db(db: AsyncSession, offset: int, limit: int) -> list[UniversityRead]:
+    """
+    Get All Universities
+    Args:
+    db: AsyncSession: Database session
+    Returns:
+    list[UniversityRead]: List of all Universities (Id and timestamps included)
+    """
+    stmt = select(University).offset(offset).limit(limit)
+    universities = await db.execute(stmt)
+    universities = universities.scalars().all()
+    return universities
 
-async def read_program(program_id: int, db: AsyncSession = Depends(get_session)):
-    program = await db.get(Program, program_id)
-    if not program:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Program not found with id: {program_id}",
-        )
+# Get University by ID
+async def get_university_by_id_db(university_id: int, db: AsyncSession) -> UniversityRead:
+    """
+    Get a University by ID
+    Args:
+    university_id: int: ID of the University to retrieve
+    db: AsyncSession: Database session
+    Returns:
+    University: University that was retrieved
+    """
+    stmt = select(University).where(University.id == university_id)
+    university = await db.execute(stmt)
+    university = university.scalar()
+    return university
+
+# Update University by ID
+async def update_university_db(university_id: int, university: UniversityUpdate, db: AsyncSession) -> UniversityRead:
+    """
+    Update a University by ID
+    Args:
+    university_id: int: ID of the University to update
+    university: UniversityUpdate: New values for University
+    db: AsyncSession: Database session
+    Returns:
+    University: University that was updated (with Id and timestamps included)
+    """
+    db_university = db.get(University, university_id)
+    if not db_university:
+        raise HTTPException(status_code=404, detail="StudentGrade not found")
+    university_data = university.model_dump(exclude_unset=True)
+    for key, value in university_data.items():
+        setattr(db_university, key, value)
+    db.add(db_university)
+    await db.commit()
+    await db.refresh(db_university)
+    return db_university
+
+# Delete University by ID
+async def delete_university_db(university_id: int, db: AsyncSession) -> UniversityRead:
+    """
+    Delete a University by ID
+    Args:
+    university_id: int: ID of the University to delete
+    db: AsyncSession: Database session
+    Returns:
+    University: University that was deleted
+    """
+    stmt = select(University).where(University.id == university_id)
+    university = await db.execute(stmt)
+    university = university.scalar()
+    if university is None:
+        raise HTTPException(status_code=404, detail="University not found")
+    db.delete(university)
+    await db.commit()
+    return university
+
+#------------------------------------------------
+            #Program CRUD
+#------------------------------------------------
+
+# Create a new Program
+async def create_program_db(program: ProgramCreate, db: AsyncSession) -> ProgramRead:
+    """
+    Create a new Program in the database
+    Args:
+    program: ProgramCreate: New Program to create (from request body)
+    db: AsyncSession: Database session
+    Returns:
+    Program: Program that was created (with Id and timestamps included)
+    """
+    db.add(program)
+    await db.commit()
+    await db.refresh(program)
     return program
 
+# Get all Programs
+async def get_all_programs_db(db: AsyncSession, offset: int, limit: int) -> list[ProgramRead]:
+    """
+    Get All Programs
+    Args:
+    db: AsyncSession: Database session
+    Returns:
+    list[ProgramRead]: List of all Programs (Id and timestamps included)
+    """
+    stmt = select(Program).offset(offset).limit(limit)
+    programs = await db.execute(stmt)
+    programs = programs.scalars().all()
+    return programs
 
-async def read_course(course_id: int, db: AsyncSession = Depends(get_session)):
-    course = await db.get(Course, course_id)
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Course not found with id: {course_id}",
-        )
+# Get Program by ID
+async def get_program_by_id_db(program_id: int, db: AsyncSession) -> ProgramRead:
+    """
+    Get a Program by ID
+    Args:
+    program_id: int: ID of the Program to retrieve
+    db: AsyncSession: Database session
+    Returns:
+    Program: Program that was retrieved
+    """
+    stmt = select(Program).where(Program.id == program_id)
+    program = await db.execute(stmt)
+    program = program.scalar()
+    return program
+
+# Update Program by ID
+async def update_program_db(program_id: int, program: ProgramUpdate, db: AsyncSession) -> ProgramRead:
+    """
+    Update a Program by ID
+    Args:
+    program_id: int: ID of the Program to update
+    program: ProgramUpdate: New values for Program
+    db: AsyncSession: Database session
+    Returns:
+    Program: Program that was updated (with Id and timestamps included)
+    """
+    db_program = db.get(Program, program_id)
+    if not db_program:
+        raise HTTPException(status_code=404, detail="Program not found")
+    program_data = program.model_dump(exclude_unset=True)
+    for key, value in program_data.items():
+        setattr(db_program, key, value)
+    db.add(db_program)
+    await db.commit()
+    await db.refresh(db_program)
+    return db_program
+
+# Delete Program by ID
+async def delete_program_db(program_id: int, db: AsyncSession) -> ProgramRead:
+    """
+    Delete a Program by ID
+    Args:
+    program_id: int: ID of the Program to delete
+    db: AsyncSession: Database session
+    Returns:
+    Program: Program that was deleted
+    """
+    stmt = select(Program).where(Program.id == program_id)
+    program = await db.execute(stmt)
+    program = program.scalar()
+    if program is None:
+        raise HTTPException(status_code=404, detail="Program not found")
+    db.delete(program)
+    await db.commit()
+    return program
+
+#------------------------------------------------
+            #Course CRUD
+#------------------------------------------------
+
+# Create a new Course
+async def create_course_db(course: CourseCreate, db: AsyncSession) -> CourseRead:
+    """
+    Create a new Course in the database
+    Args:
+    course: CourseCreate: New Course to create (from request body)
+    db: AsyncSession: Database session
+    Returns:
+    Course: Course that was created (with Id and timestamps included)
+    """
+    db.add(course)
+    await db.commit()
+    await db.refresh(course)
     return course
 
-# function to update a university, program, and course
+# Get all Courses
+async def get_all_courses_db(db: AsyncSession, offset: int, limit: int) -> list[CourseRead]:
+    """
+    Get All Courses
+    Args:
+    db: AsyncSession: Database session
+    Returns:
+    list[CourseRead]: List of all Courses (Id and timestamps included)
+    """
+    stmt = select(Course).offset(offset).limit(limit)
+    courses = await db.execute(stmt)
+    courses = courses.scalars().all()
+    return courses
 
+# Get Course by ID
+async def get_course_by_id_db(course_id: int, db: AsyncSession) -> CourseRead:
+    """
+    Get a Course by ID
+    Args:
+    course_id: int: ID of the Course to retrieve
+    db: AsyncSession: Database session
+    Returns:
+    Course: Course that was retrieved
+    """
+    stmt = select(Course).where(Course.id == course_id)
+    course = await db.execute(stmt)
+    course = course.scalar()
+    return course
 
-async def update_university(university_id: int, university: UniversityUpdate, db: AsyncSession = Depends(get_session)):
-    university_to_update = await db.get(University, university_id)
-    if not university_to_update:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"University not found with id: {university_id}",
-        )
-
-    university_to_update_data = university.model_dump(exclude_unset=True)
-    for key, value in university_to_update_data.items():
-        setattr(university_to_update, key, value)
-
-    db.add(university_to_update)
+# Update Course by ID
+async def update_course_db(course_id: int, course: CourseUpdate, db: AsyncSession) -> CourseRead:
+    """
+    Update a Course by ID
+    Args:
+    course_id: int: ID of the Course to update
+    course: CourseUpdate: New values for Course
+    db: AsyncSession: Database session
+    Returns:
+    Course: Course that was updated (with Id and timestamps included)
+    """
+    db_course = db.get(Course, course_id)
+    if not db_course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    course_data = course.model_dump(exclude_unset=True)
+    for key, value in course_data.items():
+        setattr(db_course, key, value)
+    db.add(db_course)
     await db.commit()
-    db.refresh(university_to_update)
+    await db.refresh(db_course)
+    return db_course
 
-    return university_to_update
-
-
-async def update_program(program_id: int, program: ProgramUpdate, db: AsyncSession = Depends(get_session)):
-    program_to_update = await db.get(Program, program_id)
-    if not program_to_update:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Program not found with id: {program_id}",
-        )
-
-    program_to_update_data = program.model_dump(exclude_unset=True)
-    for key, value in program_to_update_data.items():
-        setattr(program_to_update, key, value)
-
-    db.add(program_to_update)
+# Delete Course by ID
+async def delete_course_db(course_id: int, db: AsyncSession) -> CourseRead:
+    """
+    Delete a Course by ID
+    Args:
+    course_id: int: ID of the Course to delete
+    db: AsyncSession: Database session
+    Returns:
+    Course: Course that was deleted
+    """
+    stmt = select(Course).where(Course.id == course_id)
+    course = await db.execute(stmt)
+    course = course.scalar()
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    db.delete(course)
     await db.commit()
-    db.refresh(program_to_update)
+    return course
 
-    return program_to_update
-
-
-async def update_course(course_id: int, course: CourseUpdate, db: AsyncSession = Depends(get_session)):
-    course_to_update = await db.get(Course, course_id)
-    if not course_to_update:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Course not found with id: {course_id}",
-        )
-
-    course_to_update_data = course.model_dump(exclude_unset=True)
-    for key, value in course_to_update_data.items():
-        setattr(course_to_update, key, value)
-
-    db.add(course_to_update)
-    await db.commit()
-    db.refresh(course_to_update)
-    return course_to_update
-
-# function to delete a university, program, and course
-
-
-async def delete_university(university_id: int, db: AsyncSession = Depends(get_session)):
-    university = await db.get(University, university_id)
-    if not university:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"University not found with id: {university_id}",
-        )
-
-    await db.delete(university)
-    await db.commit()
-    return {"ok": True}
-
-
-async def delete_program(program_id: int, db: AsyncSession = Depends(get_session)):
-    program = await db.get(Program, program_id)
-    if not program:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Program not found with id: {program_id}",
-        )
-
-    await db.delete(program)
-    await db.commit()
-    return {"ok": True}
-
-
-async def delete_course(course_id: int, db: AsyncSession = Depends(get_session)):
-    course = await db.get(Course, course_id)
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Course not found with id: {course_id}",
-        )
-
-    await db.delete(course)
-    await db.commit()
-    return {"ok": True}

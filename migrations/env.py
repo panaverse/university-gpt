@@ -13,8 +13,8 @@ from app.quiz.topic.models import Topic, Content
 from app.quiz.university.models import University, Program, Course
 from app.quiz.user.models import Student
 from app.quiz.quiz.link_models import QuizTopic
-from app.quiz.quiz.models import Quiz, QuizQuestion
-from app.quiz.answersheet.models import AnswerSheet
+from app.quiz.quiz.models import Quiz, QuizQuestion, QuizSetting
+from app.quiz.answersheet.models import AnswerSheet, AnswerSlot, AnswerSlotOption
 
 load_dotenv(find_dotenv())
 DATABASE_URL = getenv("DATABASE_URL")
