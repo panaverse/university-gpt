@@ -256,13 +256,18 @@ class QuestionRuntimeQuiz(SQLModel):
 
 
 class RuntimeQuizGenerated(SQLModel):
-    id: int
-    title: str
+    answer_sheet_id: int
+    quiz_title: str
     course_id: int
     instructions: str
     quiz_questions: list[QuestionRuntimeQuiz] = []
 
-    answer_sheet: AnswerSheetRead  # Add this line
+    student_id: int 
+    quiz_id: int 
+    time_limit: timedelta
+    time_start: datetime 
+    total_points: int
+    quiz_key: str 
 
     # Custom validator to directly include question data
 

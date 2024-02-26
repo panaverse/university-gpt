@@ -36,9 +36,6 @@ class AnswerSheet(BaseIdModel, AnswerSheetBase, table=True):
     quiz: Optional["Quiz"] = Relationship(back_populates="answer_sheets")
     quiz_answers: list["AnswerSlot"] = Relationship(back_populates="answer_sheet")
 
-    # Relationship to Quiz
-    quiz: "Quiz" = Relationship(back_populates="answer_sheets")
-
     # TODO: quiz_grades: list["QuizGrade"] = Relationship(back_populates="quiz_attempt")
 
 class AnswerSheetCreate(SQLModel):

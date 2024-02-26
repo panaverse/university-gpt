@@ -24,37 +24,73 @@ logger = logger_config(__name__)
 class CRUDQuizEngine:
 
     # Recursive, we need to create a helper function that will fetch all the subtopics for a given topic. This function will call itself for each subtopic until there are no more subtopics to fetch. 
+    # async def _fetch_all_subtopics(self, *, topic_ids: list[int], db: AsyncSession):
+    #     topics_and_subtopics = await db.execute(select(Topic).options(selectinload(Topic.children_topics)).where(Topic.id.in_(topic_ids)))
+    #     topics_from_db = topics_and_subtopics.scalars().all()
+
+    #     if not topics_from_db:
+    #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incorrect Topic IDs Provided")
+
+    #     all_topic_ids = {topic.id for topic in topics_from_db}
+    #     for topic in topics_from_db:
+    #         if topic.children_topics:
+    #             child_topic_ids = {child.id for child in topic.children_topics}
+    #             all_topic_ids.update(await self._fetch_all_subtopics(topic_ids=child_topic_ids, db=db))
+
+    #     return all_topic_ids
+
     async def _fetch_all_subtopics(self, *, topic_ids: list[int], db: AsyncSession):
         topics_and_subtopics = await db.execute(select(Topic).options(selectinload(Topic.children_topics)).where(Topic.id.in_(topic_ids)))
         topics_from_db = topics_and_subtopics.scalars().all()
 
+        print("\n---------topics_from_db--------\n", topics_from_db)
+
         if not topics_from_db:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incorrect Topic IDs Provided")
 
-        all_topic_ids = {topic.id for topic in topics_from_db}
-        for topic in topics_from_db:
-            if topic.children_topics:
-                child_topic_ids = {child.id for child in topic.children_topics}
-                all_topic_ids.update(await self.fetch_all_subtopics(child_topic_ids, db))
+        all_topic_data = []
+        all_topic_ids = set()
 
-        return all_topic_ids
+        async def fetch_subtopics(topic_ids):
+            nonlocal all_topic_data, all_topic_ids
+            topics_result = await db.execute(select(Topic).options(selectinload(Topic.children_topics)).where(Topic.id.in_(topic_ids)))
+            topics = topics_result.scalars().all()
+            for topic in topics:
+                all_topic_data.append(topic)  # Store the topic object
+                all_topic_ids.add(topic.id)  # Store the topic ID
+                if topic.children_topics:
+                    child_topic_ids = [child.id for child in topic.children_topics]
+                    await fetch_subtopics(child_topic_ids)
+
+        await fetch_subtopics(topic_ids)
+
+        return all_topic_ids, all_topic_data
     # Create Quiz
     async def create_quiz(self, *, quiz: QuizCreate, db: AsyncSession):
         try:
             question_ids_with_topics = []  # Store tuples of (question_id, topic_id)
+            topic_from_db = []
 
             # Get all topics if topic_ids are provided and append to quiz.topics
             if quiz.add_topic_ids:
-                all_topic_ids = await self._fetch_all_subtopics(topic_ids=quiz.add_topic_ids, db=db)
+                all_topic_ids, all_topic_data = await self._fetch_all_subtopics(topic_ids=quiz.add_topic_ids, db=db)
+
+                print("\n----all_topic_ids----\n", all_topic_ids)
 
                 # Fetch all unique questions linked to these topics and subtopics
                 questions_result = await db.execute(select(QuestionBank.id, QuestionBank.topic_id).where(QuestionBank.topic_id.in_(all_topic_ids), QuestionBank.is_verified == True))
                 question_ids_with_topics.extend(questions_result.all())
 
+                # Append the topics to the quiz
+                topic_from_db.extend(all_topic_data)
+
+            print("\n----TOPICS_FROM_DB----\n", topic_from_db)
             quiz_to_db = Quiz.model_validate(quiz)
+            quiz_to_db.topics = topic_from_db
             db.add(quiz_to_db)
             await db.commit()
             db.refresh(quiz_to_db)
+
 
             if question_ids_with_topics:
                 quiz_questions_instances = [QuizQuestion(quiz_id=quiz_to_db.id, question_id=q_id, topic_id=t_id) for q_id, t_id in question_ids_with_topics]
@@ -64,8 +100,12 @@ class CRUDQuizEngine:
 
             db.refresh(quiz_to_db)
 
+            print("\n----quiz_to_db----\n", quiz_to_db)
+            print("\n----quiz_to_db.id----\n", quiz_to_db.id)
+
             # Fetch the quiz with the topics and questions
             quiz_added = await self.read_quiz_by_id(quiz_id=quiz_to_db.id, db=db)
+
             # Update quiz points - based on the sum of all question points
             quiz_added.total_points = sum([quiz_question.question.points for quiz_question in quiz_added.quiz_questions])
         
@@ -173,7 +213,8 @@ class CRUDQuizEngine:
 
     async def update_quiz(self, *, quiz_id: int, quiz_update_data: QuizUpdate, db: AsyncSession):
         try:
-            quiz_to_update = await self.read_quiz_by_id(quiz_id, db)
+            quiz_to_update = await self.read_quiz_by_id(quiz_id=quiz_id, db=db)
+           
             existing_topic_ids = {topic.id for topic in quiz_to_update.topics}
             new_topic_ids = set(quiz_update_data.add_topic_ids) - existing_topic_ids if quiz_update_data.add_topic_ids else set()
             topics_to_remove = set(quiz_update_data.remove_topic_ids) if quiz_update_data.remove_topic_ids else set()
@@ -189,7 +230,7 @@ class CRUDQuizEngine:
             await db.commit()
             db.expire_all()
 
-            quiz_updated = await self.read_quiz_by_id(quiz_id, db)
+            quiz_updated = await self.read_quiz_by_id(quiz_id=quiz_id, db=db)
             quiz_updated.total_points = sum(quiz_question_link.question.points for quiz_question_link in quiz_updated.quiz_questions)
             await db.commit()
 
@@ -437,11 +478,17 @@ class CRUDQuizSetting:
         Check if the Quiz Key is valid
         """
         try:
-            quiz_setting = await db.execute(select(QuizSetting).where(and_(QuizSetting.quiz_id == quiz_id, QuizSetting.quiz_key == quiz_key)))
+            quiz_setting_statement = await db.execute(select(QuizSetting).where(and_(QuizSetting.quiz_id == quiz_id, QuizSetting.quiz_key == quiz_key)))
+            quiz_setting = quiz_setting_statement.scalars().one_or_none()
 
             if quiz_setting is None:
                 raise HTTPException(
                     status_code=404, detail="QuizSetting not found")
+            
+            # If Time is not None then check if it is between start and end time
+            if quiz_setting.start_time and quiz_setting.end_time:
+                if not quiz_setting.start_time <= datetime.now() <= quiz_setting.end_time:
+                    raise HTTPException(status_code=404, detail="Quiz is not active")
             
             return quiz_setting
         except Exception as e:
@@ -461,7 +508,7 @@ class CRUDQuizSetting:
 # DOMAIN LEVEL = 4. After calling it we will create Quiz Attempt and then return the Quiz with Questions
 
 class QuizRuntimeEngine:
-    async def generate_quiz(self, *, quiz_id: int, quiz_key: str, student_id: int, db: AsyncSession):
+    async def generate_quiz(self, *, quiz_id: int, student_id: int, db: AsyncSession):
         try:
             # 1. Verify Student ID
             student = await db.get(Student, student_id)
@@ -473,21 +520,14 @@ class QuizRuntimeEngine:
             quiz_with_question_result = await db.execute(
                 select(Quiz)
                 .options(
-                    # selectinload(Quiz.quiz_settings).where(QuizSetting.quiz_key == quiz_key),
                     selectinload(Quiz.quiz_questions)
                     .joinedload(QuizQuestion.question)
                 )
-                .where(and_(Quiz.id == quiz_id, Quiz.quiz_settings.any(QuizSetting.quiz_key == quiz_key)))
-            )
+                .where(Quiz.id == quiz_id))
             quiz_with_questions = quiz_with_question_result.scalars().one()
             
             if not quiz_with_questions:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
-
-            # 3. Verify Quiz is between Start & End Date
-            if quiz_with_questions.quiz_settings[0].start_time and quiz_with_questions.quiz_settings[0].end_time:
-                if not (quiz_with_questions.quiz_settings[0].start_time <= datetime.now() <= quiz_with_questions.quiz_settings[0].end_time):
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz is not active")
 
             # 4. Generate Quiz with Randomly Shuffled Questions
             random.shuffle(quiz_with_questions.quiz_questions)

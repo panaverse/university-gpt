@@ -43,31 +43,34 @@ async def generate_runtime_quiz_for_student(attempt_ids: AttemptQuizRequest, db:
         student_id: int = attempt_ids.student_id
 
         has_attempted = await crud_answer_sheet.student_answer_sheet_exists(db, user_id=student_id, quiz_id=quiz_id)
-        print("\n-----has_attempted----\n", has_attempted)
         if has_attempted:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="You have already attempted this quiz")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You have already attempted this quiz")
 
-        # Checl if quiz key is valid
-        quiz_key_valid = await quiz_setting_engine.validate_quiz_key(db=db, quiz_id=quiz_id, quiz_key=quiz_key)
-        print("\n-----quiz_key_valid----\n", quiz_key_valid)
+        # Check if quiz key is valid
+        quiz_key_validated = await quiz_setting_engine.validate_quiz_key(db=db, quiz_id=quiz_id, quiz_key=quiz_key)
 
-        runtime_quiz = await runtime_quiz_engine.generate_quiz(quiz_id=quiz_id, quiz_key=quiz_key, student_id=student_id, db=db)
-        print("\n--LEN---runtime_quiz----\n", len(runtime_quiz.quiz_settings))
+        runtime_quiz = await runtime_quiz_engine.generate_quiz(quiz_id=quiz_id, student_id=student_id, db=db)
 
-        # 1 TODO: Create Quiz Attempt
-        quiz_attempt_response = await crud_answer_sheet.create_answer_sheet(db_session=db,
-                                                                            answer_sheet_obj_in=AnswerSheetCreate(student_id == student_id,
-                                                                                                                  quiz_id=quiz_id, quiz_key=quiz_key,
-                                                                                                                  time_limit=runtime_quiz.quiz_settings[
-                                                                                                                      0].time_limit,
-                                                                                                                  total_points=runtime_quiz.total_points,
-                                                                                                                  time_start=datetime.now()))
+        # 1 Create Quiz Attempt
+        answer_sheet_obj_in = AnswerSheetCreate(student_id= student_id, quiz_id= quiz_id, quiz_key= quiz_key, time_limit= quiz_key_validated.time_limit, total_points= runtime_quiz.total_points, time_start=datetime.now())
+        quiz_attempt_response = await crud_answer_sheet.create_answer_sheet(db_session=db, answer_sheet_obj_in=answer_sheet_obj_in)
 
-        runtime_quiz.answer_sheet = quiz_attempt_response
-        runtime_quiz.instructions = runtime_quiz.quiz_settings[0].instructions
+        response_object = RuntimeQuizGenerated(
+                answer_sheet_id = quiz_attempt_response.id,
+                quiz_title = runtime_quiz.quiz_title,
+                course_id = runtime_quiz.course_id,
+                instructions = quiz_key_validated.instructions,
+                student_id = quiz_attempt_response.student_id,
+                quiz_id = quiz_attempt_response.quiz_id,
+                time_limit = quiz_attempt_response.time_limit,
+                time_start = quiz_attempt_response.time_start,
+                total_points = quiz_attempt_response.total_points,
+                quiz_key = quiz_attempt_response.quiz_key,
+                quiz_questions = runtime_quiz.quiz_questions,                
+        )
 
-        return runtime_quiz
+
+        return response_object
     except HTTPException as http_err:
         logger.error(f"generate_quiz Error: {http_err}")
         raise http_err
@@ -82,16 +85,20 @@ async def generate_runtime_quiz_for_student(attempt_ids: AttemptQuizRequest, db:
 @router.get("/{quiz_attempt_id}", response_model=AnswerSheetRead)
 async def get_quiz_attempt_by_id(
         quiz_attempt_id: int,
+        student_id: int,
         db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Gets a Quiz Answer Sheet by its id
     """
     try:
 
-        is_active = await crud_answer_sheet.is_answer_sheet_active(db_session=db, answer_sheet_id=quiz_attempt_id)
-        print("\n------------ is_active ------------\n", is_active)
+        # is_active = await crud_answer_sheet.is_answer_sheet_active(db_session=db, answer_sheet_id=quiz_attempt_id, student_id=student_id)
+        # print("\n------------ is_active ------------\n", is_active)
 
-        quiz_attempt = await crud_answer_sheet.get_answer_sheet_by_id(db, quiz_attempt_id)
+        answer_sheet_obj_tuple = await crud_answer_sheet.get_answer_sheet_by_id(db_session=db, answer_sheet_id=quiz_attempt_id, student_id=student_id)
+        if not answer_sheet_obj_tuple:
+            raise HTTPException(status_code=404, detail="Quiz Attempt Not Found")
+        quiz_attempt = answer_sheet_obj_tuple[0]
         return quiz_attempt
 
     except ValueError as e:
@@ -104,14 +111,14 @@ async def get_quiz_attempt_by_id(
 
 @router.patch("/{quiz_attempt_id}/finish")
 async def update_quiz_attempt(
-        quiz_attempt_id: str,
+        answer_sheet_id: int,
         db_session: Annotated[AsyncSession, Depends(get_session)]
 ):
     """
     Update Quiz Attempt
     """
     try:
-        quiz_attempt_response = await crud_answer_sheet.finish_answer_sheet_attempt(db_session, quiz_attempt_id)
+        quiz_attempt_response = await crud_answer_sheet.finish_answer_sheet_attempt(db_session=db_session, answer_sheet_id=answer_sheet_id)
         return quiz_attempt_response
 
     except ValueError as e:
@@ -126,6 +133,7 @@ async def update_quiz_attempt(
 
 @router.post("/answer_slot/save", response_model=AnswerSlotRead)
 async def save_quiz_answer_slot(
+        student_id: int,
         background_tasks: BackgroundTasks,
         quiz_answer_slot: AnswerSlotCreate,
         db_session: Annotated[AsyncSession, Depends(get_session)]
@@ -135,7 +143,7 @@ async def save_quiz_answer_slot(
     """
     try:
         # 1. ValidateIf Quiz is Active & Quiz Attempt ID is Valid
-        quiz_attempt = await crud_answer_sheet.is_answer_sheet_active(db_session, quiz_answer_slot.quiz_attempt_id)
+        quiz_attempt = await crud_answer_sheet.is_answer_sheet_active(db_session=db_session, answer_sheet_id=quiz_answer_slot.quiz_answer_sheet_id, student_id=student_id)
         if not quiz_attempt:
             raise ValueError("Quiz Time has Ended or Invalid Quiz Attempt ID")
 
@@ -153,3 +161,5 @@ async def save_quiz_answer_slot(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+

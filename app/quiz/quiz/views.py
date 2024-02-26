@@ -61,7 +61,7 @@ async def get_quiz_setting_by_id_endpoint(quiz_setting_id: int, db: Annotated[As
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="QuizSetting not found")
 
 # Update a QuizSetting
-@router_quiz_setting.put("/{quiz_setting_id}", response_model=QuizSettingRead)
+@router_quiz_setting.patch("/{quiz_setting_id}", response_model=QuizSettingRead)
 async def update_quiz_setting_endpoint(quiz_setting_id: int, quiz_setting_update: QuizSettingUpdate, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Update a QuizSetting
@@ -190,7 +190,7 @@ async def update_existing_quiz(quiz_id: int, quiz: QuizUpdate, db: Annotated[Asy
     logger.info(f"Updating existing Quiz:, {__name__}, quiz_id: {quiz_id}, quiz: {quiz}")
 
     try:
-        return await quiz_engine.update_quiz(quiz_id, quiz_update_data=quiz, db=db)
+        return await quiz_engine.update_quiz(quiz_id=quiz_id, quiz_update_data=quiz, db=db)
 
     except HTTPException as http_err:
         logger.error(f"update_existing_quiz Error: {http_err}")
