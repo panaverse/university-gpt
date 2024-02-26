@@ -78,7 +78,7 @@ async def get_university_by_id(university_id: int, db: AsyncSession = Depends(ge
 
 # Endpoints for updating a University by ID
 @router_uni.put("/{university_id}", response_model=UniversityRead)
-async def update_university_by_id(university_id: int, university: UniversityUpdate)-> UniversityRead:
+async def update_university_by_id(university_id: int, university: UniversityUpdate, db: AsyncSession = Depends(get_session))-> UniversityRead:
     """
     Update a University by ID
     Args:
@@ -88,7 +88,7 @@ async def update_university_by_id(university_id: int, university: UniversityUpda
     Returns:
     University: University that was updated (with Id and timestamps included)
     """
-    return await update_university_db(university_id, university)
+    return await update_university_db(university_id=university_id, university=university, db=db)
 
 #------------------------------------------------
             #Program Endpoints
@@ -155,7 +155,7 @@ async def get_program_by_id(program_id: int, db: AsyncSession = Depends(get_sess
 
 # Endpoints for updating a Program by ID
 @router_prog.put("/{program_id}", response_model=ProgramRead)
-async def update_program_by_id(program_id: int, program: ProgramUpdate)-> ProgramRead:
+async def update_program_by_id(program_id: int, program: ProgramUpdate,db:AsyncSession = Depends(get_session))-> ProgramRead:
     """
     Update a Program by ID
     Args:
@@ -165,7 +165,7 @@ async def update_program_by_id(program_id: int, program: ProgramUpdate)-> Progra
     Returns:
     Program: Program that was updated (with Id and timestamps included)
     """
-    return await update_program_db(program_id, program)
+    return await update_program_db(program_id=program_id, program=program, db=db)
 
 #------------------------------------------------
             #Course Endpoints
@@ -232,7 +232,7 @@ async def get_course_by_id(course_id: int, db: AsyncSession = Depends(get_sessio
     
 # Endpoints for updating a Course by ID
 @router_course.put("/{course_id}", response_model=CourseRead)
-async def update_course_by_id(course_id: int, course: CourseUpdate)-> CourseRead:
+async def update_course_by_id(course_id: int, course: CourseUpdate,db:AsyncSession = Depends(get_session))-> CourseRead:
     """
     Update a Course by ID
     Args:
@@ -242,7 +242,7 @@ async def update_course_by_id(course_id: int, course: CourseUpdate)-> CourseRead
     Returns:
     Course: Course that was updated (with Id and timestamps included)
     """
-    return await update_course_db(course_id, course)
+    return await update_course_db(course_id=course_id, course=course, db=db)
 
 
 router = APIRouter()
