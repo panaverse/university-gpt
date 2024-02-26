@@ -14,7 +14,7 @@ RUN pipenv install --system --deploy --ignore-pipfile --${PIPENV_ARGS}
 
 RUN cat /etc/ssl/certs/ca-certificates.crt >> `python -m certifi`
 
-COPY api/ /app/api
+COPY app/ /app/api
 COPY entry_point.py /app/entry_point.py
 
 EXPOSE 8080

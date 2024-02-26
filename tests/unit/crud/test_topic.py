@@ -9,9 +9,9 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from api.quiz.topic.crud import (create_topic, read_topics, get_topic_by_name, get_topic_by_id, update_topic, delete_topic,
+from app.quiz.topic.crud import (create_topic, read_topics, get_topic_by_name, get_topic_by_id, update_topic, delete_topic,
                                  create_new_content, read_content_for_topic, get_content_by_id, update_content, delete_content)
-from api.quiz.topic.models import TopicCreate, TopicUpdate, ContentCreate, ContentUpdate
+from app.quiz.topic.models import TopicCreate, TopicUpdate, ContentCreate, ContentUpdate
 
 # Load environment variables
 load_dotenv(find_dotenv())

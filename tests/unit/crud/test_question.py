@@ -7,11 +7,11 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from api.quiz.question.crud import (add_question, read_questions, read_questions_by_type, get_question_by_id, update_question, delete_question,
+from app.quiz.question.crud import (add_question, read_questions, read_questions_by_type, get_question_by_id, update_question, delete_question,
                                     add_mcq_option, read_mcq_options, get_mcq_option_by_id, update_mcq_option, delete_mcq_option)
-from api.quiz.question.models import QuestionBankCreate, QuestionBankUpdate, MCQOptionCreate, MCQOptionUpdate
-from api.quiz.topic.crud import create_topic, delete_topic
-from api.quiz.topic.models import TopicCreate
+from app.quiz.question.models import QuestionBankCreate, QuestionBankUpdate, MCQOptionCreate, MCQOptionUpdate
+from app.quiz.topic.crud import create_topic, delete_topic
+from app.quiz.topic.models import TopicCreate
 
 # Load environment variables
 load_dotenv(find_dotenv())
