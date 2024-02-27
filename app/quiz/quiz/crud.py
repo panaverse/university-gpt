@@ -195,7 +195,7 @@ class CRUDQuizEngine:
                 .where(QuestionBank.topic_id.in_(list(newly_added_topic_ids)), QuestionBank.is_verified == True)
             )
             questions_to_add = questions_result.scalars().all()
-            new_quiz_questions = [QuizQuestion(quiz_id=quiz_id, question_id=question.id) for question in questions_to_add]
+            new_quiz_questions = [QuizQuestion(quiz_id=quiz_id, question_id=question.id, topic_id=question.topic_id) for question in questions_to_add]
             db.add_all(new_quiz_questions)
             await db.commit()
 
