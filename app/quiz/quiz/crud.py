@@ -1,7 +1,8 @@
 from fastapi import HTTPException, status
+from datetime import datetime
+import random
 
 from sqlmodel import select, delete, and_
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -11,8 +12,6 @@ from app.quiz.question.models import QuestionBank, QuestionBankCreate, MCQOption
 from app.quiz.user.models import Student
 from app.quiz.quiz.models import (Quiz, QuizCreate, QuizUpdate, QuizUpdate,
                                   QuizQuestion, QuizSetting, QuizSettingCreate, QuizSettingUpdate, QuizSettingRead)
-from datetime import datetime
-import random
 
 logger = logger_config(__name__)
 
@@ -243,14 +242,21 @@ class CRUDQuizEngine:
             logger.error(f"update_quiz Error: {e}")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         
-    async def delete_quiz(quiz_id: int, db: AsyncSession):
+    async def delete_quiz(self, *, quiz_id: int, db: AsyncSession):
         try:
+            print("\n----quiz_id----\n", quiz_id)
             quiz_to_delete = await db.get(Quiz, quiz_id)
+            
             if not quiz_to_delete:
                 raise ValueError("Quiz not found")
+            
+            print("\n----quiz_to_delete----\n", quiz_to_delete)
+
             logger.info(f"DELETE_QUIZ_TEST: {quiz_to_delete}")
+            
             await db.delete(quiz_to_delete)
             await db.commit()
+            
             return {"message": "Quiz deleted successfully!"}
         except ValueError as e:
             await db.rollback()
@@ -292,7 +298,7 @@ class CRUDQuizQuestion:
                 quiz_question_create_data)
 
             quiz_question_link = QuizQuestion(
-                quiz=quiz, question=question_to_db)
+                quiz=quiz, question=question_to_db, topic_id=question_to_db.topic_id)
 
             db.add(quiz_question_link)
             await db.commit()
@@ -309,12 +315,17 @@ class CRUDQuizQuestion:
     # Remove a Quiz Question
     async def remove_quiz_question(self, *, quiz_id: int, quiz_question_id: int, db: AsyncSession):
         try:
-            quiz_question_to_delete = await db.get(QuizQuestion, (quiz_id, quiz_question_id))
-            if not quiz_question_to_delete:
+            query = select(QuizQuestion).where(and_(QuizQuestion.quiz_id == quiz_id, QuizQuestion.question_id == quiz_question_id))
+            quiz_question_row = await db.execute(query)
+            quiz_question_instance = quiz_question_row.fetchone()       
+            print("\n----quiz_question_to_delete----\n", quiz_question_instance)
+            if not quiz_question_instance:
                 raise ValueError("Quiz Question not found")
-            await db.delete(quiz_question_to_delete)
-            await db.commit()
-            return {"message": "Quiz Question deleted successfully!"}
+            for quiz_question in quiz_question_instance:
+
+                await db.delete(quiz_question)
+                await db.commit()
+                return {"message": "Quiz Question deleted successfully!"}
         except ValueError as e:
             await db.rollback()
             logger.error(f"remove_quiz_question Error: {e}")
@@ -331,39 +342,6 @@ class CRUDQuizQuestion:
 # -------------------------------------------
 #             # QuizSetting CRUD
 # -------------------------------------------
-
-# Create a new QuizSetting for a quiz
-
-
-async def create_quiz_setting(db: AsyncSession, quiz_setting: QuizSettingCreate) -> QuizSettingRead:
-    """
-    Create a new QuizSetting in the database
-    """
-    try:
-        is_quiz_valid = await db.get(Quiz, quiz_setting.quiz_id)
-        if not is_quiz_valid:
-            raise HTTPException(status_code=404, detail="Quiz not found")
-
-        # Create a new QuizSetting
-        db_quiz_setting = QuizSetting.model_validate(quiz_setting)
-
-        # Add the new QuizSetting to the database
-        db.add(db_quiz_setting)
-
-        # Commit the session to the database to actually add the QuizSetting
-        await db.commit()
-
-        # Refresh the database to get the updated details of the QuizSetting
-        await db.refresh(db_quiz_setting)
-
-        # Return the newly created QuizSetting
-        return db_quiz_setting
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"create_quiz_setting Error: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
-
-
 class CRUDQuizSetting:
     async def create_quiz_setting(self, *, db: AsyncSession, quiz_setting: QuizSettingCreate) -> QuizSettingRead:
         """
@@ -499,13 +477,6 @@ class CRUDQuizSetting:
 # ------------------------------
 # Quiz Generation Endpoint
 # ------------------------------
-
-# Take Quiz ID and Generate Quiz For Student
-# DOMAIN LEVEL = 0. Ensure student have not attempted the quiz before
-# 1. Verify Student ID & Quiz ID are valid & Quiz is between Start & End Date
-# 2. Generate Quiz with Randomly Shuffled Questions
-# 3. Return Quiz with Questions
-# DOMAIN LEVEL = 4. After calling it we will create Quiz Attempt and then return the Quiz with Questions
 
 class QuizRuntimeEngine:
     async def generate_quiz(self, *, quiz_id: int, student_id: int, db: AsyncSession):

@@ -247,6 +247,6 @@ async def update_course_by_id(course_id: int, course: CourseUpdate,db:AsyncSessi
 
 router = APIRouter()
 
-router.include_router(router_uni, prefix="/university")
-router.include_router(router_prog, prefix="/program")
-router.include_router(router_course, prefix="/course")
+router.include_router(router_uni, prefix="/university", tags=["University"])
+router.include_router(router_prog, prefix="/program", tags=["Program"])
+router.include_router(router_course, prefix="/course", tags=["Course"])

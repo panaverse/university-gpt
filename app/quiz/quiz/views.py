@@ -43,7 +43,7 @@ async def get_all_quiz_settings_endpoint(quiz_id: int, db: Annotated[AsyncSessio
     Get all QuizSettings
     """
     try:
-        return await quiz_setting_engine.get_all_quiz_settings_for_quiz(db, quiz_id=quiz_id)
+        return await quiz_setting_engine.get_all_quiz_settings_for_quiz(db=db, quiz_id=quiz_id)
     except Exception as err:
         logger.error(f"get_all_quiz_settings_endpoint Error: {err}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Error in fetching QuizSettings")
@@ -55,7 +55,7 @@ async def get_quiz_setting_by_id_endpoint(quiz_setting_id: int, db: Annotated[As
     Get a QuizSetting by ID
     """
     try:
-        return await quiz_setting_engine.get_quiz_setting_by_id(db, quiz_setting_id)
+        return await quiz_setting_engine.get_quiz_setting_by_id(db=db, quiz_setting_id=quiz_setting_id)
     except Exception as err:
         logger.error(f"get_quiz_setting_by_id_endpoint Error: {err}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="QuizSetting not found")
@@ -67,7 +67,7 @@ async def update_quiz_setting_endpoint(quiz_setting_id: int, quiz_setting_update
     Update a QuizSetting
     """
     try:
-        quiz_setting = await quiz_setting_engine.update_quiz_setting(db, quiz_setting_id=quiz_setting_id, quiz_setting_update=quiz_setting_update)
+        quiz_setting = await quiz_setting_engine.update_quiz_setting(db=db, quiz_setting_id=quiz_setting_id, quiz_setting_update=quiz_setting_update)
         if not quiz_setting:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="QuizSetting not found")
         return quiz_setting
@@ -201,7 +201,7 @@ async def update_existing_quiz(quiz_id: int, quiz: QuizUpdate, db: Annotated[Asy
             status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
 
 
-@quiz_router.delete("/{quiz_id}")
+@quiz_router.delete("/delete/{quiz_id}")
 async def delete_existing_quiz(quiz_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Delete an existing Quiz
@@ -219,7 +219,8 @@ async def delete_existing_quiz(quiz_id: int, db: Annotated[AsyncSession, Depends
     logger.info(f"Deleting existing Quiz: {__name__}, quiz_id: {quiz_id}")
 
     try:
-        return await quiz_engine.delete_quiz(quiz_id=quiz_id, db=db)
+        quiz_del = await quiz_engine.delete_quiz(quiz_id=quiz_id, db=db)
+        return quiz_del
     except HTTPException as http_err:
         logger.error(f"delete_existing_quiz Error: {http_err}")
         raise http_err
@@ -263,7 +264,7 @@ async def create_new_quiz_question(quiz_id: int, quiz_question_data: QuestionBan
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Error in creating Quiz Question")
 
 
-@quiz_question_router.delete("{quiz_id}/quiz-question/{quiz_question_id}")
+@quiz_question_router.delete("/{quiz_id}/quiz-question/{quiz_question_id}")
 async def call_remove_quiz_question(quiz_id: int, quiz_question_id: int, db: Annotated[AsyncSession, Depends(get_session)]):
     """
     Remove an existing Quiz Question

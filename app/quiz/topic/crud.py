@@ -156,7 +156,12 @@ async def read_topic_and_subtopics(id: int, db: AsyncSession):
 
         parent_topic_id = topic.parent_topic.id if topic.parent_topic else None
         children_topic_ids = [child.id for child in topic.children_topics]
-        children_topics = [child for child in topic.children_topics]
+
+        # Recursively get the children topics
+        children_topics = []
+        for child in topic.children_topics:
+            child_topic = await read_topic_and_subtopics(child.id, db)
+            children_topics.append(child_topic)
 
         return {
             "topic_id": topic.id,
@@ -164,7 +169,7 @@ async def read_topic_and_subtopics(id: int, db: AsyncSession):
             "description": topic.description,
             "parent_topic_id": parent_topic_id,
             "children_topic_ids": children_topic_ids,
-            "children_topic": children_topics
+            "children_topics": children_topics
         }
 
     except ValueError as e:
@@ -180,9 +185,8 @@ async def read_topic_and_subtopics(id: int, db: AsyncSession):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-# Update a Topic by ID
 
-
+# Update a Topic by ID=
 async def update_topic(id: int, topic: TopicUpdate, db: AsyncSession):
 
     """

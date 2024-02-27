@@ -168,6 +168,7 @@ class QuizSettingCreate(QuizSettingBase):
         
 
 class QuizSettingRead(QuizSettingBase):
+    id: int
     class Config:
         json_schema_extra = {
             "example": example_quiz_setting_output
