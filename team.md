@@ -1,8 +1,8 @@
 
-
 University-GPT Project and GenAI Faculty Training
 
 I will be doing coding directly with these developers, they in turn will be connected to all the GenAI students.
+
 
 University GPT Project:
 https://github.com/panaverse/university-gpt/blob/main/team.md
