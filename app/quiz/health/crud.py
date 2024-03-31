@@ -38,4 +38,4 @@ async def health_db(db: AsyncSession) -> Status:
     except Exception as e:
         logger.exception(e)
 
-    return Status.KO
+    # return Status.KO

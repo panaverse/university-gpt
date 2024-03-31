@@ -11,26 +11,24 @@ The GUI will be built by using the OpenAI Assistant APIs and Conversational UI b
 
 0. Run Migrations using alembic
 
-In alembic.ini add the same async neon serverless postgress database url to sqlalchemy.url as in .env file.
+In *alembic.ini* & *env.py* add the same async neon serverless postgress database url to sqlalchemy.url & DATABASE_URL as in .env file without `sslmode=require`.
 
-In migrations folder create a `versions` folder if not present and rm any files present there.
+In migrations folder go to `versions` folder if not present and rm any files present there.
 
 ```
-pipenv run alembic revision --autogenerate -m "Add DataLayer v1"
+poetry run alembic revision --autogenerate -m "Add DataLayer v1"
 
-pipenv run alembic upgrade head  
+poetry run alembic upgrade head    
 ```
 
 1.  <b>Start the App</b>:
 
-    ```
-    pip install pipenv
-    pipenv install uvicorn
-    ```
   - Using Python:
-    `pipenv run python asgi.py`
+    `zsh .env or bash .env` depending on your vs code terminal
 
-  - sing Docker:
+    `poetry run python asgi.py`
+
+  - Using Docker:
     `docker build -t sqlmodel-api:latest . && docker run -p 8080:8080 sqlmodel-api:latest`
 
 2. <b>Use Openapi at</b>: `http://localhost:8080/#/`

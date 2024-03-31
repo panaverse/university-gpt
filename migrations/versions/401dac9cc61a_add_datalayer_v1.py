@@ -1,8 +1,8 @@
 """Add DataLayer v1
 
-Revision ID: ea0f8a0b43c8
+Revision ID: 401dac9cc61a
 Revises: 
-Create Date: 2024-02-26 20:01:44.102602
+Create Date: 2024-03-31 03:24:27.991753
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ea0f8a0b43c8'
+revision: str = '401dac9cc61a'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,7 +40,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('university_id', sa.Integer(), nullable=False),
+    sa.Column('university_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['university_id'], ['university.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -51,13 +51,13 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('program_id', sa.Integer(), nullable=False),
+    sa.Column('program_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['program_id'], ['program.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_course_id'), 'course', ['id'], unique=False)
     op.create_table('quiz',
-    sa.Column('quiz_title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('quiz_title', sqlmodel.sql.sqltypes.AutoString(length=160), nullable=False),
     sa.Column('difficulty_level', sa.Enum('easy', 'medium', 'hard', name='questiondifficultyenum'), nullable=False),
     sa.Column('random_flag', sa.Boolean(), nullable=False),
     sa.Column('total_points', sa.Integer(), nullable=True),
@@ -71,10 +71,10 @@ def upgrade() -> None:
     op.create_index(op.f('ix_quiz_id'), 'quiz', ['id'], unique=False)
     op.create_index(op.f('ix_quiz_quiz_title'), 'quiz', ['quiz_title'], unique=False)
     op.create_table('topic',
-    sa.Column('title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('title', sqlmodel.sql.sqltypes.AutoString(length=160), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('parent_id', sa.Integer(), nullable=True),
-    sa.Column('course_id', sa.Integer(), nullable=False),
+    sa.Column('course_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -92,7 +92,7 @@ def upgrade() -> None:
     sa.Column('time_finish', sa.DateTime(), nullable=True),
     sa.Column('total_points', sa.Integer(), nullable=False),
     sa.Column('attempt_score', sa.Float(), nullable=True),
-    sa.Column('quiz_key', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('quiz_key', sqlmodel.sql.sqltypes.AutoString(length=160), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -129,11 +129,11 @@ def upgrade() -> None:
     op.create_index(op.f('ix_questionbank_id'), 'questionbank', ['id'], unique=False)
     op.create_table('quizsetting',
     sa.Column('quiz_id', sa.Integer(), nullable=False),
-    sa.Column('instructions', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('instructions', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('time_limit', sa.Interval(), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=True),
     sa.Column('end_time', sa.DateTime(), nullable=True),
-    sa.Column('quiz_key', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('quiz_key', sqlmodel.sql.sqltypes.AutoString(length=160), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -166,7 +166,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_answerslot_question_id'), 'answerslot', ['question_id'], unique=False)
     op.create_index(op.f('ix_answerslot_quiz_answer_sheet_id'), 'answerslot', ['quiz_answer_sheet_id'], unique=False)
     op.create_table('mcqoption',
-    sa.Column('option_text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('option_text', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
     sa.Column('is_correct', sa.Boolean(), nullable=False),
     sa.Column('question_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),

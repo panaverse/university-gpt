@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, create_engine
 from sqlalchemy.ext.asyncio import AsyncEngine
 from dotenv import load_dotenv, find_dotenv
 from alembic import context
-from os import getenv
+import os
 
 #from services.quiz.university.models import University, Program, Course
 from app.quiz.question.models import QuestionBank, MCQOption
@@ -16,8 +16,8 @@ from app.quiz.quiz.link_models import QuizTopic
 from app.quiz.quiz.models import Quiz, QuizQuestion, QuizSetting
 from app.quiz.answersheet.models import AnswerSheet, AnswerSlot, AnswerSlotOption
 
-load_dotenv(find_dotenv())
-DATABASE_URL = getenv("DATABASE_URL")
+_: bool = load_dotenv(find_dotenv())
+DATABASE_URL = "postgresql+asyncpg://todo_owner:ipgcEC0fJd4s@ep-old-block-a5y75062.us-east-2.aws.neon.tech/quiz"
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
