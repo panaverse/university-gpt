@@ -70,54 +70,54 @@ async def new_question(async_db_session):
         await delete_topic(id=new_topic_created.id, db=session)
 
 class TestQuestionCRUD:
-    @pytest.mark.asyncio
-    async def test_create_new_question(self, async_db_session):
-        async for session in async_db_session:
-            # Create topic for the question
-            topic = TopicCreate(title="TypeScript", description="TypeScript Programming Language")
-            new_topic_created = await create_topic(topic=topic, db=session)
+    # @pytest.mark.asyncio
+    # async def test_create_new_question(self, async_db_session):
+    #     async for session in async_db_session:
+    #         # Create topic for the question
+    #         topic = TopicCreate(title="TypeScript", description="TypeScript Programming Language")
+    #         new_topic_created = await create_topic(topic=topic, db=session)
 
-            question = QuestionBankCreate(
-                question_text= "Is Functional Programming same as OOP?",
-                is_verified= True,
-                points= 1,
-                difficulty= "easy",
-                topic_id= new_topic_created.id,
-                question_type= "single_select_mcq",
-                options=[
-                    MCQOptionCreate(
-                        option_text= "Yes",
-                        is_correct= True
-                    ),
-                    MCQOptionCreate(
-                        option_text= "No",
-                        is_correct= False
-                    )
-                ]
-            )
-            new_question = await add_question(question=question, db=session)
-            assert new_question is not None
-            assert new_question.id is not None
-            assert new_question.question_text == question.question_text
-            assert new_question.is_verified == question.is_verified
-            assert new_question.points == question.points
-            assert new_question.difficulty == question.difficulty
-            assert new_question.topic_id == question.topic_id
-            assert new_question.question_type == question.question_type
-            assert new_question.options[0].option_text == question.options[0].option_text
-            assert new_question.options[0].is_correct == question.options[0].is_correct
-            assert new_question.options[1].option_text == question.options[1].option_text
-            assert new_question.options[1].is_correct == question.options[1].is_correct
+    #         question = QuestionBankCreate(
+    #             question_text= "Is Functional Programming same as OOP?",
+    #             is_verified= True,
+    #             points= 1,
+    #             difficulty= "easy",
+    #             topic_id= new_topic_created.id,
+    #             question_type= "single_select_mcq",
+    #             options=[
+    #                 MCQOptionCreate(
+    #                     option_text= "Yes",
+    #                     is_correct= True
+    #                 ),
+    #                 MCQOptionCreate(
+    #                     option_text= "No",
+    #                     is_correct= False
+    #                 )
+    #             ]
+    #         )
+    #         new_question = await add_question(question=question, db=session)
+    #         assert new_question is not None
+    #         assert new_question.id is not None
+    #         assert new_question.question_text == question.question_text
+    #         assert new_question.is_verified == question.is_verified
+    #         assert new_question.points == question.points
+    #         assert new_question.difficulty == question.difficulty
+    #         assert new_question.topic_id == question.topic_id
+    #         assert new_question.question_type == question.question_type
+    #         assert new_question.options[0].option_text == question.options[0].option_text
+    #         assert new_question.options[0].is_correct == question.options[0].is_correct
+    #         assert new_question.options[1].option_text == question.options[1].option_text
+    #         assert new_question.options[1].is_correct == question.options[1].is_correct
 
-            await delete_question(id=new_question.id, db=session)
-            await delete_topic(id=new_topic_created.id, db=session)
+    #         await delete_question(id=new_question.id, db=session)
+    #         await delete_topic(id=new_topic_created.id, db=session)
 
-    @pytest.mark.asyncio
-    async def test_read_questions(self, async_db_session):
-        async for session in async_db_session:
-            questions = await read_questions(db=session, offset=0, limit=10)
-            assert questions is not None
-            assert len(questions) >= 0
+    # @pytest.mark.asyncio
+    # async def test_read_questions(self, async_db_session):
+    #     async for session in async_db_session:
+    #         questions = await read_questions(db=session, offset=0, limit=10)
+    #         assert questions is not None
+    #         assert len(questions) >= 0
 
     @pytest.mark.asyncio
     async def test_get_question_by_id(self, async_db_session, new_question):

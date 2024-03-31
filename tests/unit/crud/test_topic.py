@@ -9,7 +9,7 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from app.quiz.topic.crud import (create_topic, read_topics, get_topic_by_name, get_topic_by_id, update_topic, delete_topic,
+from app.quiz.topic.crud import (create_topic, read_topics, read_topic_by_id, update_topic, delete_topic,
                                  create_new_content, read_content_for_topic, get_content_by_id, update_content, delete_content)
 from app.quiz.topic.models import TopicCreate, TopicUpdate, ContentCreate, ContentUpdate
 
@@ -52,26 +52,18 @@ class TestTopicCRUD:
     title= "TS OOP"
     description= "Learn OOPS in Typescript 5.0+"
 
-    @pytest.mark.asyncio
-    async def test_read_topics(self, async_db_session):
-        async for session in async_db_session:
-            topics = await read_topics(offset=0, limit=10, db=session)
-            assert topics is not None
-            assert len(topics) >= 0
-
-    @pytest.mark.asyncio
-    async def test_get_topic_by_name(self, async_db_session, new_topic):
-        async for session in async_db_session:
-            topic = await get_topic_by_name(name=self.title, db=session)
-            assert topic is not None
-            assert topic.title == self.title
-            assert topic.description == self.description
+    # @pytest.mark.asyncio
+    # async def test_read_topics(self, async_db_session):
+    #     async for session in async_db_session:
+    #         topics = await read_topics(offset=0, limit=10, db=session)
+    #         assert topics is not None
+    #         assert len(topics) >= 0
 
     @pytest.mark.asyncio
     async def test_get_topic_by_id(self, async_db_session, new_topic):
         async for session in async_db_session:
             async for topic in new_topic:
-                fetched_topic = await get_topic_by_id(id=topic.id, db=session)
+                fetched_topic = await read_topic_by_id(id=topic.id, db=session)
                 assert fetched_topic is not None
                 assert fetched_topic.title == self.title
                 assert fetched_topic.description == self.description

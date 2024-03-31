@@ -13,7 +13,7 @@ The GUI will be built by using the OpenAI Assistant APIs and Conversational UI b
 
 In *alembic.ini* & *env.py* add the same async neon serverless postgress database url to sqlalchemy.url & DATABASE_URL as in .env file without `sslmode=require`.
 
-In migrations folder go to `versions` folder if not present and rm any files present there.
+In migrations folder go to `versions` folder if not present make it and rm any files present there.
 
 ```
 poetry run alembic revision --autogenerate -m "Add DataLayer v1"

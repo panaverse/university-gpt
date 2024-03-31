@@ -1,5 +1,3 @@
-from app.core.database import get_session
-from asgi import app
 from httpx import AsyncClient
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -10,6 +8,9 @@ import pytest
 import sys
 import os
 sys.path.append(os.getcwd())
+
+from app.core.database import get_session
+from asgi import app
 
 
 # Load environment variables
@@ -43,7 +44,7 @@ async def async_db_session():
 @pytest.mark.asyncio
 async def test_question_creation_deletion():
     app.dependency_overrides[get_session] = async_db_session
-    async with AsyncClient(app=api, base_url="http://localhost:8080") as ac:
+    async with AsyncClient(app=app, base_url="http://localhost:8080") as ac:
 
         # Create a topic
         response = await ac.post("/quiz/api/v1/topics", json={"title": "Test Topic", "description": "Test Description"})
