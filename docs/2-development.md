@@ -10,6 +10,8 @@ alembic revision --autogenerate -m "Add DataLayer v1"
 alembic upgrade head
 ```
 
+Note: When running migrations if you get error `NameError: name 'sqlmodel' is not defined` Open alembic>versions> generated_file and this line at top `import sqlmodel`
+
 3. In Terminal Run `Make quiz` - if you don't have make cli tool then run commands in `Makefile`
 
 ```

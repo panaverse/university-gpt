@@ -17,6 +17,7 @@ repos:
       - id: ruff
         args:
           - --fix
+          - --ignore=F403  # Ignore F403 linting error for undefined names in wildcard imports
       - id: ruff-format
 
 ci:

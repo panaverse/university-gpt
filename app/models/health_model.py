@@ -16,5 +16,10 @@ class Health(BaseModel):
 
 
 class Stats(BaseModel):
+    university: int | None
+    program: int | None
+    course: int | None
     topics: int | None
     questions: int | None
+    quizzes: int | None
+    quiz_settings: int | None

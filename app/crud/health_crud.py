@@ -17,19 +17,25 @@ async def get_health(db: AsyncSession) -> Health:
 
 async def get_stats(db: AsyncSession) -> Stats:
     stats = Stats(
+        university=await count_from_db("university", db),
+        program=await count_from_db("program", db),
+        course=await count_from_db("course", db),
         topics=await count_from_db("topic", db),
         questions=await count_from_db("questionbank", db),
+        quizzes=await count_from_db("quiz", db),
+        quiz_settings=await count_from_db("quizsetting", db),
     )
     logger.info("%sget_stats: %s", __name__, stats)
     return stats
 
 
 async def count_from_db(table: str, db: AsyncSession):
-    results = await db.execute(text(f"SELECT COUNT(id) FROM {table};"))
+    t = text(f"SELECT COUNT(id) FROM {table};")
+    results = await db.execute(t)
     if results is None:
         return 0
-    teams = results.scalars().one_or_none()
-    return teams if isinstance(teams, int) else teams[0] if teams else 0
+    objs = results.scalars().one_or_none()
+    return objs if isinstance(objs, int) else objs[0] if objs else 0
 
 
 async def health_db(db: AsyncSession) -> Status:

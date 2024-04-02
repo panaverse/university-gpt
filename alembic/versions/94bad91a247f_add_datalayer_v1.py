@@ -1,8 +1,8 @@
 """Add DataLayer v1
 
-Revision ID: b19d41dbd0c8
+Revision ID: 94bad91a247f
 Revises:
-Create Date: 2024-04-02 17:46:54.182293
+Create Date: 2024-04-03 03:17:52.265642
 
 """
 from typing import Sequence, Union
@@ -11,9 +11,8 @@ from alembic import op
 import sqlalchemy as sa
 import sqlmodel
 
-
 # revision identifiers, used by Alembic.
-revision: str = "b19d41dbd0c8"
+revision: str = "94bad91a247f"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -60,7 +59,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
-        sa.Column("program_id", sa.Integer(), nullable=True),
+        sa.Column("program_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["program_id"],
             ["program.id"],
@@ -70,9 +69,7 @@ def upgrade() -> None:
     op.create_index(op.f("ix_course_id"), "course", ["id"], unique=False)
     op.create_table(
         "quiz",
-        sa.Column(
-            "quiz_title", sqlmodel.sql.sqltypes.AutoString(length=160), nullable=False
-        ),
+        sa.Column("quiz_title", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column(
             "difficulty_level",
             sa.Enum("easy", "medium", "hard", name="questiondifficultyenum"),
@@ -94,12 +91,10 @@ def upgrade() -> None:
     op.create_index(op.f("ix_quiz_quiz_title"), "quiz", ["quiz_title"], unique=False)
     op.create_table(
         "topic",
-        sa.Column(
-            "title", sqlmodel.sql.sqltypes.AutoString(length=160), nullable=False
-        ),
+        sa.Column("title", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("parent_id", sa.Integer(), nullable=True),
-        sa.Column("course_id", sa.Integer(), nullable=True),
+        sa.Column("course_id", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
@@ -124,9 +119,7 @@ def upgrade() -> None:
         sa.Column("time_finish", sa.DateTime(), nullable=True),
         sa.Column("total_points", sa.Integer(), nullable=False),
         sa.Column("attempt_score", sa.Float(), nullable=True),
-        sa.Column(
-            "quiz_key", sqlmodel.sql.sqltypes.AutoString(length=160), nullable=True
-        ),
+        sa.Column("quiz_key", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
@@ -189,13 +182,11 @@ def upgrade() -> None:
     op.create_table(
         "quizsetting",
         sa.Column("quiz_id", sa.Integer(), nullable=False),
-        sa.Column("instructions", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+        sa.Column("instructions", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("time_limit", sa.Interval(), nullable=False),
         sa.Column("start_time", sa.DateTime(), nullable=True),
         sa.Column("end_time", sa.DateTime(), nullable=True),
-        sa.Column(
-            "quiz_key", sqlmodel.sql.sqltypes.AutoString(length=160), nullable=False
-        ),
+        sa.Column("quiz_key", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
@@ -263,9 +254,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "mcqoption",
-        sa.Column(
-            "option_text", sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True
-        ),
+        sa.Column("option_text", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("is_correct", sa.Boolean(), nullable=False),
         sa.Column("question_id", sa.Integer(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
