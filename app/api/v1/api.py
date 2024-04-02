@@ -1,43 +1,27 @@
-from fastapi import APIRouter, Depends
-
-from app.quiz.topic import views as topics
-from app.quiz.question import views as questions
-from app.quiz.user import views as users
-from app.quiz.quiz import views as quizzes
-from app.quiz.answersheet import views as answersheets
-# from app.quiz.grade import views as grades
-
-router = APIRouter(prefix="/v1",)
-
-router.include_router(
-    topics.router,
-    prefix="/topics",
-    tags=["Topics"],
+from fastapi import APIRouter
+from app.api.v1.routes import (
+    users,
+    university,
+    topic,
+    quiz,
+    question,
+    answersheet,
+    health,
 )
 
-router.include_router(
-    questions.router,
-    prefix="/questions",
-    tags=["Questions"],
-)
+api_router = APIRouter(prefix="/v1")
 
-router.include_router(
-    users.router,
-    prefix="/user",
-    tags=["User"],
-)
-router.include_router(
-    quizzes.router
-)
+api_router.include_router(health.router, prefix="/health", tags=["Health"])
+api_router.include_router(
+    university.router, prefix="/university"
+)  # university have separate routers for each, program & courses
 
-router.include_router(
-    answersheets.router,
-    prefix="/answersheet",
-    tags=["AnswerSheet"],
+api_router.include_router(users.router, prefix="/user", tags=["User"])
+api_router.include_router(topic.router, prefix="/topic", tags=["Topic"])
+api_router.include_router(question.router, prefix="/question", tags=["Question"])
+api_router.include_router(
+    quiz.router, prefix="/quiz-engine"
+)  # have separate table for quiz, quiz key, quiz question
+api_router.include_router(
+    answersheet.router, prefix="/answersheet", tags=["AnswerSheet"]
 )
-
-# router.include_router(
-#     grades.router,
-#     prefix="/grade",
-#     tags=["Grade"],
-# )

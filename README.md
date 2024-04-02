@@ -6,33 +6,6 @@ University GPT is a conversational tool and a Generative AI app which personaliz
 
 The GUI will be built by using the OpenAI Assistant APIs and Conversational UI by using OpenAI GPTs. Both will be interacting with our University APIs. We will build both but first we will build the University Custom GPT.
 
-
-### Quickstart
-
-0. Run Migrations using alembic
-
-In *alembic.ini* & *env.py* add the same async neon serverless postgress database url to sqlalchemy.url & DATABASE_URL as in .env file without `sslmode=require`.
-
-In migrations folder go to `versions` folder if not present make it and rm any files present there.
-
-```
-poetry run alembic revision --autogenerate -m "Add DataLayer v1"
-
-poetry run alembic upgrade head    
-```
-
-1.  <b>Start the App</b>:
-
-  - Using Python:
-    `zsh .env or bash .env` depending on your vs code terminal
-
-    `poetry run python asgi.py`
-
-  - Using Docker:
-    `docker build -t sqlmodel-api:latest . && docker run -p 8080:8080 sqlmodel-api:latest`
-
-2. <b>Use Openapi at</b>: `http://localhost:8080/#/`
-
 ## To Get Started Learn about Custom GPTs and Actions
 
 [Introducing Custom GPTs](https://openai.com/blog/introducing-gpts)
@@ -49,12 +22,12 @@ poetry run alembic upgrade head
 
 ## Lets Get Started
 
-The GPT will first build a student profile by asking the student questions and taking quizzes in order to construct the student capability matrix. The matrix will continuesly be updated as the learning process moves forward. The contents of the course the students take will be customized for each student given his or her capability matrix. After a topic's content is presented to the student to learn he/she will immediately be required to take a quiz to judge his/her understanding of the subject matter. The next step in the learning process will be generated given the results of the quiz. The results will also be used to update the capability matrix of the student.  
+The GPT will first build a student profile by asking the student questions and taking quizzes in order to construct the student capability matrix. The matrix will continuesly be updated as the learning process moves forward. The contents of the course the students take will be customized for each student given his or her capability matrix. After a topic's content is presented to the student to learn he/she will immediately be required to take a quiz to judge his/her understanding of the subject matter. The next step in the learning process will be generated given the results of the quiz. The results will also be used to update the capability matrix of the student.
 
 **Here's how it works:**
 
 * **Get to know you:** University GPT starts by building a **student profile**. Through **conversations and quizzes**, it identifies your strengths, weaknesses, and learning preferences. This creates a dynamic **"capability matrix"** that evolves as you learn.
-* **Your personalized study path:** Forget one-size-fits-all lectures. University GPT tailors course content based on your capability matrix. **No more struggling with concepts beyond your grasp or feeling bored with repetitive material.** 
+* **Your personalized study path:** Forget one-size-fits-all lectures. University GPT tailors course content based on your capability matrix. **No more struggling with concepts beyond your grasp or feeling bored with repetitive material.**
 * **Active learning:** After each learning module, you'll take a **quiz** to gauge your understanding. The results **instantly adjust your study path** and update your capability matrix. This **feedback loop** ensures you're always challenged and engaged.
 * **Two ways to learn:** Choose the platform that suits you best. University GPT offers a **visual interface** (think intuitive menus and dashboards) or a **conversational interface** (chat with the AI directly!).
 
@@ -73,7 +46,7 @@ The GPT will first build a student profile by asking the student questions and t
 
 ## Gen AI University: Certified Cloud Applied Generative AI Developer
 
-We will use University GPT go lauch a GenAI University which will start by offering a six month "Certified Cloud Applied Genertative AI Developer Program". To begin with we will be using GenAI to teach GenAI development. 
+We will use University GPT go lauch a GenAI University which will start by offering a six month "Certified Cloud Applied Genertative AI Developer Program". To begin with we will be using GenAI to teach GenAI development.
 
 The complete details of the certification program is as follows:
 
@@ -83,10 +56,10 @@ Selected Headline + Subheading Combo:
 Headline: Join the Generative AI Era as a Professional
 Subheading: Become a Certified Cloud Applied Generative AI Engineer (GenEng) in 6 Months
 
-The duration of the program will be six months. 
+The duration of the program will be six months.
 
 Three hours of classes each week:
-We will have interactive online classes using Zoom and Google Colaboratory. The classes will be held twice a week for 1.5 hours each. 
+We will have interactive online classes using Zoom and Google Colaboratory. The classes will be held twice a week for 1.5 hours each.
 
 One and half hour of lab each week:
 We will have an interactive online lab using Zoom and Microsoft Visual Studio Live Share. The lab will be held once a week for one and a half hours. Visual Studio Live Share will allow our students to work together with an instructor, while retaining their personal VS Code editor preferences (e.g. theme, keybindings), as well as having their own cursor. This will allow the students to seamlessly transition between following the lab instructor, and being able to explore ideas/tasks on your own. This ability to work together and independently provides a collaboration experience that feels much like in-person collaboration.
@@ -159,4 +132,3 @@ This unique program, powered by University GPT's cutting-edge AI technology, tak
 [AI could finally solve a problem that’s long plagued education](https://www.fastcompany.com/90959893/ai-could-finally-solve-a-problem-thats-long-plagued-education)
 
 [GenAI in Education](https://www.matellio.com/blog/generative-ai-in-education/)
-
