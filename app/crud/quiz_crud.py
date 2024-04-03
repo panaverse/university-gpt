@@ -8,7 +8,6 @@ from app.core.db import AsyncSession
 
 from app.core.config import logger_config
 from app.models.topic_models import Topic
-from app.models.user_model import Student
 from app.models.quiz_models import (
     Quiz,
     QuizCreate,
@@ -31,9 +30,9 @@ class CRUDQuizEngine:
     async def _fetch_all_subtopics(self, *, topic_ids: list[int], db: AsyncSession):
         topics_and_subtopics = await db.exec(
             select(Topic)
-            .options(selectinload(Topic.children_topics))
-            .where(Topic.id.in_(topic_ids))
-        )  # type:ignore
+            .options(selectinload(Topic.children_topics))  # type:ignore
+            .where(Topic.id.in_(topic_ids))  # type:ignore
+        )  #
         topics_from_db = topics_and_subtopics.all()
 
         print("\n---------topics_from_db--------\n", topics_from_db)
@@ -176,11 +175,11 @@ class CRUDQuizEngine:
             result = await db.exec(
                 select(Quiz)
                 .options(
-                    selectinload(Quiz.topics),
-                    selectinload(Quiz.quiz_settings),
-                    selectinload(  # type:ignore
-                        Quiz.quiz_questions
-                    ).joinedload(QuizQuestion.question),
+                    selectinload(Quiz.topics),  # type:ignore
+                    selectinload(Quiz.quiz_settings),  # type:ignore
+                    selectinload(
+                        Quiz.quiz_questions  # type:ignore
+                    ).joinedload(QuizQuestion.question),  # type:ignore
                 )
                 .where(Quiz.id == quiz_id)  # type:ignore
             )
@@ -372,7 +371,7 @@ class CRUDQuizQuestion:
             # 2. Add Question to the QuestionBank then link to the Quiz using QuizQuestion Model
             if quiz_question_create_data.options:
                 quiz_question_create_data.options = [
-                    MCQOption.model_validate(option)
+                    MCQOption.model_validate(option)  # type:ignore
                     for option in quiz_question_create_data.options
                 ]  # type:ignore
 
@@ -584,6 +583,10 @@ class CRUDQuizSetting:
                     raise HTTPException(status_code=404, detail="Quiz is not active")
 
             return quiz_setting
+        except HTTPException as httperr:
+            await db.rollback()
+            logger.error(f"is_quiz_key_valid Error: {httperr}")
+            raise httperr
         except Exception as e:
             await db.rollback()
             logger.error(f"is_quiz_key_valid Error: {e}")
@@ -599,11 +602,11 @@ class QuizRuntimeEngine:
     async def generate_quiz(self, *, quiz_id: int, student_id: int, db: AsyncSession):
         try:
             # 1. Verify Student ID
-            student = await db.get(Student, student_id)
-            if not student:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Student not found"
-                )
+            # student = await db.get(Student, student_id)
+            # if not student:
+            #     raise HTTPException(
+            #         status_code=status.HTTP_404_NOT_FOUND, detail="Student not found"
+            #     )
 
             # 2. Verify Quiz ID and Quiz Key
             quiz_with_question_result = await db.exec(

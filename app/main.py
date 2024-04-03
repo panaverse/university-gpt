@@ -41,3 +41,8 @@ app.add_middleware(
 @app.get("/", include_in_schema=False)
 def redirect_to_docs():
     return RedirectResponse(url="/docs")
+
+
+@app.get("/api", tags=["Health"], response_model=dict)
+def health():
+    return {"status": "ok"}

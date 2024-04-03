@@ -16,6 +16,8 @@ alembic = "^1.13.1"
 tenacity = "^8.2.3"
 asyncer = "^0.0.5"
 psycopg2-binary = "^2.9.9"
+httpx = "^0.27.0"
+pytest-asyncio = "^0.23.6"
 
 
 [build-system]

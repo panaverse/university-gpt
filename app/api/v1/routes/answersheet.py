@@ -112,11 +112,11 @@ async def generate_runtime_quiz_for_student(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Quiz Attempt"
             )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
     except HTTPException as http_err:
         logger.error(f"generate_quiz Error: {http_err}")
         raise http_err
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
     except Exception as err:
         logger.error(f"generate_quiz Error: {err}")
@@ -141,6 +141,8 @@ async def get_quiz_attempt_by_id(
             raise HTTPException(status_code=404, detail="Quiz Attempt Not Found")
         return answer_sheet_obj
 
+    except HTTPException as http_err:
+        raise http_err
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
@@ -150,7 +152,7 @@ async def get_quiz_attempt_by_id(
 # ~ Update Quiz Attempt - Finish Quiz
 
 
-@router.patch("/{quiz_attempt_id}/finish")
+@router.patch("/{answer_sheet_id}/finish")
 async def update_quiz_attempt(answer_sheet_id: int, db_session: AsyncSessionDep):
     """
     Update Quiz Attempt

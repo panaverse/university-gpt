@@ -12,3 +12,6 @@ migrate:
 
 upgrade:
 	poetry run alembic upgrade head
+
+test:
+	poetry install && poetry run python app/pre_start_tests.py && poetry run pytest
