@@ -24,3 +24,9 @@ class QuestionTypeEnum(str, enum.Enum):
     single_select_mcq = "single_select_mcq"
     # Multiple Select MCQ
     multiple_select_mcq = "multiple_select_mcq"
+
+
+class QuizAttemptStatus(str, enum.Enum):
+    to_attempt = ("to_attempt",)
+    in_progress = ("in_progress",)
+    completed = "completed"

@@ -1,8 +1,8 @@
 """Add DataLayer v1
 
-Revision ID: 94bad91a247f
+Revision ID: 4e639e3c58a5
 Revises:
-Create Date: 2024-04-03 03:17:52.265642
+Create Date: 2024-04-03 04:41:43.399318
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 import sqlmodel
 
 # revision identifiers, used by Alembic.
-revision: str = "94bad91a247f"
+revision: str = "4e639e3c58a5"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -117,6 +117,11 @@ def upgrade() -> None:
         sa.Column("time_limit", sa.Interval(), nullable=False),
         sa.Column("time_start", sa.DateTime(), nullable=True),
         sa.Column("time_finish", sa.DateTime(), nullable=True),
+        sa.Column(
+            "status",
+            sa.Enum("to_attempt", "in_progress", "completed", name="quizattemptstatus"),
+            nullable=True,
+        ),
         sa.Column("total_points", sa.Integer(), nullable=False),
         sa.Column("attempt_score", sa.Float(), nullable=True),
         sa.Column("quiz_key", sqlmodel.sql.sqltypes.AutoString(), nullable=True),

@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.db import AsyncSession
 from app.crud.question_crud import question_crud
+from app.models.base import QuizAttemptStatus, QuestionTypeEnum
 from app.models.answersheet_models import (
     AnswerSheet,
     AnswerSlot,
@@ -16,19 +17,18 @@ from sqlalchemy.engine.result import ScalarResult
 
 
 class CRUDQuizAnswerSheetEngine:
-    # 1. Create Quiz Attempt
     async def create_answer_sheet(
-        self, db_session: AsyncSession, answer_sheet_obj_in: AnswerSheetCreate
+        self, *, db_session: AsyncSession, answer_sheet_obj_in: AnswerSheetCreate
     ):
         """
         Create an Answer Sheet Entry in the Database whenever a student attempts a quiz
         """
         try:
             # Convert start_time and end_time to offset-naive datetime objects if they are not None
-            if answer_sheet_obj_in.time_start and answer_sheet_obj_in.time_start.tzinfo:
-                answer_sheet_obj_in.time_start = answer_sheet_obj_in.time_start.replace(
-                    tzinfo=None
-                )
+            # if answer_sheet_obj_in.time_start and answer_sheet_obj_in.time_start.tzinfo:
+            #     answer_sheet_obj_in.time_start = answer_sheet_obj_in.time_start.replace(
+            #         tzinfo=None
+            #     )
 
             db_quiz_attempt = AnswerSheet.model_validate(answer_sheet_obj_in)
             print("\n---db_quiz_attempt---\n", db_quiz_attempt)
@@ -40,7 +40,6 @@ class CRUDQuizAnswerSheetEngine:
             await db_session.rollback()
             raise e
 
-    # 2. Get  Answer Sheet by ID
     async def get_answer_sheet_by_id(
         self, db_session: AsyncSession, answer_sheet_id: int, student_id: int
     ):
@@ -60,8 +59,6 @@ class CRUDQuizAnswerSheetEngine:
 
         return answer_sheet_obj
 
-    # Check if time_limit + time_start is greater than current time
-
     async def is_answer_sheet_active(
         self, db_session: AsyncSession, answer_sheet_id: int, student_id: int
     ):
@@ -79,20 +76,28 @@ class CRUDQuizAnswerSheetEngine:
         if not answer_sheet_obj:
             raise ValueError("Invalid Quiz Attempt ID")
 
-        # Calculate the end time of the quiz
-        end_time = answer_sheet_obj.time_start + answer_sheet_obj.time_limit
-
-        # Check if current UTC time is past the end time
-        if datetime.utcnow() < end_time:
-            print("\n-----Quiz is still active----\n")
-            return True
-        else:
-            print("\n-----Quiz is not active----\n")
-            answer_sheet_obj.time_finish = datetime.utcnow()
-            await db_session.commit()
+        if answer_sheet_obj.status == QuizAttemptStatus.completed:
+            print("\n-----Quiz is already completed----\n")
             return False
 
-    # Lock the quiz
+        if answer_sheet_obj.status == QuizAttemptStatus.in_progress:
+            print("\n-----Quiz is in progress----\n")
+            # 1. Check if the quiz time limit is ended
+
+            # Calculate the end time of the quiz
+            end_time = answer_sheet_obj.time_start + answer_sheet_obj.time_limit
+
+            # Check if current UTC time is past the end time
+            if datetime.utcnow() < end_time:
+                print("\n-----Quiz is still active----\n")
+                return True
+            else:
+                print("\n-----Quiz is not active----\n")
+                answer_sheet_obj.time_finish = datetime.utcnow()
+                answer_sheet_obj.status = QuizAttemptStatus.completed
+                await db_session.commit()
+                return False
+
     async def finish_answer_sheet_attempt(
         self, db_session: AsyncSession, answer_sheet_id: int
     ):
@@ -115,6 +120,7 @@ class CRUDQuizAnswerSheetEngine:
         # 2. Add Finish Time to Quiz Attempt if not already added
         if not answer_sheet_obj.time_finish:
             answer_sheet_obj.time_finish = datetime.utcnow()
+            answer_sheet_obj.status = QuizAttemptStatus.completed
             await db_session.commit()
 
         # 3. Grade & Count
@@ -147,7 +153,6 @@ class CRUDQuizAnswerSheetEngine:
 
         return answer_sheet_obj
 
-    # Get Quiz Attempt Based on User ID and Quiz ID
     async def get_answer_sheet_by_user_id_and_quiz_id(
         self, db_session: AsyncSession, user_id: str, quiz_id: int
     ):
@@ -157,7 +162,7 @@ class CRUDQuizAnswerSheetEngine:
         print("\n-----user_id----\n", user_id)
         print("\n-----quiz_id----\n", quiz_id)
 
-        quiz_answer_sheet = await db_session.execute(
+        quiz_answer_sheet = await db_session.exec(
             select(AnswerSheet.id).where(
                 and_(AnswerSheet.student_id == user_id, AnswerSheet.quiz_id == quiz_id)
             )
@@ -168,21 +173,17 @@ class CRUDQuizAnswerSheetEngine:
 
         return quiz_answer_sheet_obj
 
-    # Ensure student have not attempted the quiz before
     async def student_answer_sheet_exists(
         self, db_session: AsyncSession, user_id: int, quiz_id: int
     ):
         answer_sheet_query = await db_session.exec(
-            select(AnswerSheet.id).where(
+            select(AnswerSheet).where(
                 and_(AnswerSheet.student_id == user_id, AnswerSheet.quiz_id == quiz_id)
             )
         )
         answer_sheet_obj = answer_sheet_query.one_or_none()
 
-        if answer_sheet_obj:
-            return True
-
-        return False
+        return answer_sheet_obj
 
 
 class CRUDQuizAnswerSlotEngine:
@@ -217,19 +218,20 @@ class CRUDQuizAnswerSlotEngine:
 
     # 2. Grade Quiz Answer Slot
     async def grade_quiz_answer_slot(
-        self, db_session: AsyncSession, quiz_answer_slot: AnswerSlot
+        self, *, db_session: AsyncSession, quiz_answer_slot: AnswerSlot
     ):
         """
         Grade a Quiz Answer Slot
         """
         try:
+            print("\n\n\n GRADING" "\n\n\n")
             # 1. Get Questions using question_id from question_engine
             question = await question_crud.get_question_by_id(
                 db=db_session, id=quiz_answer_slot.question_id
             )
 
             # 2.1 for single_select_mcq match answer_id with question.mcq_options and update points_awarded
-            if quiz_answer_slot.question_type == "single_select_mcq":
+            if quiz_answer_slot.question_type == QuestionTypeEnum.single_select_mcq:
                 # Get the correct answer
                 selected_option_id = quiz_answer_slot.selected_options[0].option_id
                 correct_option_id = next(
@@ -242,10 +244,9 @@ class CRUDQuizAnswerSlotEngine:
                     quiz_answer_slot.points_awarded = 0
 
                 db_session.add(quiz_answer_slot)
-                await db_session.commit()
 
             # 2.2 for multi_select_mcq match answer_id with question.mcq_options for total correct and matching correct and update points_awarded
-            if quiz_answer_slot.question_type == "multi_select_mcq":
+            if quiz_answer_slot.question_type == QuestionTypeEnum.multiple_select_mcq:
                 print("\n\n\n multi_select_mcq GRADING" "\n\n\n")
                 # Get the correct answer
                 selected_option_ids = [
@@ -288,10 +289,12 @@ class CRUDQuizAnswerSlotEngine:
                     quiz_answer_slot.points_awarded = 0
 
                 db_session.add(quiz_answer_slot)
-                await db_session.commit()
+
+            await db_session.commit()
 
             # Refresh the Quiz Answer Slot
-            # await db_session.refresh(quiz_answer_slot)
+            await db_session.refresh(quiz_answer_slot)
+
             return quiz_answer_slot
 
             # 3. Update Quiz Answer Slot with points_awarded

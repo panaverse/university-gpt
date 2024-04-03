@@ -2,7 +2,7 @@ from sqlmodel import Field, SQLModel, Relationship
 from datetime import timedelta, datetime
 from typing import TYPE_CHECKING, Optional
 
-from app.models.base import QuestionTypeEnum, BaseIdModel
+from app.models.base import QuestionTypeEnum, BaseIdModel, QuizAttemptStatus
 
 if TYPE_CHECKING:
     # Avoid circular imports at runtime
@@ -26,6 +26,7 @@ class AnswerSheetBase(SQLModel):
     time_limit: timedelta = Field()
     time_start: datetime | None = Field(default=None)
     time_finish: datetime | None = Field(default=None)
+    status: QuizAttemptStatus | None = Field(default=QuizAttemptStatus.in_progress)
 
     total_points: int
     attempt_score: float | None = Field(default=None)
@@ -54,6 +55,7 @@ class AnswerSheetCreate(SQLModel):
 class AnswerSheetUpdate(SQLModel):
     time_finish: datetime | None = None
     attempt_score: float | None = None
+    status: QuizAttemptStatus | None = None
 
 
 class AnswerSheetRead(AnswerSheetBase):

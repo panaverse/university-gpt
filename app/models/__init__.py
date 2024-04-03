@@ -6,3 +6,4 @@ from app.models.user_model import *
 from app.models.university_model import *
 from app.models.link_models import *
 from app.models.health_model import *
+from app.models.base import *
