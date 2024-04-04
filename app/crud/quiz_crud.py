@@ -1,6 +1,5 @@
 from fastapi import HTTPException, status
 from datetime import datetime
-import random
 
 from sqlmodel import select, delete, and_
 from sqlalchemy.orm import selectinload
@@ -618,7 +617,7 @@ class CRUDQuizSetting:
 
 
 class QuizRuntimeEngine:
-    async def generate_quiz(self, *, quiz_id: int, student_id: int, db: AsyncSession):
+    async def generate_quiz(self, *, quiz_id: int, db: AsyncSession):
         try:
             # 1. Verify Student ID
             # student = await db.get(Student, student_id)
@@ -641,9 +640,6 @@ class QuizRuntimeEngine:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found"
                 )
-
-            # 4. Generate Quiz with Randomly Shuffled Questions
-            random.shuffle(quiz_with_questions.quiz_questions)
 
             # 5. Return Quiz with Questions
             return quiz_with_questions

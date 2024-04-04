@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.university_model import Course
     from app.models.question_models import QuestionBank
     from app.models.answersheet_models import AnswerSheet
+import random
 
 # -------------------------------------------
 # Quiz Models
@@ -261,6 +262,12 @@ class RuntimeQuizGenerated(SQLModel):
     time_start: datetime
     total_points: int
     quiz_key: str
+
+    # Custom validator to shuffle the order of quiz_questions
+    @validator("quiz_questions", pre=True)
+    def shuffle_quiz_questions(cls, v):
+        random.shuffle(v)
+        return v
 
     # Custom validator to directly include question data
 

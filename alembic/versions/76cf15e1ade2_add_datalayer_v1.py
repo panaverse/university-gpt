@@ -1,8 +1,8 @@
 """Add DataLayer v1
 
-Revision ID: 4e639e3c58a5
+Revision ID: 76cf15e1ade2
 Revises:
-Create Date: 2024-04-03 04:41:43.399318
+Create Date: 2024-04-04 15:44:42.236134
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 import sqlmodel
 
 # revision identifiers, used by Alembic.
-revision: str = "4e639e3c58a5"
+revision: str = "76cf15e1ade2"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

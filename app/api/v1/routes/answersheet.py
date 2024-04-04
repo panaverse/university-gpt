@@ -63,7 +63,7 @@ async def generate_runtime_quiz_for_student(
         )
         if attempt_sheet is None:
             runtime_quiz = await runtime_quiz_engine.generate_quiz(
-                quiz_id=quiz_id, student_id=student_id, db=db
+                quiz_id=quiz_id, db=db
             )
 
             # 1 Create Quiz Attempt
@@ -75,6 +75,7 @@ async def generate_runtime_quiz_for_student(
                 total_points=runtime_quiz.total_points,
                 time_start=datetime.now(),
             )
+
             quiz_attempt_response = await crud_answer_sheet.create_answer_sheet(
                 db_session=db, answer_sheet_obj_in=answer_sheet_obj_in
             )
