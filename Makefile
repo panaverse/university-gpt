@@ -15,3 +15,12 @@ upgrade:
 
 test:
 	poetry install && poetry run python app/pre_start_tests.py && poetry run pytest
+
+build:
+	 docker build -f Dockerfile.dev -t quiz-api .
+
+run:
+	docker run -d --name quiz-api -v /Users/mjs/Documents/GitHub/panaverse-official/university-gpt:/code -p 8000:8000 --env-file .env quiz-api
+
+doc-test:
+	docker run -it --rm quiz-api /bin/bash -c "poetry run pytest"

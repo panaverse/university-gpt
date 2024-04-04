@@ -186,8 +186,9 @@ async def test_generate_runtime_quiz_for_student_with_finished_attempt(
         assert response is not None
         assert response.status_code == 200
         # Finish the Attempt
+        answer_sheet_id = response.json()["answer_sheet_id"]
         response_2 = await client.patch(
-            f"/api/v1/answersheet/{response.json()["answer_sheet_id"]}/finish",
+            f"/api/v1/answersheet/{answer_sheet_id}/finish",
         )
         assert response_2 is not None
         assert response_2.status_code == 200
