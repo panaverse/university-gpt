@@ -54,9 +54,11 @@ class CRUDQuizEngine:
                 .where(Topic.id.in_(topic_ids))
             )
             topics = topics_result.all()
+            # for topic in topics:
             for topic in topics:
-                all_topic_data.append(topic)  # Store the topic object
-                all_topic_ids.add(topic.id)  # Store the topic ID
+                if topic not in all_topic_data:
+                    all_topic_data.append(topic)  # Store the topic object
+                    all_topic_ids.add(topic.id)  # Store the topic ID
                 if topic.children_topics:
                     child_topic_ids = [child.id for child in topic.children_topics]
                     await fetch_subtopics(child_topic_ids)
@@ -83,15 +85,31 @@ class CRUDQuizEngine:
                 questions_result = await db.exec(
                     select(QuestionBank.id, QuestionBank.topic_id).where(
                         QuestionBank.topic_id.in_(all_topic_ids),  # type:ignore
-                        QuestionBank.is_verified is True,
+                        QuestionBank.is_verified == True,
                     )
                 )  # type:ignore
-                question_ids_with_topics.extend(questions_result.all())
+
+                all_questions = questions_result.all()
+
+                print(
+                    "\n----questions_result----\n",
+                    questions_result,
+                    "\n\n\n",
+                    all_questions,
+                )
+
+                question_ids_with_topics.extend(all_questions)
+
+                print(
+                    "\n\n\n----question_ids_with_topics----\n\n\n",
+                    question_ids_with_topics,
+                )
 
                 # Append the topics to the quiz
                 topic_from_db.extend(all_topic_data)
 
-            print("\n----TOPICS_FROM_DB----\n", topic_from_db)
+                print("\n----TOPICS_FROM_DB----\n", topic_from_db)
+
             quiz_to_db = Quiz.model_validate(quiz)
             quiz_to_db.topics = topic_from_db
             db.add(quiz_to_db)
@@ -103,6 +121,7 @@ class CRUDQuizEngine:
                     QuizQuestion(quiz_id=quiz_to_db.id, question_id=q_id, topic_id=t_id)
                     for q_id, t_id in question_ids_with_topics
                 ]
+                print("\n----quiz_questions_instances----\n", quiz_questions_instances)
                 db.add_all(quiz_questions_instances)
 
             await db.commit()
@@ -229,7 +248,7 @@ class CRUDQuizEngine:
             questions_result = await db.execute(
                 select(QuestionBank).where(
                     QuestionBank.topic_id.in_(list(newly_added_topic_ids)),
-                    QuestionBank.is_verified is True,
+                    QuestionBank.is_verified == True,
                 )
             )
             questions_to_add = questions_result.all()

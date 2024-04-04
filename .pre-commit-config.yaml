@@ -18,6 +18,7 @@ repos:
         args:
           - --fix
           - --ignore=F403  # Ignore F403 linting error for undefined names in wildcard imports
+          - --ignore=E712 # Ignore Comparison to `True` should be `cond is True` or `if cond:`
       - id: ruff-format
 
 ci:
