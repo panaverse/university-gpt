@@ -1,17 +1,33 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
+# Use an official Python runtime as a parent image
+FROM python:3.11-slim
 
-WORKDIR /app/
+LABEL maintainer="mjunaidca"
+# Set the working directory in the container
+WORKDIR /code
+
+# Copy the Poetry lock file and pyproject.toml file to the container
+COPY pyproject.toml poetry.lock* ./
+
+# Install system dependencies required for potential Python packages
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
-    cd /usr/local/bin && \
-    ln -s /opt/poetry/bin/poetry && \
-    poetry config virtualenvs.create false
+RUN pip install poetry
 
-# Copy Project
-COPY . /app/
-# Allow installing dev dependencies to run tests
-ARG INSTALL_DEV=true
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --only main ; fi"
-ENV PYTHONPATH=/app
-CMD ["/bin/bash","-c", "poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"]
+# Configuration to avoid creating virtual environments inside the Docker container
+RUN poetry config virtualenvs.create false
+
+# Copy the current directory contents into the container at /code
+COPY . /code/
+
+# Install dependencies including development ones
+RUN poetry install
+
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
+
+# Run the app. CMD can be overridden when starting the container
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

@@ -9,17 +9,55 @@ readme = "README.md"
 python = "^3.11"
 fastapi = "^0.110.0"
 sqlmodel = "^0.0.16"
-uvicorn = {extras = ["standard"], version = "^0.29.0"}
+uvicorn = "^0.29.0"
 asyncpg = "^0.29.0"
 greenlet = "^3.0.3"
 alembic = "^1.13.1"
 tenacity = "^8.2.3"
 asyncer = "^0.0.5"
 psycopg2-binary = "^2.9.9"
-httpx = "^0.27.0"
-pytest-asyncio = "^0.23.6"
+gunicorn = "^21.2.0"
+pytest = "^8.1.1"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest-asyncio = "^0.23.6"
+httpx = "^0.27.0"
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 88
+
+[tool.mypy]
+strict = true
+exclude = ["venv", "alembic"]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "W191",  # indentation contains tabs
+    "B904",  # Allow raising exceptions without from e, for HTTPException
+]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry>=1.8.2"]
 build-backend = "poetry.core.masonry.api"

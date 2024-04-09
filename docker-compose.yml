@@ -1,0 +1,22 @@
+version: "3"
+services:
+
+  devcontainor:
+    image: quiz-api
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file: ".env"
+    container_name: quiz-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PROJECT_NAME=${PROJECT_NAME}
+      - DESCRIPTION=${DESCRIPTION}
+      - ENV=${ENV}
+      - DATABASE_URL=${DATABASE_URL}
+      - TEST_DATABASE_URL=${TEST_DATABASE_URL}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+    volumes:
+      - .:/code # Mount the host code directory into the container
+    command: sleep infinity

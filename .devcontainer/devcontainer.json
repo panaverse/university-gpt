@@ -1,0 +1,36 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+{
+	"name": "Existing Dockerfile",
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "devcontainor",
+	"forwardPorts": [
+		8000
+	],
+	"portsAttributes": {
+		"8000": {
+			"label": "University GPT",
+			"onAutoForward": "notify",
+			"visibility": "public"
+		}
+	},
+
+	"runArgs": [
+		"--env-file",
+		".env"
+	],
+
+	"workspaceMount": "source=${localWorkspaceFolder}, target=/code,type=bind,consistency=delegated",
+	"workspaceFolder": "/code",
+	"postCreateCommand": "poetry shell",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"streetsidesoftware.code-spell-checker"
+			]
+		}
+	},
+
+}
