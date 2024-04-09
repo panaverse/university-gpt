@@ -1,22 +1,22 @@
-from fastapi import HTTPException, status
 from datetime import datetime
 
-from sqlmodel import select, delete, and_
+from fastapi import HTTPException, status
 from sqlalchemy.orm import selectinload
-from app.core.db import AsyncSession
+from sqlmodel import and_, delete, select
 
 from app.core.config import logger_config
-from app.models.topic_models import Topic
+from app.core.db import AsyncSession
+from app.models.question_models import MCQOption, QuestionBank, QuestionBankCreate
 from app.models.quiz_models import (
     Quiz,
     QuizCreate,
-    QuizUpdate,
     QuizQuestion,
     QuizSetting,
     QuizSettingCreate,
     QuizSettingUpdate,
+    QuizUpdate,
 )
-from app.models.question_models import QuestionBank, QuestionBankCreate, MCQOption
+from app.models.topic_models import Topic
 
 logger = logger_config(__name__)
 
@@ -400,6 +400,11 @@ class CRUDQuizQuestion:
             )
 
             db.add(quiz_question_link)
+
+            # Update Quiz Sum
+            quiz.total_points += question_to_db.points
+            db.add(quiz)
+
             await db.commit()
             await db.refresh(quiz_question_link)
 
@@ -418,12 +423,26 @@ class CRUDQuizQuestion:
         self, *, quiz_id: int, quiz_question_id: int, db: AsyncSession
     ):
         try:
-            query = select(QuizQuestion).where(
-                and_(
-                    QuizQuestion.quiz_id == quiz_id,
-                    QuizQuestion.question_id == quiz_question_id,
+            quiz = await db.get(Quiz, quiz_id)
+            if not quiz:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found"
+                )
+
+            query = (
+                select(QuizQuestion)
+                .options(
+                    selectinload(QuizQuestion.quiz),
+                    selectinload(QuizQuestion.question),  # type:ignore
+                )
+                .where(
+                    and_(
+                        QuizQuestion.quiz_id == quiz_id,
+                        QuizQuestion.question_id == quiz_question_id,
+                    )
                 )
             )
+
             quiz_question_row = await db.exec(query)
             quiz_question_instance = quiz_question_row.one_or_none()
             print("\n----quiz_question_to_delete----\n", quiz_question_instance)
@@ -432,6 +451,11 @@ class CRUDQuizQuestion:
             # for quiz_question in quiz_question_instance:
 
             await db.delete(quiz_question_instance)
+
+            # Update Quiz Sum
+            quiz.total_points -= quiz_question_instance.question.points
+            db.add(quiz)
+
             await db.commit()
             return {"message": "Quiz Question deleted successfully!"}
         except ValueError as e:
