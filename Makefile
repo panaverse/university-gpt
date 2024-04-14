@@ -1,6 +1,21 @@
 PATH  := $(PATH)
 SHELL := /bin/bash
 
+compose:
+	docker-compose -f docker-compose-dev.yml up
+
+compose-name:
+	docker-compose ps
+
+compose-d:
+	docker-compose down
+
+compose-b:
+	docker-compose  -f docker-compose-dev.yml up --build
+
+compose-in:
+	docker-compose exec devcontainor /bin/bash
+
 dev:
 	poetry install && poetry run python app/init_data.py && poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
