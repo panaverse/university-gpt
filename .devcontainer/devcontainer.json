@@ -5,11 +5,21 @@
 	"dockerComposeFile": "../docker-compose.yml",
 	"service": "devcontainor",
 	"forwardPorts": [
-		8000
+		8000, 5433, 5434
 	],
 	"portsAttributes": {
 		"8000": {
-			"label": "University GPT",
+			"label": "Quiz API MicroserviceService",
+			"onAutoForward": "notify",
+			"visibility": "public"
+		},
+		"5433": {
+			"label": "Development Database",
+			"onAutoForward": "notify",
+			"visibility": "public"
+		},
+		"5434": {
+			"label": "Test Database",
 			"onAutoForward": "notify",
 			"visibility": "public"
 		}
@@ -20,17 +30,25 @@
 		".env"
 	],
 
+	// add .git and .ssh to the container
+	"mounts": [
+		"source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind",
+		"source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind"
+	],
+
+	// mount local source folder to the container
 	"workspaceMount": "source=${localWorkspaceFolder}, target=/code,type=bind,consistency=delegated",
 	"workspaceFolder": "/code",
-	"postCreateCommand": "poetry shell",
+	"postCreateCommand": "alembic upgrade head && python app/init_data.py && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
 
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"streetsidesoftware.code-spell-checker"
+				"streetsidesoftware.code-spell-checker",
+				"ms-python.python"
 			]
 		}
-	},
+	}
 
 }

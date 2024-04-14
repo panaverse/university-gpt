@@ -1,6 +1,6 @@
-version: "3"
-services:
+version: "3.9"
 
+services:
   devcontainor:
     image: quiz-api
     build:
@@ -8,8 +8,6 @@ services:
       dockerfile: Dockerfile.dev
     env_file: ".env"
     container_name: quiz-api
-    ports:
-      - "8000:8000"
     environment:
       - PROJECT_NAME=${PROJECT_NAME}
       - DESCRIPTION=${DESCRIPTION}
@@ -19,4 +17,51 @@ services:
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
     volumes:
       - .:/code # Mount the host code directory into the container
+    depends_on:
+      - postgres_dev_db
+      - postgres_test_db
     command: sleep infinity
+    networks:
+      - university-gpt
+
+  postgres_dev_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresDevCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_dev_pass
+      - POSTGRES_DB=postgres_dev_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt
+
+
+  postgres_test_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresTestCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_test_pass
+      - POSTGRES_DB=postgres_test_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_test_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt
+
+
+volumes:
+  postgres_dev_db:
+    driver: local
+  postgres_test_db:
+    driver: local
+
+
+networks:
+  university-gpt: # Define the custom network
