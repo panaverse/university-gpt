@@ -39,14 +39,22 @@
 	// mount local source folder to the container
 	"workspaceMount": "source=${localWorkspaceFolder}, target=/code,type=bind,consistency=delegated",
 	"workspaceFolder": "/code",
+	"onCreateCommand": "apt-get update && apt-get install -y git",
 	"postCreateCommand": "alembic upgrade head && python app/init_data.py && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
 
+	"dev.containers.defaultExtensions": [
+		"mutantdino.resourcemonitor"
+	],
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"streetsidesoftware.code-spell-checker",
-				"ms-python.python"
+				"ms-python.python",
+				"ms-azuretools.vscode-docker",
+				"dracula-theme.theme-dracula",
+				"GitHub.copilot",
+				"matangover.mypy"
 			]
 		}
 	}

@@ -1,5 +1,7 @@
 Now we are using VS Dev Containers for Local Development & Tests.
 
+#### Note: Follow the 4-development.md to setup and run this project in VS code Dev Containors or using Docker Compose.
+
 Understand the basics about them from this step:
 
 https://github.com/panaverse/learn-generative-ai/tree/main/05_microservices_all_in_one_platform/14_docker/03_dev_containers
@@ -15,5 +17,6 @@ Now open the Dockerfile.dev and review it. Next do it for docker-compose.yml fil
 Note: If you don't want to use vs code devcontainor then you can simply run it with docker compose as well.
 
 Future TODOS:
-1. update .devcontainor.json to configure local git
-2. add essential vs code extensions in it as well.
+1. update .devcontainor.json to configure local git = completed
+2. add essential vs code extensions in it as well. = completed
+3. Setup Containerized Development & Test Databases = completed

@@ -1,0 +1,2926 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Quiz GPT API",
+    "description": "API Service for Quiz GPT",
+    "version": "0.1"
+  },
+  "servers": [
+    {
+      "url": "https://bug-accurate-heron.ngrok-free.app",
+      "description": "Development Server"
+    }
+  ],
+  "paths": {
+    "/api/v1/university/program": {
+      "get": {
+        "tags": [
+          "Program"
+        ],
+        "summary": "Get All Programs",
+        "description": "Get All Programs\n\n(Args):\n    db: AsyncSession: Database session DI(Injected by FastAPI)\n    offset: int: Offset for pagination\n    limit: int: Limit for pagination\n\n(Returns):\n    list[ProgramRead]: List of all Programs (Id and timestamps included)",
+        "operationId": "get_all_programs_api_v1_university_program_get",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProgramRead"
+                  },
+                  "title": "Response Get All Programs Api V1 University Program Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/university/course": {
+      "get": {
+        "tags": [
+          "Course"
+        ],
+        "summary": "Get All Courses",
+        "description": "Get All Courses\n\n(Args):\n    db: AsyncSession: Database session DI(Injected by FastAPI)\n    offset: int: Offset for pagination\n    limit: int: Limit for pagination\n\n(Returns):\n    list[CourseRead]: List of all Courses (Id and timestamps included)",
+        "operationId": "get_all_courses_api_v1_university_course_get",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourseRead"
+                  },
+                  "title": "Response Get All Courses Api V1 University Course Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/topic": {
+      "post": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Create New Topic",
+        "description": "Create a new recursive topic.\n\nArgs:\n    topic (TopicCreate): The topic data to create.\n\nReturns:\n    TopicResponse: The created topic.\n\nRaises:\n    HTTPException: If an error occurs while creating the topic.",
+        "operationId": "create_new_topic_api_v1_topic_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicResponseWithContent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Get All Topics",
+        "description": "Get all topics.\n\nArgs:\n    offset (int, optional): The offset for pagination. Defaults to 0.\n    limit (int, optional): The limit for pagination. Defaults to 100.\n\nReturns:\n    list[TopicResponse]: The list of topics.\n\nRaises:\n    HTTPException: If an error occurs while retrieving topics.",
+        "operationId": "get_all_topics_api_v1_topic_get",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "lte": 10,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "lte": 100,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopicResponse"
+                  },
+                  "title": "Response Get All Topics Api V1 Topic Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/topic/{topic_id}": {
+      "get": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Get Topic And Its Content By Id",
+        "description": "Get a Topic and its Content by ID.\n\nArgs:\n    topic_id (int): The ID of the topic.\n\nReturns:\n    TopicResponse: The topic with the specified ID.",
+        "operationId": "get_topic_and_its_content_by_id_api_v1_topic__topic_id__get",
+        "parameters": [
+          {
+            "name": "topic_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Topic Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicResponseWithContent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Update Topic By Id",
+        "description": "Update a topic by ID.\n\nArgs:\n    topic_id (int): The ID of the topic to update.\n    topic (TopicUpdate): The updated topic data.\n\nReturns:\n    TopicResponse: The updated topic.",
+        "operationId": "update_topic_by_id_api_v1_topic__topic_id__patch",
+        "parameters": [
+          {
+            "name": "topic_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Topic Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Delete Topic By Id",
+        "description": "Delete a topic by ID.\n\nArgs:\n    topic_id (int): The ID of the topic to delete.",
+        "operationId": "delete_topic_by_id_api_v1_topic__topic_id__delete",
+        "parameters": [
+          {
+            "name": "topic_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Topic Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/topic/{topic_id}/subtopics": {
+      "get": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Get Topic And Subtopics",
+        "operationId": "get_topic_and_subtopics_api_v1_topic__topic_id__subtopics_get",
+        "parameters": [
+          {
+            "name": "topic_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Topic Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/topic/content": {
+      "post": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Create Content For Topic",
+        "description": "Create a new content for a topic.\n\nArgs:\n    content (ContentCreate): The content data to create that is topic_id and content_text.\n\nReturns:\n    ContentResponse: The created content.",
+        "operationId": "create_content_for_topic_api_v1_topic_content_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/topic/content/{content_id}": {
+      "patch": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Update Content By Id",
+        "description": "Update a content by ID.\n\nArgs:\n    topic_id (int): The ID of the topic.\n    content_id (int): The ID of the content to update.\n    content (ContentUpdate): The updated content data.\n   db (optional) : Database Dependency Injection.\n\nReturns:\n    ContentResponse: The updated content.",
+        "operationId": "update_content_by_id_api_v1_topic_content__content_id__patch",
+        "parameters": [
+          {
+            "name": "content_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Content Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Delete Content By Id",
+        "description": "Delete a content by ID.\n\nArgs:\n    topic_id (int): The ID of the topic.\n    content_id (int): The ID of the content to delete.\n   db (optional) : Database Dependency Injection.",
+        "operationId": "delete_content_by_id_api_v1_topic_content__content_id__delete",
+        "parameters": [
+          {
+            "name": "content_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Content Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/question": {
+      "post": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Create New Question",
+        "description": "Add a question to the database.\n\nArgs:\n    question (QuestionBank): The question to be added.\n    db (optional) : Database Dependency Injection.\n\nReturns:\n    QuestionBank: The added question.",
+        "operationId": "create_new_question_api_v1_question_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionBankCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionBankRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Call Read Questions",
+        "description": "Get all questions from the database.\n\nArgs:\n    offset (int, optional): The offset for pagination. Defaults to 0.\n    limit (int, optional): The limit for pagination. Defaults to 100.\n   db (optional) : Database Dependency Injection.\n\nReturns:\n    list[QuestionBank]: The list of questions.",
+        "operationId": "call_read_questions_api_v1_question_get",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuestionBankRead"
+                  },
+                  "title": "Response Call Read Questions Api V1 Question Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/question/{question_id}": {
+      "get": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Call Get Question By Id",
+        "description": "Get a question by its ID from the database.\n\nArgs:\n    question_id (int): The ID of the question.\n   db (optional) : Database Dependency Injection.\n\nReturns:\n    QuestionBank: The retrieved question.",
+        "operationId": "call_get_question_by_id_api_v1_question__question_id__get",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionBankRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Call Update Question",
+        "description": "Update a question by its ID in the database.\n\nArgs:\n    question_id (int): The ID of the question.\n    question (QuestionBank): The updated question.\n    db (optional) : Database Dependency Injection.\n\nReturns:\n    QuestionBank: The updated question.",
+        "operationId": "call_update_question_api_v1_question__question_id__patch",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionBankUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionBankRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Call Delete Question",
+        "description": "Delete a question by its ID from the database.\n\nArgs:\n    question_id (int): The ID of the question.\n   db (optional) : Database Dependency Injection.\n\nReturns:\n    deletion status.",
+        "operationId": "call_delete_question_api_v1_question__question_id__delete",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/question/mcq-option": {
+      "post": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Call Add Mcq Option",
+        "description": "Add an MCQ option to the database.\n\nArgs:\n    mcq_option (MCQOption): The MCQ option to be added.\n   db (optional) : Database Dependency Injection.\n\nReturns:\n    MCQOption: The added MCQ option.",
+        "operationId": "call_add_mcq_option_api_v1_question_mcq_option_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MCQOptionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCQOptionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/question/mcq-option/{mcq_option_id}": {
+      "patch": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Call Update Mcq Option",
+        "description": "Update an MCQ option by its ID in the database.\n\nArgs:\n    mcq_option_id (int): The ID of the MCQ option.\n    mcq_option (MCQOption): The updated MCQ option.\n   db (optional) : Database Dependency Injection.\n\nReturns:\n    MCQOption: The updated MCQ option.",
+        "operationId": "call_update_mcq_option_api_v1_question_mcq_option__mcq_option_id__patch",
+        "parameters": [
+          {
+            "name": "mcq_option_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Mcq Option Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MCQOptionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCQOptionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Question"
+        ],
+        "summary": "Call Delete Mcq Option",
+        "description": "Delete an MCQ option by its ID from the database.\n\nArgs:\n    mcq_option_id (int): The ID of the MCQ option.\n   db (optional) : Database Dependency Injection.\n\nReturns:\n    deletion status.",
+        "operationId": "call_delete_mcq_option_api_v1_question_mcq_option__mcq_option_id__delete",
+        "parameters": [
+          {
+            "name": "mcq_option_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Mcq Option Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz-setting": {
+      "post": {
+        "tags": [
+          "QuizSetting"
+        ],
+        "summary": "Create New Quiz Setting",
+        "description": "Create a new QuizSetting",
+        "operationId": "create_new_quiz_setting_api_v1_quiz_engine_quiz_setting_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizSettingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizSettingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "QuizSetting"
+        ],
+        "summary": "Get All Quiz Settings Endpoint",
+        "description": "Get all QuizSettings",
+        "operationId": "get_all_quiz_settings_endpoint_api_v1_quiz_engine_quiz_setting_get",
+        "parameters": [
+          {
+            "name": "quiz_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuizSettingRead"
+                  },
+                  "title": "Response Get All Quiz Settings Endpoint Api V1 Quiz Engine Quiz Setting Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz-setting/{quiz_setting_id}": {
+      "patch": {
+        "tags": [
+          "QuizSetting"
+        ],
+        "summary": "Update Quiz Setting Endpoint",
+        "description": "Update a QuizSetting",
+        "operationId": "update_quiz_setting_endpoint_api_v1_quiz_engine_quiz_setting__quiz_setting_id__patch",
+        "parameters": [
+          {
+            "name": "quiz_setting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Setting Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizSettingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizSettingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "QuizSetting"
+        ],
+        "summary": "Remove Quiz Setting Endpoint",
+        "description": "Remove a QuizSetting",
+        "operationId": "remove_quiz_setting_endpoint_api_v1_quiz_engine_quiz_setting__quiz_setting_id__delete",
+        "parameters": [
+          {
+            "name": "quiz_setting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Setting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz": {
+      "post": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Create New Quiz",
+        "description": "Create a new Quiz\n\nArgs:\n    quiz (QuizCreate): Quiz to be created\n\nReturns:\n    QuizReadWithQuizTopics: The created Quiz and QuizTopics Included\n\nRaises:\n    HTTPException: Error in creating Quiz",
+        "operationId": "create_new_quiz_api_v1_quiz_engine_quiz_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizReadWithQuestionsAndTopics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz/all/{course_id}": {
+      "get": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Call Read All Quizzes",
+        "description": "Read all Quizzes\n\nArgs:\n    offset (int, optional): Offset for pagination. Defaults to 0.\n    limit (int, optional): Limit for pagination. Defaults to 10.\n\nReturns:\n    list[QuizReadWithTopics]: List of Quizzes with QuizTopics Included\n\nRaises:\n    HTTPException: Error in fetching Quizzes",
+        "operationId": "call_read_all_quizzes_api_v1_quiz_engine_quiz_all__course_id__get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "lte": 10,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "lte": 100,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuizReadWithTopics"
+                  },
+                  "title": "Response Call Read All Quizzes Api V1 Quiz Engine Quiz All  Course Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz/{quiz_id}": {
+      "get": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Call Read Quiz By Id",
+        "description": "Read a Quiz by ID\n\nArgs:\n    quiz_id (int): ID of the Quiz\n\nReturns:\n    QuizReadWithQuizTopics: The Quiz with QuizTopics Included\n\nRaises:\n    HTTPException: Quiz not found",
+        "operationId": "call_read_quiz_by_id_api_v1_quiz_engine_quiz__quiz_id__get",
+        "parameters": [
+          {
+            "name": "quiz_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizReadWithQuestionsAndTopics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Update Existing Quiz",
+        "description": "Partially Update an existing Quiz\n\nArgs:\n    quiz_id (int): ID of the Quiz\n    quiz (QuizUpdate): Updated Quiz Data\n\nReturns:\n    QuizReadWithQuizTopics: The updated Quiz with QuizTopics Included\n\nRaises:\n    HTTPException: Quiz not found",
+        "operationId": "update_existing_quiz_api_v1_quiz_engine_quiz__quiz_id__patch",
+        "parameters": [
+          {
+            "name": "quiz_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizReadWithQuestionsAndTopics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz/delete/{quiz_id}": {
+      "delete": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Delete Existing Quiz",
+        "description": "Delete an existing Quiz\n\nArgs:\n    quiz_id (int): ID of the Quiz\n\nReturns:\n    dict: Success Message\n\nRaises:\n    HTTPException: Quiz not found",
+        "operationId": "delete_existing_quiz_api_v1_quiz_engine_quiz_delete__quiz_id__delete",
+        "parameters": [
+          {
+            "name": "quiz_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz/{quiz_id}/quiz-question": {
+      "post": {
+        "tags": [
+          "QuizQuestion"
+        ],
+        "summary": "Create New Quiz Question",
+        "description": "Create a new Quiz Question\n\nArgs:\n    quiz_id (int): ID of the Quiz\n    quiz_question_data (QuestionBankCreate): Quiz Question Data to add in QuestionBank and Link to QuizQuestion\n\nReturns:\n    QuizQuestion: The created Quiz Question\n\nRaises:\n    HTTPException: Error in creating Quiz Question",
+        "operationId": "create_new_quiz_question_api_v1_quiz_engine_quiz__quiz_id__quiz_question_post",
+        "parameters": [
+          {
+            "name": "quiz_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionBankCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizQuestionReadQuestionBank"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quiz-engine/quiz/{quiz_id}/quiz-question/{quiz_question_id}": {
+      "delete": {
+        "tags": [
+          "QuizQuestion"
+        ],
+        "summary": "Call Remove Quiz Question",
+        "description": "Remove an existing Quiz Question\n\nArgs:\n    quiz_question_id (int): ID of the Quiz Question\n\nReturns:\n    dict: Success Message\n\nRaises:\n    HTTPException: Quiz Question not found",
+        "operationId": "call_remove_quiz_question_api_v1_quiz_engine_quiz__quiz_id__quiz_question__quiz_question_id__delete",
+        "parameters": [
+          {
+            "name": "quiz_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Id"
+            }
+          },
+          {
+            "name": "quiz_question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Quiz Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ContentCreate": {
+        "properties": {
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Id"
+          },
+          "content_text": {
+            "type": "string",
+            "title": "Content Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content_text"
+        ],
+        "title": "ContentCreate",
+        "example": {
+          "content_text": "Python programming language",
+          "topic_id": 1
+        }
+      },
+      "ContentResponse": {
+        "properties": {
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Id"
+          },
+          "content_text": {
+            "type": "string",
+            "title": "Content Text"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content_text",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ContentResponse",
+        "example": {
+          "content_desc": "Python programming language",
+          "created_at": "2021-07-10T14:48:00.000Z",
+          "id": 1,
+          "topic_id": 1,
+          "updated_at": "2021-07-10T14:48:00.000Z"
+        }
+      },
+      "ContentUpdate": {
+        "properties": {
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Id"
+          },
+          "content_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Text"
+          }
+        },
+        "type": "object",
+        "title": "ContentUpdate",
+        "example": {
+          "content_text": "Python programming language",
+          "topic_id": 1
+        }
+      },
+      "CourseRead": {
+        "properties": {
+          "course_name": {
+            "type": "string",
+            "title": "Course Name"
+          },
+          "course_desc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Desc"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "program_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Program Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_name",
+          "id",
+          "program_id"
+        ],
+        "title": "CourseRead",
+        "description": "Fields:\ncourse_name, course_desc (required): inherited from CourseBase\nid: int (required): ID of the Course\nprogram_id: int (required): ID of the Program\ncreated_at: datetime (required): Date and time when the Course was created\nupdated_at: datetime (required): Date and time when the Course was last updated",
+        "example": {
+          "course_desc": "The course of Python Programming is a leading educational course in Pakistan.",
+          "course_name": "Python Programming",
+          "id": 1,
+          "program_id": 1
+        }
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MCQOptionCreate": {
+        "properties": {
+          "option_text": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Option Text"
+          },
+          "is_correct": {
+            "type": "boolean",
+            "title": "Is Correct",
+            "default": false
+          },
+          "question_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Id"
+          }
+        },
+        "type": "object",
+        "title": "MCQOptionCreate",
+        "example": {
+          "is_correct": true,
+          "option_text": "Missing semicolons at the end of statements",
+          "question_id": 1
+        }
+      },
+      "MCQOptionRead": {
+        "properties": {
+          "option_text": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Option Text"
+          },
+          "is_correct": {
+            "type": "boolean",
+            "title": "Is Correct",
+            "default": false
+          },
+          "question_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Id"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "MCQOptionRead",
+        "example": {
+          "is_correct": true,
+          "option_text": "Missing semicolons at the end of statements",
+          "question_id": 1
+        }
+      },
+      "MCQOptionUpdate": {
+        "properties": {
+          "option_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Option Text"
+          },
+          "is_correct": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Correct"
+          },
+          "question_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Id"
+          }
+        },
+        "type": "object",
+        "title": "MCQOptionUpdate"
+      },
+      "ProgramRead": {
+        "properties": {
+          "program_name": {
+            "type": "string",
+            "title": "Program Name"
+          },
+          "program_desc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Program Desc"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "university_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "University Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "program_name",
+          "id",
+          "university_id"
+        ],
+        "title": "ProgramRead",
+        "description": "Fields:\nprogram_name, program_desc (required): inherited from ProgramBase\nid: int (required): ID of the Program\nuniversity_id: int (required): ID of the University\ncreated_at: datetime (required): Date and time when the Program was created\nupdated_at: datetime (required): Date and time when the Program was last updated",
+        "example": {
+          "id": 1,
+          "program_desc": "The program of Artificial Intelligence is a leading educational program in Pakistan.",
+          "program_name": "Artificial Intelligence",
+          "university_id": 1
+        }
+      },
+      "QuestionBankCreate": {
+        "properties": {
+          "question_text": {
+            "type": "string",
+            "title": "Question Text"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified",
+            "default": false
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points",
+            "default": 0
+          },
+          "difficulty": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionDifficultyEnum"
+              }
+            ],
+            "default": "easy"
+          },
+          "topic_id": {
+            "type": "integer",
+            "title": "Topic Id"
+          },
+          "question_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionTypeEnum"
+              }
+            ],
+            "default": "single_select_mcq"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/MCQOptionCreate"
+            },
+            "type": "array",
+            "title": "Options",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_text",
+          "topic_id"
+        ],
+        "title": "QuestionBankCreate",
+        "example": {
+          "created_at": "2021-07-10T14:48:00.000Z",
+          "difficulty": "easy",
+          "id": 1,
+          "is_verified": true,
+          "options": [
+            {
+              "is_correct": true,
+              "option_text": "Missing semicolons at the end of statements"
+            },
+            {
+              "is_correct": false,
+              "option_text": "Missing types in function parameters"
+            }
+          ],
+          "points": 1,
+          "question_text": "What is a common cause of syntax errors in TypeScript?",
+          "question_type": "single_select_mcq",
+          "topic_id": 1,
+          "updated_at": "2021-07-10T14:48:00.000Z"
+        }
+      },
+      "QuestionBankRead": {
+        "properties": {
+          "question_text": {
+            "type": "string",
+            "title": "Question Text"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified",
+            "default": false
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points",
+            "default": 0
+          },
+          "difficulty": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionDifficultyEnum"
+              }
+            ],
+            "default": "easy"
+          },
+          "topic_id": {
+            "type": "integer",
+            "title": "Topic Id"
+          },
+          "question_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionTypeEnum"
+              }
+            ],
+            "default": "single_select_mcq"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/MCQOptionRead"
+            },
+            "type": "array",
+            "title": "Options",
+            "default": []
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_text",
+          "topic_id",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "QuestionBankRead",
+        "example": {
+          "created_at": "2021-07-10T14:48:00.000Z",
+          "difficulty": "easy",
+          "id": 1,
+          "is_verified": true,
+          "options": [
+            {
+              "is_correct": true,
+              "option_text": "Missing semicolons at the end of statements"
+            },
+            {
+              "is_correct": false,
+              "option_text": "Missing types in function parameters"
+            }
+          ],
+          "points": 1,
+          "question_text": "What is a common cause of syntax errors in TypeScript?",
+          "question_type": "single_select_mcq",
+          "topic_id": 1,
+          "updated_at": "2021-07-10T14:48:00.000Z"
+        }
+      },
+      "QuestionBankUpdate": {
+        "properties": {
+          "question_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Text"
+          },
+          "is_verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Verified"
+          },
+          "points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Points"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuestionDifficultyEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Id"
+          }
+        },
+        "type": "object",
+        "title": "QuestionBankUpdate"
+      },
+      "QuestionDifficultyEnum": {
+        "type": "string",
+        "enum": [
+          "easy",
+          "medium",
+          "hard"
+        ],
+        "title": "QuestionDifficultyEnum"
+      },
+      "QuestionTypeEnum": {
+        "type": "string",
+        "enum": [
+          "single_select_mcq",
+          "multiple_select_mcq"
+        ],
+        "title": "QuestionTypeEnum"
+      },
+      "QuizCreate": {
+        "properties": {
+          "quiz_title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Quiz Title"
+          },
+          "difficulty_level": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionDifficultyEnum"
+              }
+            ],
+            "default": "easy"
+          },
+          "random_flag": {
+            "type": "boolean",
+            "title": "Random Flag",
+            "default": false
+          },
+          "total_points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Points",
+            "default": 0
+          },
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "add_topic_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Add Topic Ids",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "quiz_title"
+        ],
+        "title": "QuizCreate",
+        "example": {
+          "add_topic_ids": [
+            1
+          ],
+          "course_id": 1,
+          "difficulty_level": "easy",
+          "quiz_title": "TypeScript Quiz",
+          "random_flag": true
+        }
+      },
+      "QuizQuestionReadQuestionBank": {
+        "properties": {
+          "quiz_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quiz Id"
+          },
+          "question_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Id"
+          },
+          "topic_id": {
+            "type": "integer",
+            "title": "Topic Id"
+          },
+          "question": {
+            "$ref": "#/components/schemas/QuestionBankRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "QuizQuestionReadQuestionBank",
+        "example": {
+          "question_id": 1,
+          "quiz_id": 1,
+          "topic_id": 1
+        }
+      },
+      "QuizReadWithQuestionsAndTopics": {
+        "properties": {
+          "quiz_title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Quiz Title"
+          },
+          "difficulty_level": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionDifficultyEnum"
+              }
+            ],
+            "default": "easy"
+          },
+          "random_flag": {
+            "type": "boolean",
+            "title": "Random Flag",
+            "default": false
+          },
+          "total_points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Points",
+            "default": 0
+          },
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/Topic"
+            },
+            "type": "array",
+            "title": "Topics",
+            "default": []
+          },
+          "quiz_questions": {
+            "items": {
+              "$ref": "#/components/schemas/QuizQuestionReadQuestionBank"
+            },
+            "type": "array",
+            "title": "Quiz Questions",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "quiz_title",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "QuizReadWithQuestionsAndTopics",
+        "example": {
+          "course_id": 1,
+          "difficulty_level": "easy",
+          "quiz_title": "TypeScript Quiz",
+          "random_flag": true
+        }
+      },
+      "QuizReadWithTopics": {
+        "properties": {
+          "quiz_title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Quiz Title"
+          },
+          "difficulty_level": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionDifficultyEnum"
+              }
+            ],
+            "default": "easy"
+          },
+          "random_flag": {
+            "type": "boolean",
+            "title": "Random Flag",
+            "default": false
+          },
+          "total_points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Points",
+            "default": 0
+          },
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/Topic"
+            },
+            "type": "array",
+            "title": "Topics",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "quiz_title",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "QuizReadWithTopics",
+        "example": {
+          "course_id": 1,
+          "difficulty_level": "easy",
+          "quiz_title": "TypeScript Quiz",
+          "random_flag": true
+        }
+      },
+      "QuizSettingCreate": {
+        "properties": {
+          "quiz_id": {
+            "type": "integer",
+            "title": "Quiz Id"
+          },
+          "instructions": {
+            "type": "string",
+            "title": "Instructions"
+          },
+          "time_limit": {
+            "type": "string",
+            "format": "duration",
+            "title": "Time Limit"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "quiz_key": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Quiz Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quiz_id",
+          "time_limit",
+          "quiz_key"
+        ],
+        "title": "QuizSettingCreate"
+      },
+      "QuizSettingRead": {
+        "properties": {
+          "quiz_id": {
+            "type": "integer",
+            "title": "Quiz Id"
+          },
+          "instructions": {
+            "type": "string",
+            "title": "Instructions"
+          },
+          "time_limit": {
+            "type": "string",
+            "format": "duration",
+            "title": "Time Limit"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "quiz_key": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Quiz Key"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quiz_id",
+          "time_limit",
+          "quiz_key",
+          "id"
+        ],
+        "title": "QuizSettingRead",
+        "example": {
+          "created_at": "2021-07-10T14:48:00.000Z",
+          "end_time": "2021-07-10T14:48:00.000Z",
+          "instructions": "Read the questions carefully.",
+          "quiz_id": 1,
+          "quiz_key": "BAT_Q1TS278",
+          "start_time": "2021-07-10T14:48:00.000Z",
+          "time_limit": "P3D",
+          "updated_at": "2021-07-10T14:48:00.000Z"
+        }
+      },
+      "QuizSettingUpdate": {
+        "properties": {
+          "quiz_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quiz Id"
+          },
+          "instructions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instructions"
+          },
+          "time_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Limit"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "quiz_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quiz Key"
+          }
+        },
+        "type": "object",
+        "title": "QuizSettingUpdate",
+        "example": {
+          "end_time": "2025-02-26T14:56:46.277Z",
+          "instructions": "Read the questions carefully.",
+          "quiz_id": 1,
+          "quiz_key": "BAT_Q1TS278",
+          "start_time": "2023-02-26T14:56:46.277Z",
+          "time_limit": "P3D"
+        }
+      },
+      "QuizUpdate": {
+        "properties": {
+          "quiz_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quiz Title"
+          },
+          "difficulty_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuestionDifficultyEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "random_flag": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Random Flag"
+          },
+          "total_points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Points"
+          },
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "add_topic_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Add Topic Ids",
+            "default": []
+          },
+          "remove_topic_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Remove Topic Ids",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "QuizUpdate",
+        "example": {
+          "add_topic_ids": [
+            1,
+            2,
+            3
+          ],
+          "course_id": 1,
+          "difficulty_level": "easy",
+          "quiz_title": "TypeScript Quiz",
+          "random_flag": true,
+          "remove_topic_ids": [
+            4
+          ]
+        }
+      },
+      "Topic": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description"
+        ],
+        "title": "Python",
+        "description": "Python programming language",
+        "course_id": 1
+      },
+      "TopicCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "contents": {
+            "items": {
+              "$ref": "#/components/schemas/ContentCreate"
+            },
+            "type": "array",
+            "title": "Contents",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description"
+        ],
+        "title": "TopicCreate",
+        "example": {
+          "contents": [
+            {
+              "content_text": "OOP is a programming paradigm based on classes and objects rather."
+            },
+            {
+              "content_text": "OOP Pillars: Encapsulation, Inheritance and Polymorphism, and Abstraction."
+            }
+          ],
+          "course_id": 1,
+          "description": "Learn OOPS in Python12",
+          "parent_id": 1,
+          "title": "OOP Paradigm"
+        }
+      },
+      "TopicResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "course_id",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Python",
+        "description": "Python programming language",
+        "course_id": 1
+      },
+      "TopicResponseWithContent": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "contents": {
+            "items": {
+              "$ref": "#/components/schemas/ContentResponse"
+            },
+            "type": "array",
+            "title": "Contents",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "course_id",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Python",
+        "description": "Python programming language",
+        "course_id": 1
+      },
+      "TopicUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          }
+        },
+        "type": "object",
+        "title": "TopicUpdate",
+        "example": {
+          "course_id": 1,
+          "description": "Learn OOPS in Typescript 5.0+",
+          "parent_id": 1,
+          "title": "OOP Paradigm"
+        }
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
