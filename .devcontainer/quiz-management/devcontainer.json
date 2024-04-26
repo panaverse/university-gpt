@@ -1,0 +1,11 @@
+{
+    "name": "Quiz Management Container",
+    "dockerComposeFile": ["../../docker-compose.yml"],
+    "service": "quiz-management", // This Shall be same as the service name in docker-compose.yml
+    "shutdownAction": "none",
+    "workspaceFolder": "/quiz-management",  // Changed from "/workspace" to match the volume mount in docker-compose.yml
+	"postCreateCommand": "poetry install",
+    "forwardPorts": [
+        "8003:8003"
+    ]
+}

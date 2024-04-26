@@ -1,0 +1,143 @@
+version: "3.9"
+
+services:
+  educational-program:
+    image: educational-program
+    restart: always
+    build:
+      context: ./educational-program
+      dockerfile: Dockerfile.dev
+    env_file: "./educational-program/.env"
+    container_name: educational-program
+    command: sleep infinity
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./educational-program:/educational-program # Mount the host code directory into the container
+    networks:
+      - university-gpt-net
+    depends_on:
+      - postgres_dev_db
+      - postgres_test_db
+
+
+  user-management:
+    image: user-management
+    restart: always
+    build:
+      context: ./user-management
+      dockerfile: Dockerfile.dev
+    env_file: "./user-management/.env"
+    container_name: user-management
+    command: sleep infinity
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./user-management:/user-management # Mount the host code directory into the container
+    networks:
+      - university-gpt-net
+    depends_on:
+      - postgres_dev_db
+      - postgres_test_db
+
+
+  question-bank:
+    image: question-bank
+    restart: always
+    build:
+      context: ./question-bank
+      dockerfile: Dockerfile.dev
+    env_file: "./question-bank/.env"
+    container_name: question-bank
+    command: sleep infinity
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./question-bank:/question-bank # Mount the host code directory into the container
+    networks:
+      - university-gpt-net
+    depends_on:
+      - postgres_dev_db
+      - postgres_test_db
+
+
+  quiz-management:
+    image: quiz-management
+    restart: always
+    build:
+      context: ./quiz-management
+      dockerfile: Dockerfile.dev
+    env_file: "./quiz-management/.env"
+    container_name: quiz-management
+    command: sleep infinity
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./quiz-management:/quiz-management # Mount the host code directory into the container
+    networks:
+      - university-gpt-net
+    depends_on:
+      - postgres_dev_db
+      - postgres_test_db
+
+
+  assessment-evals:
+    image: assessment-evals
+    restart: always
+    build:
+      context: ./assessment-evals
+      dockerfile: Dockerfile.dev
+    env_file: "./assessment-evals/.env"
+    container_name: assessment-evals
+    command: sleep infinity
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./assessment-evals:/assessment-evals # Mount the host code directory into the container
+    networks:
+      - university-gpt-net
+    depends_on:
+      - postgres_dev_db
+      - postgres_test_db
+
+
+  postgres_dev_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresDevCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_dev_pass
+      - POSTGRES_DB=postgres_dev_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt-net
+
+
+  postgres_test_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresTestCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_test_pass
+      - POSTGRES_DB=postgres_test_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_test_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt-net
+
+
+volumes:
+  postgres_dev_db:
+    driver: local
+  postgres_test_db:
+    driver: local
+
+networks:
+  university-gpt-net:  # Define the custom network

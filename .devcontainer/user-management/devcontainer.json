@@ -1,0 +1,11 @@
+{
+    "name": "User Management Container",
+    "dockerComposeFile": ["../../docker-compose.yml"],
+    "service": "user-management",
+    "shutdownAction": "none",
+    "workspaceFolder": "/user-management",  // Changed from "/workspace" to match the volume mount in docker-compose.yml
+	"postCreateCommand": "poetry install",
+    "forwardPorts": [
+        "8001:8001"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "name": "Question Bank Container",
+    "dockerComposeFile": ["../../docker-compose.yml"],
+    "service": "question-bank", // This Shall be same as the service name in docker-compose.yml
+    "shutdownAction": "none",
+    "workspaceFolder": "/question-bank",  // Changed from "/workspace" to match the volume mount in docker-compose.yml
+	"postCreateCommand": "poetry install",
+    "forwardPorts": [
+        "8002:8002"
+    ]
+}
