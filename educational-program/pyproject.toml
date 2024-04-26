@@ -9,6 +9,10 @@ readme = "README.md"
 python = "^3.12"
 fastapi = "^0.110.2"
 uvicorn = "^0.29.0"
+sqlmodel = "^0.0.16"
+psycopg = {extras = ["binary"], version = "^3.1.18"}
+alembic = "^1.13.1"
+psycopg2 = "^2.9.9"
 
 
 [build-system]
