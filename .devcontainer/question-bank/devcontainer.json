@@ -4,8 +4,15 @@
     "service": "question-bank", // This Shall be same as the service name in docker-compose.yml
     "shutdownAction": "none",
     "workspaceFolder": "/question-bank",  // Changed from "/workspace" to match the volume mount in docker-compose.yml
-	"postCreateCommand": "poetry install",
+    "postCreateCommand": "poetry install && alembic upgrade head && python app/init_data.py  && python -c 'print(\" CONTAINER STARTED - Start RUN FASTAPI SERVER NOW...\")'"  ,
     "forwardPorts": [
         "8002:8002"
-    ]
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    }
 }
