@@ -11,7 +11,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-python.python"
+                "ms-python.python",
+                "ms-vscode.makefile-tools"
             ]
         }
     }

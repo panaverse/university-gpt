@@ -1,9 +1,7 @@
 from fastapi import APIRouter
 from app.api.v1.routes import (university, health, program, course)
 
-
-
-api_router = APIRouter(prefix="/v1")
+api_router = APIRouter()
 
 api_router.include_router(health.router, prefix="/health", tags=["Health"])
 api_router.include_router(university.router_uni, prefix="/university", tags=["University"])

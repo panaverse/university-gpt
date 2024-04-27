@@ -19,6 +19,11 @@ class ProgramCRUD:
             program_exists = db.exec(select(Program).where(Program.name == program.name)).first()
             if program_exists:
                 raise HTTPException(status_code=400, detail="Program with same name already exists")
+
+            # Check if University Exists
+            university_exists = db.get(University, program.university_id)
+            if not university_exists:
+                raise HTTPException(status_code=404, detail="University not found")
             obj_in = Program.model_validate(program)
             db.add(obj_in)
             db.commit()
@@ -40,6 +45,11 @@ class ProgramCRUD:
         Returns:
         list[ProgramRead]: List of all Programs (Id and timestamps included)
         """
+        if offset < 0:
+            raise HTTPException(status_code=400, detail="Offset cannot be negative")
+        if per_page < 1:
+            raise HTTPException(status_code=400, detail="Per page items cannot be less than 1")
+        
         programs = db.exec(select(Program).offset(offset).limit(per_page)).all()
         if programs is None:
             raise HTTPException(status_code=404, detail="Programs not found")
@@ -56,6 +66,8 @@ class ProgramCRUD:
             Program: Program that was retrieved
         """
         program = db.get(Program, program_id)
+        if program is None:
+            raise HTTPException(status_code=404, detail="Program not found")
         return program
 
     # Update Program by ID
@@ -86,7 +98,7 @@ class ProgramCRUD:
             if program.university_id:
                 university_exists = db.get(University, program.university_id)
                 if not university_exists:
-                    raise HTTPException(status_code=404, detail="University not found")
+                    raise HTTPException(status_code=404, detail=f"University with id {program.university_id} not found")
             
             program_data = program.model_dump(exclude_unset=True)
             db_program.sqlmodel_update(program_data)

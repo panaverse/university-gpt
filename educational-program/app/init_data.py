@@ -28,21 +28,24 @@ logger.info("Seeding database")
 university_name = "PIAIC"
 # University
 university = University(
+    id=1,
     name=university_name,
     description="The University of PIAIC is a leading educational institution in Pakistan.",
 )
 
+program_name = "Certified Cloud Applied Generative AI Engineer"
 # Program
 program = Program(
-    name="Certified Cloud Applied Generative AI Engineer",
+    name=program_name,
     description="The program of Artificial Intelligence is a leading educational program in Pakistan.",
     university_id=university.id,
     university=university,
 )
 
 # Course
+course_name = "Quarter 3: API Design, Development, and Deployment using FastAPI, Containers, and OpenAPI Specifications"
 course = Course(
-    name="Quarter 3: API Design, Development, and Deployment using FastAPI, Containers, and OpenAPI Specifications",
+    name=course_name,
     description=""" An API-as-a-Product is a type of Software-as-a-Service that monetizes niche functionality, typically served over HTTP.
     OpenAI APIs are themselves this kind of service. An application programming interface economy, or API economy, refers to the business structure
     where APIs are the distribution channel for products and services. In this quarter we will learn to develop APIs not just as a backend for our
@@ -80,7 +83,7 @@ def init_db_seed(session: Session):
     before=before_log(logger, 200),
     after=after_log(logger, 300),
 )
-def init_db(*, session: Session, engine=engine):
+def init_db(*, engine):
     try:
         logger.info("init_db Up")
         with Session(engine) as session:
@@ -104,7 +107,7 @@ def init_db(*, session: Session, engine=engine):
 
 if __name__ == "__main__":
     logger.info("In Initial Data Seeding Script")
-    (init_db(session=Session))
+    (init_db(engine=engine))
     logger.info("Database Seeding Completed!")
     logger.info("Database is Working!")
     logger.info("Backend Database Initial Data Seeding Completed!")

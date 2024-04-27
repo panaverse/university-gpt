@@ -28,7 +28,7 @@ app = FastAPI(
     # servers=[{"url": "http://localhost:8000", "description": "Development Server"}],
 )
 
-app.include_router(v1_api.api_router, prefix="/api")
+app.include_router(v1_api.api_router, prefix=settings.API_V1_STR)
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,6 +43,6 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 
-@app.get("/container", tags=["Health"])
+@app.get(f"{settings.API_V1_STR}/container", tags=["Health"])
 def read_root():
     return {"Container 1": "Educational Program!!!", "Port": "8000"}

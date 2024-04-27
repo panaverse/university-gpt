@@ -13,6 +13,11 @@ class CourseCRUD:
         Returns:
             Course: Course that was created (with Id and timestamps included)
         """
+        # Verify if Program ID is present and valid
+        if course.program_id:
+            program = db.get(Program, course.program_id)
+            if not program:
+                raise HTTPException(status_code=404, detail="Invalid program ID")
         # Check if Course with Same name already exists
         course_exists = db.exec(select(Course).where(Course.name == course.name)).first()
         if course_exists:
@@ -32,6 +37,11 @@ class CourseCRUD:
         Returns:
             list[CourseRead]: List of all Courses (Id and timestamps included)
         """
+        if offset < 0:
+            raise HTTPException(status_code=400, detail="Offset cannot be negative")
+        if per_page < 1:
+            raise HTTPException(status_code=400, detail="Per page items cannot be less than 1")
+        
         courses = db.exec(select(Course).offset(offset).limit(per_page)).all()
         if courses is None:
             raise HTTPException(status_code=404, detail="Courses not found")

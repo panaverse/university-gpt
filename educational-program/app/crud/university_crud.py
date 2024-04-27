@@ -36,6 +36,12 @@ class UniversityCRUD:
         Returns:
             University: List of all Universities (Id and timestamps included)
         """
+        if offset < 0:
+            raise HTTPException(status_code=400, detail="Offset cannot be negative")
+        if per_page < 1:
+            raise HTTPException(status_code=400, detail="Per page items cannot be less than 1")
+        
+        
         universities = db.exec(select(University).offset(offset).limit(per_page)).all()
         if universities is None:
             raise HTTPException(status_code=404, detail="Universities not found")

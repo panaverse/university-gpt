@@ -34,8 +34,6 @@ def create_new_university(
         # Handle specific exceptions with different HTTP status codes if needed
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
-
-
 @router_uni.get("", response_model=PaginatedUniversityRead)
 def get_all_universities(
     db: DBSessionDep,

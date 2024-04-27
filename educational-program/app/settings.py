@@ -22,4 +22,4 @@ TEST_DATABASE_URL: Secret = config("TEST_DATABASE_URL", cast=Secret)
 BACKEND_CORS_ORIGINS_STR: str = config("BACKEND_CORS_ORIGINS", default="*", cast=str)
 BACKEND_CORS_ORIGINS: list[str] | str = parse_cors(BACKEND_CORS_ORIGINS_STR)
 
-DEV_URL: str = "http://localhost:8000"
+API_V1_STR="/api/v1"
