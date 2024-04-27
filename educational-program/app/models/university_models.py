@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Relationship
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from app.models.base import BaseIdModel
 
 if TYPE_CHECKING:
@@ -37,7 +37,6 @@ class UniversityRead(UniversityBase):
     class ConfigDict:
         json_schema_extra = {"example": example_output_uni}
 
-
 # Model for creating a University this will be to get data from the client
 class UniversityCreate(UniversityBase):
 
@@ -53,3 +52,13 @@ class UniversityUpdate(SQLModel):
 
     class ConfigDict:
         json_schema_extra = {"example": example_input_uni}
+
+
+class PaginatedUniversityRead(SQLModel):
+    """
+    Represents a paginated list of SearchToolRecord items.
+    """
+    count: int
+    next:  Union[str, None] = None
+    previous:  Union[str, None] = None
+    all_records: list[UniversityRead]

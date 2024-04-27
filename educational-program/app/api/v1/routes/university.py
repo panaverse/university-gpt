@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException
 
-from app.models.university_models import UniversityRead, UniversityCreate, UniversityUpdate
+from app.models.university_models import UniversityRead, UniversityCreate, UniversityUpdate, PaginatedUniversityRead
 from app.api.deps import DBSessionDep
 from app.crud.university_crud import university_crud
 
@@ -13,7 +13,7 @@ router_uni = APIRouter()
 
 
 @router_uni.post("", response_model=UniversityRead)
-async def create_new_university(
+def create_new_university(
     university: UniversityCreate, db: DBSessionDep
 ) -> UniversityRead:
     """
@@ -25,14 +25,22 @@ async def create_new_university(
     (Returns):
         University: University that was created (with Id and timestamps included)
     """
-    return await university_crud.create_university_db(university=university, db=db)
+    try:
+        return university_crud.create_university_db(university=university, db=db)
+    except HTTPException as http_e:
+        # If the service layer raised an HTTPException, re-raise it
+        raise http_e
+    except Exception as e:
+        # Handle specific exceptions with different HTTP status codes if needed
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
 
-@router_uni.get("", response_model=list[UniversityRead])
-async def get_all_universities(
+
+@router_uni.get("", response_model=PaginatedUniversityRead)
+def get_all_universities(
     db: DBSessionDep,
-    offset: int = Query(default=0, le=10),
-    limit: int = Query(default=10, le=100),
+    page: int = Query(1, description="Page number", ge=1),
+    per_page: int = Query(10, description="Items per page", ge=1, le=100)
 ) -> list[UniversityRead]:
     """
     Get All Universities
@@ -46,10 +54,19 @@ async def get_all_universities(
         list[UniversityRead]: List of all Universities (Id and timestamps included)
     """
     try:
-        all_universities = await university_crud.get_all_universities_db(
-            db=db, offset=offset, limit=limit
-        )
-        return all_universities
+        # Calculate the offset to skip the appropriate number of items
+        offset = (page - 1) * per_page
+        all_records = university_crud.get_all_universities_db(db=db, offset=offset, per_page=per_page)
+        count_recs = university_crud.count_records(db=db)
+
+        # Calculate next and previous page URLs
+        next_page = f"?page={page + 1}&per_page={per_page}" if len(all_records) == per_page else None
+        previous_page = f"?page={page - 1}&per_page={per_page}" if page > 1 else None
+
+        # Return data in paginated format
+        paginated_data = {"count": count_recs, "next": next_page, "previous": previous_page, "all_records": all_records}
+
+        return paginated_data
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -57,7 +74,7 @@ async def get_all_universities(
 
 
 @router_uni.get("/{university_id}", response_model=UniversityRead)
-async def get_university_by_id(
+def get_university_by_id(
     university_id: int, db: DBSessionDep
 ) -> UniversityRead:
     """
@@ -69,7 +86,7 @@ async def get_university_by_id(
     University: University that was retrieved
     """
     try:
-        university = await university_crud.get_university_by_id_db(
+        university = university_crud.get_university_by_id_db(
             university_id=university_id, db=db
         )
         return university
@@ -80,7 +97,7 @@ async def get_university_by_id(
 
 
 @router_uni.patch("/{university_id}", response_model=UniversityRead)
-async def update_university_by_id(
+def update_university_by_id(
     university_id: int, university: UniversityUpdate, db: DBSessionDep
 ) -> UniversityRead:
     """
@@ -92,13 +109,13 @@ async def update_university_by_id(
     Returns:
         University: University that was updated (with Id and timestamps included)
     """
-    return await university_crud.update_university_db(
+    return university_crud.update_university_db(
         university_id=university_id, university=university, db=db
     )
 
 
 @router_uni.delete("/{university_id}", response_model=dict)
-async def delete_university_by_id(university_id: int, db: DBSessionDep):
+def delete_university_by_id(university_id: int, db: DBSessionDep):
     """
     Delete a University by ID
     Args:
@@ -107,7 +124,7 @@ async def delete_university_by_id(university_id: int, db: DBSessionDep):
     Returns:
         University: University that was deleted
     """
-    return await university_crud.delete_university_db(
+    return university_crud.delete_university_db(
         university_id=university_id, db=db
     )
 

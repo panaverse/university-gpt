@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException
 
-from app.models.course_models import CourseCreate, CourseRead, CourseUpdate
+from app.models.course_models import CourseCreate, CourseRead, CourseUpdate, PaginatedCourseRead
 from app.api.deps import DBSessionDep
 from app.crud.course_crud import course_crud
 
@@ -9,7 +9,7 @@ router_course = APIRouter()
 
 # Endpoints for creating a new Course
 @router_course.post("", response_model=CourseRead)
-async def create_new_course(course: CourseCreate, db: DBSessionDep) -> CourseRead:
+def create_new_course(course: CourseCreate, db: DBSessionDep) -> CourseRead:
     """
     Create a new Course in the database
 
@@ -19,16 +19,22 @@ async def create_new_course(course: CourseCreate, db: DBSessionDep) -> CourseRea
     (Returns):
         Course: Course that was created (with Id and timestamps included)
     """
-    return await course_crud.create_course_db(course=course, db=db)
-
+    try:
+        return course_crud.create_course_db(course=course, db=db)
+    except HTTPException as http_e:
+        # If the service layer raised an HTTPException, re-raise it
+        raise http_e
+    except Exception as e:
+        # Handle specific exceptions with different HTTP status codes if needed
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
 # Endpoints for getting all Courses
-@router_course.get("", response_model=list[CourseRead])
-async def get_all_courses(
+@router_course.get("", response_model=PaginatedCourseRead)
+def get_all_courses(
     db: DBSessionDep,
-    offset: int = Query(default=0, le=10),
-    limit: int = Query(default=10, le=100),
-) -> list[CourseRead]:
+    page: int = Query(1, description="Page number", ge=1),
+    per_page: int = Query(10, description="Items per page", ge=1, le=100)
+) -> PaginatedCourseRead:
     """
     Get All Courses
 
@@ -38,13 +44,21 @@ async def get_all_courses(
         limit: int: Limit for pagination
 
     (Returns):
-        list[CourseRead]: List of all Courses (Id and timestamps included)
+        PaginatedCourseRead: List of all Courses (Id and timestamps included)
     """
     try:
-        all_courses = await course_crud.get_all_courses_db(
-            db=db, offset=offset, limit=limit
-        )
-        return all_courses
+
+        offset = (page - 1) * per_page
+        all_records = course_crud.get_all_courses_db(db=db, offset=offset, per_page=per_page)
+        count_recs = course_crud.count_records(db=db)
+
+        # Calculate next and previous page URLs
+        next_page = f"?page={page + 1}&per_page={per_page}" if len(all_records) == per_page else None
+        previous_page = f"?page={page - 1}&per_page={per_page}" if page > 1 else None
+
+        # Return data in paginated format
+        paginated_data = {"count": count_recs, "next": next_page, "previous": previous_page, "all_records": all_records}
+        return paginated_data
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -53,7 +67,7 @@ async def get_all_courses(
 
 # Endpoints for getting a Course by ID
 @router_course.get("/{course_id}", response_model=CourseRead)
-async def get_course_by_id(course_id: int, db: DBSessionDep) -> CourseRead:
+def get_course_by_id(course_id: int, db: DBSessionDep) -> CourseRead:
     """
     Get a Course by ID
     Args:
@@ -63,7 +77,7 @@ async def get_course_by_id(course_id: int, db: DBSessionDep) -> CourseRead:
     Course: Course that was retrieved
     """
     try:
-        course = await course_crud.get_course_by_id_db(course_id=course_id, db=db)
+        course = course_crud.get_course_by_id_db(course_id=course_id, db=db)
         return course
     except HTTPException as http_exception:
         raise http_exception
@@ -73,7 +87,7 @@ async def get_course_by_id(course_id: int, db: DBSessionDep) -> CourseRead:
 
 # Endpoints for updating a Course by ID
 @router_course.patch("/{course_id}", response_model=CourseRead)
-async def update_course_by_id(
+def update_course_by_id(
     course_id: int, course: CourseUpdate, db: DBSessionDep
 ) -> CourseRead:
     """
@@ -85,11 +99,11 @@ async def update_course_by_id(
     Returns:
         Course: Course that was updated (with Id and timestamps included)
     """
-    return await course_crud.update_course_db(course_id=course_id, course=course, db=db)
+    return course_crud.update_course_db(course_id=course_id, course=course, db=db)
 
 
 @router_course.delete("/{course_id}")
-async def delete_course_by_id(course_id: int, db: DBSessionDep):
+def delete_course_by_id(course_id: int, db: DBSessionDep):
     """
     Delete a Course by ID
     Args:
@@ -98,4 +112,4 @@ async def delete_course_by_id(course_id: int, db: DBSessionDep):
     Returns:
         Course: Course that was deleted
     """
-    return await course_crud.delete_course_db(course_id=course_id, db=db)
+    return course_crud.delete_course_db(course_id=course_id, db=db)

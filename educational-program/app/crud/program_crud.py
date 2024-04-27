@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlmodel import select, Session
 
 from app.models.program_models import Program, ProgramCreate, ProgramUpdate
+from app.models.university_models import University
 
 class ProgramCRUD:
     def create_program_db(self, *, program: ProgramCreate, db: Session):
@@ -13,14 +14,25 @@ class ProgramCRUD:
         Returns:
             Program: Program that was created (with Id and timestamps included)
         """
-        obj_in = Program.model_validate(program)
-        db.add(obj_in)
-        db.commit()
-        db.refresh(obj_in)
-        return obj_in
-
+        # Check if Program for Same Same Exists
+        try:
+            program_exists = db.exec(select(Program).where(Program.name == program.name)).first()
+            if program_exists:
+                raise HTTPException(status_code=400, detail="Program with same name already exists")
+            obj_in = Program.model_validate(program)
+            db.add(obj_in)
+            db.commit()
+            db.refresh(obj_in)
+            return obj_in
+        except HTTPException as http_e:
+            # If the service layer raised an HTTPException, re-raise it
+            raise http_e
+        except Exception as e:
+            # Handle specific exceptions with different HTTP status codes if needed
+            raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+    
     # Get all Programs
-    def get_all_programs_db(self, *, db: Session, offset: int, limit: int):
+    def get_all_programs_db(self, *, db: Session, offset: int, per_page: int):
         """
         Get All Programs
         Args:
@@ -28,9 +40,9 @@ class ProgramCRUD:
         Returns:
         list[ProgramRead]: List of all Programs (Id and timestamps included)
         """
-        stmt = select(Program).offset(offset).limit(limit)
-        programs_req = db.exec(stmt)
-        programs = programs_req.all()
+        programs = db.exec(select(Program).offset(offset).limit(per_page)).all()
+        if programs is None:
+            raise HTTPException(status_code=404, detail="Programs not found")
         return programs
 
     # Get Program by ID
@@ -59,18 +71,37 @@ class ProgramCRUD:
         Returns:
             Program: Program that was updated (with Id and timestamps included)
         """
-        db_program = db.get(Program, program_id)
-        if not db_program:
-            raise HTTPException(status_code=404, detail="Program not found")
+        try:
+            db_program = db.get(Program, program_id)
+            if not db_program:
+                raise HTTPException(status_code=404, detail="Program not found")
+            
+            # If Program is Trying to change name
+            if program.name:
+                program_exists = db.exec(select(Program).where(Program.name == program.name)).first()
+                if program_exists:
+                    raise HTTPException(status_code=400, detail="Program with same name already exists")
+                
+            # If Program is Trying to change university_id
+            if program.university_id:
+                university_exists = db.get(University, program.university_id)
+                if not university_exists:
+                    raise HTTPException(status_code=404, detail="University not found")
+            
+            program_data = program.model_dump(exclude_unset=True)
+            db_program.sqlmodel_update(program_data)
+            db.add(db_program)
 
-        program_data = program.model_dump(exclude_unset=True)
-        db_program.sqlmodel_update(program_data)
-        db.add(db_program)
+            db.commit()
+            db.refresh(db_program)
 
-        db.commit()
-        db.refresh(db_program)
-
-        return db_program
+            return db_program
+        except HTTPException as http_e:
+            # If the service layer raised an HTTPException, re-raise it
+            raise http_e
+        except Exception as e:
+            # Handle specific exceptions with different HTTP status codes if needed
+            raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
     # Delete Program by ID
     def delete_program_db(self, *, program_id: int, db: Session):
@@ -89,5 +120,18 @@ class ProgramCRUD:
         db.commit()
         # return program
         return {"message": "Program deleted"}
+    
+    def count_records(self, *, db: Session) -> int:
+        try:
+            query = select(Program.name)
+            items = db.exec(query).all()
+            count = len(items)
+            return count
+        except Exception as e:
+            # Log the exception for debugging purposes
+            print(f"Error counting SearchToolRecord items: {e}")
+            # Re-raise the exception to be handled at the endpoint level
+            raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+
 
 program_crud = ProgramCRUD()

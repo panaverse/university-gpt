@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from app.models.base import BaseIdModel
 
 if TYPE_CHECKING:
@@ -61,3 +61,13 @@ class ProgramUpdate(SQLModel):
 
     class ConfigDict:
         json_schema_extra = {"example": example_input_prog}
+
+
+class PaginatedProgramRead(SQLModel):
+    """
+    Represents a paginated list of SearchToolRecord items.
+    """
+    count: int
+    next:  Union[str, None] = None
+    previous:  Union[str, None] = None
+    all_records: list[ProgramRead]
