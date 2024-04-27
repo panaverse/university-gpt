@@ -17,7 +17,7 @@ services:
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
+      - postgres_edu_dev_db
       - postgres_test_db
 
 
@@ -57,7 +57,7 @@ services:
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
+      - postgres_qse_dev_db
       - postgres_test_db
 
 
@@ -100,6 +100,55 @@ services:
       - postgres_dev_db
       - postgres_test_db
 
+# A Single Test Database for All Microservices (Raw Migrations using SQLModel)
+  postgres_test_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresTestCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_test_pass
+      - POSTGRES_DB=postgres_test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt-net
+
+# A Seperate Development Database for Each Microservice (Alembic for Migrations)
+  #1. Education Program Microservice Development Database
+  postgres_edu_dev_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresEduDevCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_edu_dev_pass
+      - POSTGRES_DB=postgres_edu_dev_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_edu_dev_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt-net
+
+  #2. Question Bank Microservice Development Database (Question Bank + Topics)
+  postgres_qse_dev_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresQSEDevCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_qse_dev_pass
+      - POSTGRES_DB=postgres_qse_dev_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_qse_dev_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt-net
+
 
   postgres_dev_db:
     image: postgres:latest # Use the official PostgreSQL image
@@ -110,33 +159,20 @@ services:
       - POSTGRES_PASSWORD=temp_dev_pass
       - POSTGRES_DB=postgres_dev_db
     ports:
-      - "5433:5432"
+      - "5436:5432"
     volumes:
       - postgres_dev_db:/var/lib/postgresql/data
     networks:
       - university-gpt-net
 
-
-  postgres_test_db:
-    image: postgres:latest # Use the official PostgreSQL image
-    restart: always
-    container_name: PostgresTestCont
-    environment:
-      - POSTGRES_USER=mjunaidca
-      - POSTGRES_PASSWORD=temp_test_pass
-      - POSTGRES_DB=postgres_test_db
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres_test_db:/var/lib/postgresql/data
-    networks:
-      - university-gpt-net
-
-
 volumes:
-  postgres_dev_db:
-    driver: local
   postgres_test_db:
+    driver: local
+  postgres_edu_dev_db:
+    driver: local
+  postgres_qse_dev_db:
+    driver: local
+  postgres_dev_db:
     driver: local
 
 networks:

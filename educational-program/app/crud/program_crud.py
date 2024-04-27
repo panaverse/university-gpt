@@ -30,9 +30,11 @@ class ProgramCRUD:
             db.refresh(obj_in)
             return obj_in
         except HTTPException as http_e:
+            db.rollback()
             # If the service layer raised an HTTPException, re-raise it
             raise http_e
         except Exception as e:
+            db.rollback()
             # Handle specific exceptions with different HTTP status codes if needed
             raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
     
@@ -45,15 +47,23 @@ class ProgramCRUD:
         Returns:
         list[ProgramRead]: List of all Programs (Id and timestamps included)
         """
-        if offset < 0:
-            raise HTTPException(status_code=400, detail="Offset cannot be negative")
-        if per_page < 1:
-            raise HTTPException(status_code=400, detail="Per page items cannot be less than 1")
-        
-        programs = db.exec(select(Program).offset(offset).limit(per_page)).all()
-        if programs is None:
-            raise HTTPException(status_code=404, detail="Programs not found")
-        return programs
+        try:
+            if offset < 0:
+                raise HTTPException(status_code=400, detail="Offset cannot be negative")
+            if per_page < 1:
+                raise HTTPException(status_code=400, detail="Per page items cannot be less than 1")
+            
+            programs = db.exec(select(Program).offset(offset).limit(per_page)).all()
+            if programs is None:
+                raise HTTPException(status_code=404, detail="Programs not found")
+            return programs
+        except HTTPException as http_e:
+            db.rollback()
+            # If the service layer raised an HTTPException, re-raise it
+            raise http_e
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
     # Get Program by ID
     def get_program_by_id_db(self, *, program_id: int, db: Session):
@@ -65,10 +75,18 @@ class ProgramCRUD:
         Returns:
             Program: Program that was retrieved
         """
-        program = db.get(Program, program_id)
-        if program is None:
-            raise HTTPException(status_code=404, detail="Program not found")
-        return program
+        try:
+            program = db.get(Program, program_id)
+            if program is None:
+                raise HTTPException(status_code=404, detail="Program not found")
+            return program
+        except HTTPException as http_e:
+            db.rollback()
+            # If the service layer raised an HTTPException, re-raise it
+            raise http_e
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
     # Update Program by ID
     def update_program_db(
@@ -109,9 +127,11 @@ class ProgramCRUD:
 
             return db_program
         except HTTPException as http_e:
+            db.rollback()
             # If the service layer raised an HTTPException, re-raise it
             raise http_e
         except Exception as e:
+            db.rollback()
             # Handle specific exceptions with different HTTP status codes if needed
             raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
@@ -125,13 +145,22 @@ class ProgramCRUD:
         Returns:
             Program: Program that was deleted
         """
-        program = db.get(Program, program_id)
-        if program is None:
-            raise HTTPException(status_code=404, detail="Program not found")
-        db.delete(program)
-        db.commit()
-        # return program
-        return {"message": "Program deleted"}
+        try:
+            program = db.get(Program, program_id)
+            if program is None:
+                raise HTTPException(status_code=404, detail="Program not found")
+            db.delete(program)
+            db.commit()
+            # return program
+            return {"message": "Program deleted"}
+        except HTTPException as http_e:
+            db.rollback()
+            # If the service layer raised an HTTPException, re-raise it
+            raise http_e
+        except Exception as e:
+            db.rollback()
+            # Handle specific exceptions with different HTTP status codes if needed
+            raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
     
     def count_records(self, *, db: Session) -> int:
         try:
@@ -140,6 +169,7 @@ class ProgramCRUD:
             count = len(items)
             return count
         except Exception as e:
+            db.rollback()
             # Log the exception for debugging purposes
             print(f"Error counting SearchToolRecord items: {e}")
             # Re-raise the exception to be handled at the endpoint level
