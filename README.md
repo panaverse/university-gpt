@@ -7,6 +7,7 @@ University GPT is a conversational tool and a Generative AI app which personaliz
 The GUI will be built by using the OpenAI Assistant APIs and Conversational UI by using OpenAI GPTs. Both will be interacting with our University APIs. We will build both but first we will build the University Custom GPT.
 
 ## Microservices Overview
+
 This repository contains the source code for the following microservices:
 
 ### 1. Assessment Evals
@@ -17,7 +18,7 @@ This repository contains the source code for the following microservices:
 
 ### 2. Question Bank
 
-- Folder Name: question-bank
+- Folder Name: quiz-engine
 - Description: The Question Bank service acts as a central repository for storing and managing questions and their respective answers. It provides functionalities for adding, updating, and retrieving questions.
 - Purpose: To maintain a comprehensive database of questions and answers, ensuring easy access and management for quiz creation and assessment purposes.
 

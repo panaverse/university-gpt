@@ -20,7 +20,6 @@ services:
       - postgres_edu_dev_db
       - postgres_test_db
 
-
   user-management:
     image: user-management
     restart: always
@@ -40,46 +39,24 @@ services:
       - postgres_dev_db
       - postgres_test_db
 
-
-  question-bank:
-    image: question-bank
+  quiz-engine:
+    image: quiz-engine
     restart: always
     build:
-      context: ./question-bank
+      context: ./quiz-engine
       dockerfile: Dockerfile.dev
-    env_file: "./question-bank/.env"
-    container_name: question-bank
+    env_file: "./quiz-engine/.env"
+    container_name: quiz-engine
     command: sleep infinity
     ports:
       - "8002:8002"
     volumes:
-      - ./question-bank:/question-bank # Mount the host code directory into the container
+      - ./quiz-engine:/quiz-engine # Mount the host code directory into the container
     networks:
       - university-gpt-net
     depends_on:
       - postgres_qse_dev_db
       - postgres_test_db
-
-
-  quiz-management:
-    image: quiz-management
-    restart: always
-    build:
-      context: ./quiz-management
-      dockerfile: Dockerfile.dev
-    env_file: "./quiz-management/.env"
-    container_name: quiz-management
-    command: sleep infinity
-    ports:
-      - "8003:8003"
-    volumes:
-      - ./quiz-management:/quiz-management # Mount the host code directory into the container
-    networks:
-      - university-gpt-net
-    depends_on:
-      - postgres_dev_db
-      - postgres_test_db
-
 
   assessment-evals:
     image: assessment-evals
@@ -91,7 +68,7 @@ services:
     container_name: assessment-evals
     command: sleep infinity
     ports:
-      - "8004:8004"
+      - "8003:8003"
     volumes:
       - ./assessment-evals:/assessment-evals # Mount the host code directory into the container
     networks:
@@ -100,7 +77,7 @@ services:
       - postgres_dev_db
       - postgres_test_db
 
-# A Single Test Database for All Microservices (Raw Migrations using SQLModel)
+  # A Single Test Database for All Microservices (Raw Migrations using SQLModel)
   postgres_test_db:
     image: postgres:latest # Use the official PostgreSQL image
     restart: always
@@ -116,7 +93,7 @@ services:
     networks:
       - university-gpt-net
 
-# A Seperate Development Database for Each Microservice (Alembic for Migrations)
+  # A Seperate Development Database for Each Microservice (Alembic for Migrations)
   #1. Education Program Microservice Development Database
   postgres_edu_dev_db:
     image: postgres:latest # Use the official PostgreSQL image
@@ -149,6 +126,21 @@ services:
     networks:
       - university-gpt-net
 
+  #3. Quiz management Microservice Development Database (Quiz + Quiz Engine)
+  postgres_answer_dev_db:
+    image: postgres:latest # Use the official PostgreSQL image
+    restart: always
+    container_name: PostgresAnswerDevCont
+    environment:
+      - POSTGRES_USER=mjunaidca
+      - POSTGRES_PASSWORD=temp_answer_dev_pass
+      - POSTGRES_DB=postgres_answer_dev_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_answer_dev_db:/var/lib/postgresql/data
+    networks:
+      - university-gpt-net
 
   postgres_dev_db:
     image: postgres:latest # Use the official PostgreSQL image
@@ -159,7 +151,7 @@ services:
       - POSTGRES_PASSWORD=temp_dev_pass
       - POSTGRES_DB=postgres_dev_db
     ports:
-      - "5436:5432"
+      - "5439:5432"
     volumes:
       - postgres_dev_db:/var/lib/postgresql/data
     networks:
@@ -172,8 +164,10 @@ volumes:
     driver: local
   postgres_qse_dev_db:
     driver: local
+  postgres_answer_dev_db:
+    driver: local
   postgres_dev_db:
     driver: local
 
 networks:
-  university-gpt-net:  # Define the custom network
+  university-gpt-net: # Define the custom network

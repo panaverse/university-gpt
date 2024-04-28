@@ -20,7 +20,7 @@ services:
     depends_on:
       - postgres_dev_db
       - postgres_test_db
- 
+
   user-management:
     image: user-management
     restart: always
@@ -39,18 +39,18 @@ services:
       - postgres_dev_db
       - postgres_test_db
 
-  question-bank:
-    image: question-bank
+  quiz-engine:
+    image: quiz-engine
     restart: always
     build:
-      context: ./question-bank
+      context: ./quiz-engine
       dockerfile: Dockerfile.dev
-    env_file: "./question-bank/.env"
-    container_name: question-bank
+    env_file: "./quiz-engine/.env"
+    container_name: quiz-engine
     ports:
       - "8002:8000"
     volumes:
-      - ./question-bank:/code # Mount the host code directory into the container
+      - ./quiz-engine:/code # Mount the host code directory into the container
     networks:
       - university-gpt-net
     depends_on:
@@ -74,7 +74,6 @@ services:
     depends_on:
       - postgres_dev_db
       - postgres_test_db
-
 
   assessment-evals:
     image: assessment-evals
@@ -109,7 +108,6 @@ services:
     networks:
       - university-gpt-net
 
-
   postgres_test_db:
     image: postgres:latest # Use the official PostgreSQL image
     restart: always
@@ -125,7 +123,6 @@ services:
     networks:
       - university-gpt-net
 
-
 volumes:
   postgres_dev_db:
     driver: local
@@ -133,4 +130,4 @@ volumes:
     driver: local
 
 networks:
-  university-gpt-net:  # Define the custom network
+  university-gpt-net: # Define the custom network
