@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.routes import (health, topic, content, question, answer, quiz, quiz_question, quiz_setting)
+from app.api.v1.routes import (health, topic, content, question, answer, quiz, quiz_question, quiz_setting, wrapper)
 
 api_router = APIRouter()
 
@@ -12,3 +12,4 @@ api_router.include_router(answer.router, prefix="/answer", tags=["Answer"])
 api_router.include_router(quiz.router, tags=["Quiz"], prefix="/quiz")
 api_router.include_router(quiz_question.router, tags=["QuizQuestion"], prefix="/quiz")
 api_router.include_router(quiz_setting.router, tags=["QuizSetting"], prefix="/quiz-setting")
+api_router.include_router(wrapper.router, tags=["Wrapper & Runtime Generation APIs"], prefix="/wrapper")

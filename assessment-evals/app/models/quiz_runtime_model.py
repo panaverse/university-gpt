@@ -1,5 +1,5 @@
 
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Field, SQLModel
 from pydantic import validator
 from datetime import datetime, timedelta
 
@@ -39,26 +39,6 @@ class RuntimeQuizGenerated(SQLModel):
     time_start: datetime
     total_points: int
     quiz_key: str
-
-    # Custom validator to shuffle the order of quiz_questions
-    @validator("quiz_questions", pre=True)
-    def shuffle_quiz_questions(cls, v):
-        random.shuffle(v)
-        return v
-
-    # Custom validator to directly include question data
-
-    @validator("quiz_questions", pre=True, each_item=True)
-    def unpack_question_data(cls, v):
-        # Assuming 'v' is an instance of QuizQuestionFormating or similar
-        # Adjust this logic based on the actual structure of your data
-        return v.question if hasattr(v, "question") else v
-
-class WrapperRuntimeQuiz(SQLModel):
-    total_points: int
-    quiz_title: str
-    course_id: int
-    quiz_questions: list[QuestionRuntimeQuiz] = []
 
     # Custom validator to shuffle the order of quiz_questions
     @validator("quiz_questions", pre=True)
