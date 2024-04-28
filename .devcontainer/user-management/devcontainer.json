@@ -4,7 +4,7 @@
     "service": "user-management",
     "shutdownAction": "none",
     "workspaceFolder": "/user-management",  // Changed from "/workspace" to match the volume mount in docker-compose.yml
-	"postCreateCommand": "poetry install",
+    "postCreateCommand": "poetry install  && python -c 'print(\" CONTAINER STARTED - Start RUN FASTAPI SERVER NOW...\")'"  ,
     "forwardPorts": [
         "8001:8001"
     ]
