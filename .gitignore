@@ -131,8 +131,3 @@ dmypy.json
 .pyre/
 
 .DS_Store
-
-.mypy_cache
-.app
-.ruff_cache
-.venv

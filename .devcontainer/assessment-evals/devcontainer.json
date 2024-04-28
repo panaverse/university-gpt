@@ -1,0 +1,11 @@
+{
+    "name": "Assessment Evals Container",
+    "dockerComposeFile": ["../../docker-compose.yml"],
+    "service": "assessment-evals", // This Shall be same as the service name in docker-compose.yml
+    "shutdownAction": "none",
+    "workspaceFolder": "/assessment-evals",  // Changed from "/workspace/" to match the volume mount in docker-compose.yml
+    "postCreateCommand": "poetry install && alembic upgrade head && python app/init_data.py  && python -c 'print(\" CONTAINER STARTED - Start RUN FASTAPI SERVER NOW...\")'"  ,
+    "forwardPorts": [
+        "8004:8004"
+    ]
+}

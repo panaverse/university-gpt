@@ -9,7 +9,6 @@ services:
       dockerfile: Dockerfile.dev
     env_file: "./educational-program/.env"
     container_name: educational-program
-    command: sleep infinity
     ports:
       - "8000:8000"
     volumes:
@@ -28,7 +27,6 @@ services:
       dockerfile: Dockerfile.dev
     env_file: "./user-management/.env"
     container_name: user-management
-    command: sleep infinity
     ports:
       - "8001:8001"
     volumes:
@@ -47,7 +45,6 @@ services:
       dockerfile: Dockerfile.dev
     env_file: "./quiz-engine/.env"
     container_name: quiz-engine
-    command: sleep infinity
     ports:
       - "8002:8002"
     volumes:
@@ -66,7 +63,6 @@ services:
       dockerfile: Dockerfile.dev
     env_file: "./assessment-evals/.env"
     container_name: assessment-evals
-    command: sleep infinity
     ports:
       - "8003:8003"
     volumes:
