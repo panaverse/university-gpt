@@ -182,6 +182,23 @@ class CRUDQuizAnswerSheetEngine:
         answer_sheet_obj = answer_sheet_query.one_or_none()
 
         return answer_sheet_obj
+    
+    def get_quiz_feedback(
+        self, db_session: Session, answer_sheet_id: int, student_id: int
+    ):
+        """
+        Get Quiz Feedback
+        """
+        # 1. Load the Answer Sheet with AnswerSlot
+        answer_sheet_obj_exec = db_session.exec(
+            select(AnswerSheet)
+            .where(and_(AnswerSheet.id == answer_sheet_id, AnswerSheet.student_id == student_id))
+        ).one_or_none()
+        
+    
+        return answer_sheet_obj_exec
+        
+        
 
 
 
