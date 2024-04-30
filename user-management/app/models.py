@@ -1,5 +1,5 @@
 from sqlmodel import Field, Relationship, SQLModel
-
+from app.core.roles import UserRole
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -8,6 +8,7 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = None
+    role: UserRole = Field(default=UserRole.student)
 
 
 # Properties to receive via API on creation
@@ -101,6 +102,8 @@ class Message(SQLModel):
 class Token(SQLModel):
     access_token: str
     token_type: str = "bearer"
+    refresh_token: str | None = None
+    expires_in: int
 
 
 # Contents of JWT token

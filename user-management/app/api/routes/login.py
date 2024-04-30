@@ -1,7 +1,7 @@
 from datetime import timedelta
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -16,6 +16,8 @@ from app.utils import (
     generate_reset_password_email,
     send_email,
     verify_password_reset_token,
+    validate_refresh_token,
+    credentials_exception
 )
 
 router = APIRouter()
@@ -36,11 +38,82 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return Token(
+    refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    print("\n\n settings.ACCESS_TOKEN_EXPIRE_MINUTES \n\n ", settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    token_data = Token(
         access_token=security.create_access_token(
             user.id, expires_delta=access_token_expires
-        )
+        ),
+        refresh_token=security.create_access_token(
+            user.email, expires_delta=refresh_token_expires
+        ),
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
+    print("\n\n token_data \n\n ", token_data)
+    return token_data
+
+@router.post("/oauth/token", response_model=Token)
+def tokens_manager_oauth_codeflow(
+    session: SessionDep,
+    grant_type: str = Form(...),
+    refresh_token: Optional[str] = Form(None),
+    code: Optional[str] = Form(None)
+):
+    """
+    Token URl For OAuth Code Grant Flow
+
+    Args:
+        grant_type (str): Grant Type
+        code (Optional[str], optional)
+        refresh_token (Optional[str], optional)
+
+    Returns:
+        access_token (str)
+        token_type (str)
+        expires_in (int)
+        refresh_token (str)
+    """
+    # Token refresh flow
+    if grant_type == "refresh_token":
+        # Check if the refresh token is Present
+        if not refresh_token:
+            raise credentials_exception
+        # Validate the refresh token and client credentials
+        user_email = validate_refresh_token(refresh_token)
+        user = crud.get_user_by_email(
+        session=session, email=user_email['sub']
+        )
+        if not user:
+            raise credentials_exception
+
+    # Initial token generation flow
+    elif grant_type == "authorization_code":
+        #  TODO: OAUTH Temp Code Flow
+        raise credentials_exception
+        # user_id = await get_current_user_dep(code) 
+        # if not user_id:
+        #     raise credentials_exception
+    else:
+        raise credentials_exception
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    print("\n\n settings.ACCESS_TOKEN_EXPIRE_MINUTES \n\n ", settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    token_data = Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        ),
+        refresh_token=security.create_access_token(
+            user.email, expires_delta=refresh_token_expires
+        ),
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+
+    print("\n\n token_data \n\n ", token_data)
+    return token_data
+    
 
 
 @router.post("/login/test-token", response_model=UserPublic)

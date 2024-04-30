@@ -3,7 +3,7 @@ FROM python:3.12
 
 LABEL maintainer="mjunaidca"
 # Set the working directory in the container
-WORKDIR /educational-program
+WORKDIR /workspace
 # Install system dependencies required for potential Python packages
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -13,15 +13,16 @@ RUN apt-get update && apt-get install -y \
 # Install Poetry
 RUN pip install poetry
 
-# Copy the current directory contents into the container at /educational-program
-COPY . /educational-program/
-
-# Configuration to avoid creating virtual environments inside the Docker container
+# RUN poetry config virtualenvs.create false
 RUN poetry config virtualenvs.create false
 
-# Install dependencies including development ones
-RUN poetry install
+# Copy the current directory contents into the container
+COPY . /workspace/
 
+# RUN poetry install
+RUN poetry install --no-interaction --no-root
+
+ENV PYTHONPATH="/workspace:${PYTHONPATH}"
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 

@@ -5,11 +5,19 @@ from app.core.db_eng import tests_engine as engine
 from app.core.config import logger_config
 from app.init_data import init_db_seed
 
+from app.models.question_models import QuestionBank
+from app.models.answer_models import MCQOption
+from app.models.topic_models import Topic
+from app.models.content_models import Content
+from app.models.quiz_models import Quiz, QuizQuestion
+from app.models.link_models import QuizTopic
+from app.models.quiz_setting import QuizSetting
+
 logger = logger_config(__name__)
 
 def create_tables(*, db_engine: Engine) -> None:
     # Create ALl TABLES
-    SQLModel.metadata.drop_all(db_engine)
+    # SQLModel.metadata.drop_all(db_engine)
     logger.info("Creating all tables")
     SQLModel.metadata.create_all(db_engine)
 

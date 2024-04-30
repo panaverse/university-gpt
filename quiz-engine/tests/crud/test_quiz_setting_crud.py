@@ -8,13 +8,20 @@ from app.models.quiz_models import QuizCreate
 from app.crud.quiz_crud import quiz_engine
 from tests.utils.test_items import temp_quiz_data 
 import random
+from app import settings
+from fastapi.testclient import TestClient
+
+@pytest.fixture(autouse=True)
+def existing_topic_id(client: TestClient):
+    response = client.get(f"{settings.API_V1_STR}/topic")
+    return response.json()["results"][0]["id"]
 
 @pytest.fixture
-def quiz_id(db: Session):  # Assuming topic_ids fixture is defined
+def quiz_id(db: Session, existing_topic_id):  # Assuming topic_ids fixture is defined
     quiz_data = QuizCreate(
         quiz_title="Quiz" + str(random.randint(1000, 9999)),
         course_id=temp_quiz_data['course_id'],  # Use real or mocked course ID
-        add_topic_ids=[1],
+        add_topic_ids=[existing_topic_id],
        difficulty_level=temp_quiz_data['difficulty_level']
     )
     created_quiz = quiz_engine.create_quiz(quiz=quiz_data, db=db)

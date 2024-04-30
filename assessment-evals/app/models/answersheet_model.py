@@ -51,6 +51,5 @@ class AnswerSheetRead(AnswerSheetBase):
 
 
 class AttemptQuizRequest(SQLModel):
-    student_id: int
     quiz_id: int
     quiz_key: str

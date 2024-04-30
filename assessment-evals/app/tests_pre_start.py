@@ -9,7 +9,7 @@ logger = logger_config(__name__)
 
 def create_tables(*, db_engine: Engine) -> None:
     # Create ALl TABLES
-    SQLModel.metadata.drop_all(db_engine)
+    # SQLModel.metadata.drop_all(db_engine)
     logger.info("Creating all tables")
     SQLModel.metadata.create_all(db_engine)
 

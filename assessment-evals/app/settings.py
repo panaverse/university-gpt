@@ -26,3 +26,4 @@ API_V1_STR="/api/v1"
 
 EDUCATIONAL_PROGRAM_URL = config("EDUCATIONAL_PROGRAM_URL", cast=str)
 QUIZ_ENGINE_API_URL = config("QUIZ_ENGINE_API_URL", cast=str)
+AUTH_SERVER_URL = config("AUTH_SERVER_URL", cast=str)

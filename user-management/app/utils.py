@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
+from fastapi import HTTPException, status, Security
 
 import emails  # type: ignore
 from jinja2 import Template
@@ -46,6 +47,7 @@ def send_email(
         smtp_options["user"] = settings.SMTP_USER
     if settings.SMTP_PASSWORD:
         smtp_options["password"] = settings.SMTP_PASSWORD
+    # print("smtp_options", smtp_options)
     response = message.send(to=email_to, smtp=smtp_options)
     logging.info(f"send email result: {response}")
 
@@ -114,3 +116,17 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except JWTError:
         return None
+
+def validate_refresh_token(token: str):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except JWTError:
+        raise credentials_exception
+
+# Create a custom credentials exception
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    headers={"WWW-Authenticate": 'Bearer'},
+    detail={"error": "invalid_token", "error_description": "The access token expired"}
+)

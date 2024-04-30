@@ -1,81 +1,87 @@
-version: "3.9"
-
 services:
   educational-program:
-    image: educational-program
+    image: educational-program-img
     restart: always
     build:
       context: ./educational-program
       dockerfile: Dockerfile.dev
+    container_name: EducationalProgramCont
     env_file: "./educational-program/.env"
-    container_name: educational-program
     command: sleep infinity
     ports:
       - "8000:8000"
     volumes:
-      - ./educational-program:/educational-program # Mount the host code directory into the container
+      - ./educational-program:/workspace:cached
+      # - .:/workspace:cached
     networks:
       - university-gpt-net
     depends_on:
       - postgres_edu_dev_db
-      - postgres_test_db
+    environment:
+      - PYTHONPATH=/workspace
 
   user-management:
-    image: user-management
+    image: user-management-img
     restart: always
     build:
       context: ./user-management
       dockerfile: Dockerfile.dev
+    container_name: UserManagementCont
     env_file: "./user-management/.env"
-    container_name: user-management
     command: sleep infinity
     ports:
       - "8001:8001"
     volumes:
-      - ./user-management:/user-management # Mount the host code directory into the container
+      - ./user-management:/workspace:cached
+      # - .:/workspace:cached
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
-      - postgres_test_db
+      - postgres_auth_dev_db
+    environment:
+      - PYTHONPATH=/workspace
 
   quiz-engine:
-    image: quiz-engine
+    image: quiz-engine-img
     restart: always
     build:
       context: ./quiz-engine
       dockerfile: Dockerfile.dev
+    container_name: QuizEngineCont
     env_file: "./quiz-engine/.env"
-    container_name: quiz-engine
     command: sleep infinity
     ports:
       - "8002:8002"
     volumes:
-      - ./quiz-engine:/quiz-engine # Mount the host code directory into the container
+      - ./quiz-engine:/workspace:cached
+      # - .:/workspace:cached
     networks:
       - university-gpt-net
     depends_on:
       - postgres_qse_dev_db
-      - postgres_test_db
+    environment:
+      - PYTHONPATH=/workspace
 
   assessment-evals:
-    image: assessment-evals
+    image: assessment-evals-img
     restart: always
     build:
       context: ./assessment-evals
       dockerfile: Dockerfile.dev
+    container_name: AssessmentEvalsCont
     env_file: "./assessment-evals/.env"
-    container_name: assessment-evals
     command: sleep infinity
     ports:
       - "8003:8003"
     volumes:
-      - ./assessment-evals:/assessment-evals # Mount the host code directory into the container
+      - ./assessment-evals:/workspace:cached
+      # - .:/workspace:cached
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
-      - postgres_test_db
+      - postgres_answer_dev_db
+    environment:
+      - PYTHONPATH=/workspace
 
   # A Single Test Database for All Microservices (Raw Migrations using SQLModel)
   postgres_test_db:
@@ -142,20 +148,21 @@ services:
     networks:
       - university-gpt-net
 
-  postgres_dev_db:
+  postgres_auth_dev_db:
     image: postgres:latest # Use the official PostgreSQL image
     restart: always
-    container_name: PostgresDevCont
+    container_name: PostgresAuthDevCont
     environment:
       - POSTGRES_USER=mjunaidca
-      - POSTGRES_PASSWORD=temp_dev_pass
-      - POSTGRES_DB=postgres_dev_db
+      - POSTGRES_PASSWORD=temp_auth_dev_pass
+      - POSTGRES_DB=postgres_auth_dev_db
     ports:
-      - "5439:5432"
+      - "5437:5432"
     volumes:
-      - postgres_dev_db:/var/lib/postgresql/data
+      - postgres_auth_dev_db:/var/lib/postgresql/data
     networks:
       - university-gpt-net
+
 
 volumes:
   postgres_test_db:
@@ -166,8 +173,9 @@ volumes:
     driver: local
   postgres_answer_dev_db:
     driver: local
-  postgres_dev_db:
+  postgres_auth_dev_db:
     driver: local
+
 
 networks:
   university-gpt-net: # Define the custom network
