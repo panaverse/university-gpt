@@ -17,6 +17,7 @@ alembic = "^1.13.1"
 httpx = "^0.27.0"
 sqlmodel = "^0.0.16"
 requests = "^2.31.0"
+python-multipart = "^0.0.9"
 
 
 [build-system]

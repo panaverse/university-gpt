@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, status
 from datetime import datetime
 
-from app.api.deps import DBSessionDep
+from app.api.deps import DBSessionDep, GetCurrentStudentDep, LoginForAccessTokenDep
 from app.core.config import logger_config
 
 from app.crud.answersheet_crud import crud_answer_sheet, crud_answer_slot
@@ -29,7 +29,7 @@ router = APIRouter()
 
 @router.post("/attempt", response_model=RuntimeQuizGenerated)
 def generate_runtime_quiz_for_student(
-    attempt_ids: AttemptQuizRequest, db: DBSessionDep
+    attempt_ids: AttemptQuizRequest, db: DBSessionDep, student_data: GetCurrentStudentDep
 ):
     """
     Take Quiz ID and Generate Quiz For Student
@@ -48,10 +48,11 @@ def generate_runtime_quiz_for_student(
     logger.info(f"Generating Quiz for Student: {__name__}")
 
     try:
+        student_id = student_data["id"]
+
         # 0. Ensure student have not attempted the quiz before
         quiz_id: int = attempt_ids.quiz_id
         quiz_key: str = attempt_ids.quiz_key
-        student_id: int = attempt_ids.student_id
 
         # Check if quiz key is valid
         quiz_key_validated = validate_quiz_key(
@@ -59,7 +60,7 @@ def generate_runtime_quiz_for_student(
         )
 
         attempt_sheet = crud_answer_sheet.student_answer_sheet_exists(
-            db, user_id=student_id, quiz_id=quiz_id
+            db, user_id=student_id, quiz_id=quiz_id, quiz_key=quiz_key
         )
         if attempt_sheet is None:
             runtime_quiz = get_runtime_quiz_questions(
@@ -113,6 +114,8 @@ def generate_runtime_quiz_for_student(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Quiz Attempt"
             )
+            
+            
     except HTTPException as http_err:
         logger.error(f"generate_quiz Error: {http_err}")
         raise http_err
@@ -122,19 +125,20 @@ def generate_runtime_quiz_for_student(
     except Exception as err:
         logger.error(f"generate_quiz Error: {err}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Unexpected Error Occured When Generating Quiz"
         )
 
 
 # ~ Get Quiz Attempt By ID
 @router.get("/{quiz_attempt_id}", response_model=AnswerSheetRead)
 def get_quiz_attempt_by_id(
-    quiz_attempt_id: int, student_id: int, db: DBSessionDep
+    quiz_attempt_id: int, db: DBSessionDep, student_data: GetCurrentStudentDep
 ):
     """
     Gets a Quiz Answer Sheet by its id
     """
     try:
+        student_id = student_data["id"]
         answer_sheet_obj = crud_answer_sheet.get_answer_sheet_by_id(
             db_session=db, answer_sheet_id=quiz_attempt_id, student_id=student_id
         )
@@ -154,13 +158,13 @@ def get_quiz_attempt_by_id(
 
 
 @router.patch("/{answer_sheet_id}/finish")
-def update_quiz_attempt(answer_sheet_id: int, db_session: DBSessionDep):
+def update_quiz_attempt(answer_sheet_id: int, db_session: DBSessionDep, student_data: GetCurrentStudentDep):
     """
     Update Quiz Attempt
     """
     try:
         quiz_attempt_response = crud_answer_sheet.finish_answer_sheet_attempt(
-            db_session=db_session, answer_sheet_id=answer_sheet_id
+            db_session=db_session, answer_sheet_id=answer_sheet_id, student_id=student_data["id"]
         )
         return quiz_attempt_response
 
@@ -177,15 +181,16 @@ def update_quiz_attempt(answer_sheet_id: int, db_session: DBSessionDep):
 
 @router.post("/answer_slot/save", response_model=AnswerSlotRead)
 def save_quiz_answer_slot(
-    student_id: int,
     background_tasks: BackgroundTasks,
     quiz_answer_slot: AnswerSlotCreate,
     db_session: DBSessionDep,
+    student_data: GetCurrentStudentDep
 ):
     """
     Saves a student attempted Quiz Answer Slot
     """
     try:
+        student_id=student_data["id"]
         # 1. ValidateIf Quiz is Active & Quiz Attempt ID is Valid
         quiz_attempt = crud_answer_sheet.is_answer_sheet_active(
             db_session=db_session,

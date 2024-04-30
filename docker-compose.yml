@@ -5,6 +5,7 @@ services:
     build:
       context: ./educational-program
       dockerfile: Dockerfile.dev
+    container_name: EducationalProgramCont
     env_file: "./educational-program/.env"
     command: sleep infinity
     ports:
@@ -25,6 +26,7 @@ services:
     build:
       context: ./user-management
       dockerfile: Dockerfile.dev
+    container_name: UserManagementCont
     env_file: "./user-management/.env"
     command: sleep infinity
     ports:
@@ -35,7 +37,7 @@ services:
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
+      - postgres_auth_dev_db
     environment:
       - PYTHONPATH=/workspace
 
@@ -45,6 +47,7 @@ services:
     build:
       context: ./quiz-engine
       dockerfile: Dockerfile.dev
+    container_name: QuizEngineCont
     env_file: "./quiz-engine/.env"
     command: sleep infinity
     ports:
@@ -65,6 +68,7 @@ services:
     build:
       context: ./assessment-evals
       dockerfile: Dockerfile.dev
+    container_name: AssessmentEvalsCont
     env_file: "./assessment-evals/.env"
     command: sleep infinity
     ports:
@@ -75,7 +79,7 @@ services:
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
+      - postgres_answer_dev_db
     environment:
       - PYTHONPATH=/workspace
 
@@ -159,20 +163,6 @@ services:
     networks:
       - university-gpt-net
 
-  postgres_dev_db:
-    image: postgres:latest # Use the official PostgreSQL image
-    restart: always
-    container_name: PostgresDevCont
-    environment:
-      - POSTGRES_USER=mjunaidca
-      - POSTGRES_PASSWORD=temp_dev_pass
-      - POSTGRES_DB=postgres_dev_db
-    ports:
-      - "5439:5432"
-    volumes:
-      - postgres_dev_db:/var/lib/postgresql/data
-    networks:
-      - university-gpt-net
 
 volumes:
   postgres_test_db:
@@ -185,8 +175,7 @@ volumes:
     driver: local
   postgres_auth_dev_db:
     driver: local
-  postgres_dev_db:
-    driver: local
+
 
 networks:
   university-gpt-net: # Define the custom network

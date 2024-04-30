@@ -46,7 +46,7 @@ services:
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
+      - postgres_auth_dev_db
     environment:
       - PYTHONPATH=/workspace
 
@@ -100,7 +100,7 @@ services:
     networks:
       - university-gpt-net
     depends_on:
-      - postgres_dev_db
+      - postgres_answer_dev_db
     environment:
       - PYTHONPATH=/workspace
 
@@ -185,20 +185,6 @@ services:
     networks:
       - university-gpt-net
 
-  postgres_dev_db:
-    image: postgres:latest # Use the official PostgreSQL image
-    restart: always
-    container_name: PostgresDevCont
-    environment:
-      - POSTGRES_USER=mjunaidca
-      - POSTGRES_PASSWORD=temp_dev_pass
-      - POSTGRES_DB=postgres_dev_db
-    ports:
-      - "5439:5432"
-    volumes:
-      - postgres_dev_db:/var/lib/postgresql/data
-    networks:
-      - university-gpt-net
 
 volumes:
   postgres_test_db:
@@ -211,8 +197,5 @@ volumes:
     driver: local
   postgres_auth_dev_db:
     driver: local
-  postgres_dev_db:
-    driver: local
-
 networks:
   university-gpt-net: # Define the custom network

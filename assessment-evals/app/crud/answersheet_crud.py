@@ -97,7 +97,7 @@ class CRUDQuizAnswerSheetEngine:
                 return False
 
     def finish_answer_sheet_attempt(
-        self, db_session: Session, answer_sheet_id: int
+        self, db_session: Session, answer_sheet_id: int, student_id: int
     ):
         """
         Lock the Answer Sheet
@@ -106,7 +106,7 @@ class CRUDQuizAnswerSheetEngine:
         answer_sheet_obj_exec = db_session.exec(
             select(AnswerSheet)
             .options(selectinload(AnswerSheet.quiz_answers))  # type:ignore
-            .where(AnswerSheet.id == answer_sheet_id)
+            .where(and_(AnswerSheet.id == answer_sheet_id, AnswerSheet.student_id == student_id))
         )  # type:ignore
         answer_sheet_obj = answer_sheet_obj_exec.one_or_none()
 
@@ -172,11 +172,11 @@ class CRUDQuizAnswerSheetEngine:
         return quiz_answer_sheet_obj
 
     def student_answer_sheet_exists(
-        self, db_session: Session, user_id: int, quiz_id: int
+        self, db_session: Session, user_id: int, quiz_id: int, quiz_key: str
     ):
         answer_sheet_query = db_session.exec(
             select(AnswerSheet).where(
-                and_(AnswerSheet.student_id == user_id, AnswerSheet.quiz_id == quiz_id)
+                and_(AnswerSheet.student_id == user_id, AnswerSheet.quiz_id == quiz_id, AnswerSheet.quiz_key == quiz_key)
             )
         )
         answer_sheet_obj = answer_sheet_query.one_or_none()
