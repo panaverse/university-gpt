@@ -3,7 +3,8 @@
     "dockerComposeFile": ["../../docker-compose.yml"],
     "service": "educational-program", // This Shall be same as the service name in docker-compose.yml
     "shutdownAction": "none",
-    "workspaceFolder": "/educational-program",  // Changed from "/workspace" to match the volume mount in docker-compose.yml
+    "workspaceFolder": "/workspace",
+    // "workspaceFolder": "/workspace/educational-program",
     "postCreateCommand": "poetry install && alembic upgrade head && python app/init_data.py  && python -c 'print(\"CONTAINER STARTED RUN FASTAPI SERVER NOW...\")'"  ,
     "forwardPorts": [
         "8000:8000"
