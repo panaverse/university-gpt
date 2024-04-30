@@ -46,7 +46,7 @@ def redirect_to_docs():
 
 @app.get(f"{settings.API_V1_STR}/container", tags=["Health"])
 def read_root():
-    return {"Container Running": "Assessment Evals", "Port": "8004"}
+    return {"Container Running": "Assessment Evals", "Port": "8003"}
 
 @app.post("/auth/login", tags=["Wrapper Auth"])
 def login_for_access_token(form_data: LoginForAccessTokenDep):

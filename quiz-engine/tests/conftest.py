@@ -3,9 +3,10 @@ from collections.abc import Generator
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete, SQLModel
+import requests
 
 from app.core.db_eng import tests_engine as engine
-from app.api.deps import get_session
+from app.api.deps import get_session, get_course_for_quiz, get_course
 from app.tests_pre_start import init_test_db
 from app.main import app
 from app.models.topic_models import Topic
@@ -15,7 +16,7 @@ from app.models.answer_models import MCQOption
 from app.models.quiz_models import Quiz, QuizQuestion
 from app.models.link_models import QuizTopic
 from app.models.quiz_setting import QuizSetting
-
+from tests.utils.test_items import mock_course
 
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session, None, None]:
@@ -50,8 +51,13 @@ def client() -> Generator[TestClient, None, None]:
             
         def get_session_override():  
                 yield session
+                
+        def get_course_for_quiz_override():
+            return mock_course
         
         app.dependency_overrides[get_session] = get_session_override 
+        app.dependency_overrides[get_course_for_quiz] = get_session_override 
+        app.dependency_overrides[get_course] = get_session_override 
         with TestClient(app) as c:
             print("Setting up Test Client")
             yield c
@@ -68,3 +74,4 @@ def client() -> Generator[TestClient, None, None]:
 #     return authentication_token_from_email(
 #         client=client, email=settings.EMAIL_TEST_USER, db=db
 #     )
+

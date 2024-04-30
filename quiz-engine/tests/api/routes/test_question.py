@@ -18,11 +18,15 @@ def topic_id(db: Session):
     return created_topic.id
 
 @pytest.fixture
-def new_question_id(client: TestClient):
+def new_question_id(client: TestClient, topic_id):
+    new_json_data = temp_question.copy()
+    new_json_data["topic_id"] = topic_id
+    
     response = client.post(
         f"{settings.API_V1_STR}/question",
-        json=temp_question
+        json=new_json_data
     )
+    print(response.json())
     return response.json()["id"]
 
 def test_create_new_question(client: TestClient, topic_id):

@@ -4,7 +4,7 @@
 # def test_container(client: TestClient):
 #     response = client.get(f"{settings.API_V1_STR}/container")
 #     assert response.status_code == 200
-#     assert response.json() == {"Container Running": "Assessment Evals", "Port": "8004"}
+#     assert response.json() == {"Container Running": "Assessment Evals", "Port": "8003"}
 
 
 # def test_health(client: TestClient):
