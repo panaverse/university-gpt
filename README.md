@@ -35,3 +35,7 @@ It also handles the lifecycle of quizzes, such as activation and deactivation.
 - Folder Name: user-management
 - Description: User Management service handles user registrations, authentication, and role management across the system. It ensures secure access to the platform and assigns appropriate roles to users.
 - Purpose: To manage user accounts and access permissions, providing a secure and personalized experience for students, instructors, and administrators.
+
+### 5- Quiz Attempt Platform 
+
+- Emphasizes the core functionality of the service where students actively participate in quiz attempts.
