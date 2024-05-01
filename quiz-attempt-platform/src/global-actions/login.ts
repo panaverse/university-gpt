@@ -36,7 +36,7 @@ export const login = async (
     const expiresInSeconds = user_data.expires_in; // Replace with the actual key in your response
     const expiresInMilliseconds = expiresInSeconds * 1000;
 
-    const updated_user_data: UserData = {
+    const updated_user_data: UserTokenData = {
       ...user_data,
       accessTokenExpires: Date.now() + expiresInMilliseconds,
     };
@@ -46,6 +46,28 @@ export const login = async (
     cookies().set({
       name: "user_data",
       value: JSON.stringify(updated_user_data), // Convert object to a string
+      httpOnly: true,
+    });
+
+    // Make Request to get UserData and Store in Cookies
+    const user_info = await fetch(`${process.env.BACKEND_AUTH_SERVER_URL}/api/v1/users/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${updated_user_data.access_token}`,
+      },
+    });
+
+    if (!user_info || user_info.status !== 200) {
+      throw new Error(user_info.statusText);
+    };
+
+    const user_info_data = await user_info.json();
+
+    console.log("User Info Request Response To Set in Cookies");
+
+    cookies().set({
+      name: "user_info",
+      value: JSON.stringify(user_info_data), // Convert object to a string
       httpOnly: true,
     });
 

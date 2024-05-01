@@ -28,6 +28,9 @@ def create_new_quiz_setting(quiz_setting: QuizSettingCreate, db: DBSessionDep):
         return quiz_setting_engine.create_quiz_setting(
             db=db, quiz_setting=quiz_setting
         )
+    except HTTPException as err:
+        logger.error(f"create_new_quiz_setting Error: {err}")
+        raise err
     except Exception as err:
         logger.error(f"create_new_quiz_setting Error: {err}")
         raise HTTPException(

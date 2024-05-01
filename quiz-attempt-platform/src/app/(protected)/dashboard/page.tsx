@@ -1,48 +1,29 @@
-
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth, auth_user_info } from "@/lib/auth";
+import { StartQuizComponent } from "./components/start-quiz";
+import { QuizOverViewComponent } from "./components/quiz-overview";
+import { QuizHistoryResultsComponent } from "./components/quiz-history-results";
+import { QuizHeaderComponent } from "./components/header";
 
-// type TempCode = {
-//   code: string;
-// };
-
-// Function to get temporary code
-// async function getTempCode(user_id: string) {
-//   const res = await fetch(
-//     `${process.env.BACKEND_AUTH_SERVER_URL}/api/oauth/temp-code?user_id=${user_id}`,
-//     {
-//       cache: "no-store",
-//     }
-//   );
-//   const data = await res.json();
-//   return data as TempCode;
-// }
-
-const page = async ({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) => {
+const page = async () => {
   const session = await auth();
   if (!session) {
     console.log("[session] No cookies. Redirecting...");
     redirect("/login");
   }
 
-  // const redirect_uri = searchParams.redirect_uri;
-  // const state = searchParams.state;
+  const user_info = await auth_user_info();
 
-  // if (redirect_uri && state && session) {
-  //   const user_id = session.user.id;
-  //   const tempCode = await getTempCode(user_id);
-  //   redirect(redirect_uri + `?code=${tempCode.code}` + `&state=${state}`);
-  // }
+  console.log("user_info", user_info);
 
   return (
-    <div className="flex w-full h-screen flex-col md:flex-row items-center justify-center">
-      Dashboard
-  </div>
-   
+    <>
+      <QuizHeaderComponent email={user_info?.email} />
+      <main className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        <StartQuizComponent />
+        <QuizOverViewComponent />
+        <QuizHistoryResultsComponent />
+      </main>    </>
   );
 };
 

@@ -36,3 +36,4 @@ export const publicRoutes = [
    * default redirect after sending password reset email
    */
   export const DEFAULT_RESET_REDIRECT = "/login";
+  export const DEFAULT_QUIZ_ATTEMPT_REDIRECT = "/dashboard/quiz-attempt";
