@@ -12,6 +12,8 @@ from app.core.config import settings
 async def lifespan(app: FastAPI):
     print("Lifespan start")
     init_db_main()
+    print("Database initialized")
+    print("settings.server_host", settings.server_host)
     yield
     print("Lifespan end")
 
