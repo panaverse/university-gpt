@@ -10,7 +10,7 @@ export default async function middleware(req: NextRequest) {
   console.log("MIDDLEWARE.TS: PATHNAME", req.nextUrl.pathname);
   const { nextUrl } = req;
 
-  console.log("[nextUrl] @middleware", nextUrl);
+  // console.log("[nextUrl] @middleware", nextUrl);
   console.log("[nextUrl.pathname] @middleware", nextUrl.pathname);
   
 
@@ -50,7 +50,7 @@ export default async function middleware(req: NextRequest) {
         formData.append("grant_type", "refresh_token");
 
         const token_response = await fetch(
-          `${process.env.BACKEND_AUTH_SERVER_URL}/api/token`,
+          `${process.env.BACKEND_AUTH_SERVER_URL}/api/v1/oauth/token`,
           {
             method: "POST",
             body: formData,

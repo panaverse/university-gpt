@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useQuizStore } from "@/stores/quiz-store"; // Import Zustand store
+import { useRouter } from 'next/navigation';
+import useResultStore from '@/stores/quiz-attempt-result';
 
 interface QuizTimerProps {
   timeStart: string;  // UTC start time in ISO 8601 format
@@ -7,6 +10,8 @@ interface QuizTimerProps {
 
 const QuizTimer: React.FC<QuizTimerProps> = ({ timeStart, timeLimit }) => {
   const [remainingTime, setRemainingTime] = useState<string>('');
+  const finishQuiz = useQuizStore(state => state.finishQuiz);
+  const router = useRouter();
 
   useEffect(() => {
     const startTime = new Date(timeStart + 'Z');  // Parse as UTC
@@ -25,7 +30,6 @@ const QuizTimer: React.FC<QuizTimerProps> = ({ timeStart, timeLimit }) => {
         const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
         const seconds = Math.floor((timeLeft / 1000) % 60);
 
-        // Construct the display string dynamically based on the time left
         let displayTime = '';
         if (days > 0) displayTime += `${days}d `;
         if (hours > 0 || displayTime) displayTime += `${hours}h `;
@@ -36,6 +40,7 @@ const QuizTimer: React.FC<QuizTimerProps> = ({ timeStart, timeLimit }) => {
       } else {
         setRemainingTime('Time is up!');
         clearInterval(timer);
+        handleQuizCompletion();
       }
     }
 
@@ -43,13 +48,24 @@ const QuizTimer: React.FC<QuizTimerProps> = ({ timeStart, timeLimit }) => {
     timer = setInterval(updateRemainingTime, 1000);
 
     return () => clearInterval(timer);
-  }, [timeStart, timeLimit]);
+  }, [timeStart, timeLimit, finishQuiz, router]);
+
+  async function handleQuizCompletion() {
+    try {
+      const data = await finishQuiz();
+      // @ts-ignore
+      useResultStore.getState().setResults(data); 
+      router.push("/dashboard/quiz-result");
+    } catch (error) {
+      console.error("Error on finishing the quiz:", error);
+    }
+  }
 
   function parseISODuration(duration: string): number {
     const regex = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
     const matches = duration.match(regex);
 
-    const days = matches?.[1] ? parseInt(matches[1], 10) * 86400000 : 0; // 24 * 60 * 60 * 1000
+    const days = matches?.[1] ? parseInt(matches[1], 10) * 86400000 : 0;
     const hours = matches?.[2] ? parseInt(matches[2], 10) * 3600000 : 0;
     const minutes = matches?.[3] ? parseInt(matches[3], 10) * 60000 : 0;
     const seconds = matches?.[4] ? parseInt(matches[4], 10) * 1000 : 0;

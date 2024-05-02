@@ -48,7 +48,7 @@ def login_access_token(
         refresh_token=security.create_access_token(
             user.email, expires_delta=refresh_token_expires
         ),
-        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        expires_in=(settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
     )
     print("\n\n token_data \n\n ", token_data)
     return token_data
@@ -108,7 +108,7 @@ def tokens_manager_oauth_codeflow(
         refresh_token=security.create_access_token(
             user.email, expires_delta=refresh_token_expires
         ),
-        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        expires_in=(settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
     )
 
     print("\n\n token_data \n\n ", token_data)
