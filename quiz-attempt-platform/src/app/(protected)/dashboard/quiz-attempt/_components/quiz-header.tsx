@@ -1,4 +1,4 @@
-import ElapsedTimeDisplay from '@/components/elasped-time';
+import QuizTimer from '@/components/elasped-time';
 
 interface QuizHeaderProps {
     title: string;
@@ -18,7 +18,8 @@ export const QuizAttemptHeader: React.FC<QuizHeaderProps> = ({ title, remainingQ
           <span>Remaining Questions: {remainingQuestions}</span>
           <span>•</span>
           {/* <span>Time Elapsed: {elapsedTime}</span> */}
-          <ElapsedTimeDisplay timeStart={timeStart} timeLimit={timeLimit} />
+          {/* <ElapsedTimeDisplay timeStart={timeStart} timeLimit={timeLimit} /> */}
+          <QuizTimer timeLimit={timeLimit} timeStart={timeStart} />
           <span>•</span>
           <span>Question Score: {questionScore}</span>
         </div>

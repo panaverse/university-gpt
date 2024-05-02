@@ -35,6 +35,9 @@ dependencies:
   date-fns:
     specifier: ^3.6.0
     version: 3.6.0
+  duration-fns:
+    specifier: ^3.0.2
+    version: 3.0.2
   immer:
     specifier: ^10.1.1
     version: 10.1.1
@@ -1475,6 +1478,10 @@ packages:
     dependencies:
       esutils: 2.0.3
     dev: true
+
+  /duration-fns@3.0.2:
+    resolution: {integrity: sha512-w82IXh/6aWNHFA0qlQazJYJrZTWieTItuuGTE7YX4cxPaZTWhmVImbsBBiMK1/OhGDgiinuCpJoSFILYLDSKDg==}
+    dev: false
 
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}

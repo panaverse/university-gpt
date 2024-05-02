@@ -21,7 +21,7 @@ def create_new_quiz_attempt(*, db: Session, student_id: int, quiz_id: int, quiz_
         quiz_key=quiz_key,
         time_limit=quiz_key_validated["time_limit"],
         total_points=runtime_quiz["total_points"],
-        time_start=datetime.now(),
+        time_start=datetime.utcnow(),  # Use UTC time
     )
     quiz_attempt_response = crud_answer_sheet.create_answer_sheet(db_session=db, answer_sheet_obj_in=answer_sheet)
     return build_response_object(quiz_attempt=quiz_attempt_response, 
