@@ -23,29 +23,54 @@ class CRUDQuizSetting:
         """
         Create a new QuizSetting in the database
         """
-        # Create a new QuizSetting
-        # Convert start_time and end_time to offset-naive datetime objects if they are not None
-        if quiz_setting.start_time and quiz_setting.start_time.tzinfo:
-            quiz_setting.start_time = quiz_setting.start_time.replace(tzinfo=None)
+        try:
+            # If quiz_key is already used for the quiz, raise an HTTPException
+            check_quiz_setting = db.exec(
+                select(QuizSetting).where(
+                    and_(
+                        QuizSetting.quiz_id == quiz_setting.quiz_id,
+                        QuizSetting.quiz_key == quiz_setting.quiz_key,
+                    )
+                )
+            ).all()
+            
+            if len(check_quiz_setting) >=1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Quiz Key already used for the quiz",
+                )
+            
+            
+            # Create a new QuizSetting
+            # Convert start_time and end_time to offset-naive datetime objects if they are not None
+            if quiz_setting.start_time and quiz_setting.start_time.tzinfo:
+                quiz_setting.start_time = quiz_setting.start_time.replace(tzinfo=None)
 
-        if quiz_setting.end_time and quiz_setting.end_time.tzinfo:
-            quiz_setting.end_time = quiz_setting.end_time.replace(tzinfo=None)
+            if quiz_setting.end_time and quiz_setting.end_time.tzinfo:
+                quiz_setting.end_time = quiz_setting.end_time.replace(tzinfo=None)
 
-        db_quiz_setting = QuizSetting.model_validate(quiz_setting)
+            db_quiz_setting = QuizSetting.model_validate(quiz_setting)
 
-        print("\n----db_quiz_setting----\n", db_quiz_setting)
+            print("\n----db_quiz_setting----\n", db_quiz_setting)
 
-        # Add the new QuizSetting to the database
-        db.add(db_quiz_setting)
+            # Add the new QuizSetting to the database
+            db.add(db_quiz_setting)
 
-        # Commit the session to the database to actually add the QuizSetting
-        db.commit()
+            # Commit the session to the database to actually add the QuizSetting
+            db.commit()
 
-        # Refresh the database to get the updated details of the QuizSetting
-        db.refresh(db_quiz_setting)
+            # Refresh the database to get the updated details of the QuizSetting
+            db.refresh(db_quiz_setting)
 
-        # Return the newly created QuizSetting
-        return db_quiz_setting
+            # Return the newly created QuizSetting
+            return db_quiz_setting
+        except HTTPException as http_err:
+            db.rollback()
+            raise http_err
+        except Exception as e:
+            db.rollback()
+            logger.error(f"create_quiz_setting Error: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
 
     # Get all QuizSettings for a quiz
     def get_all_quiz_settings_for_quiz(self, *, db: Session, quiz_id: int):

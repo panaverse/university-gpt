@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 1
     # 60 minutes * 24 hours * 8 days = 8 days
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    DOMAIN: str = "localhost"
+    DOMAIN: str = "localhost:3000"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     @computed_field  # type: ignore[misc]
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     def server_host(self) -> str:
         # Use HTTPS for anything other than local development
         if self.ENVIRONMENT == "local":
-            return f"http://{self.DOMAIN}"
+            return f"http://localhost:3000"
         return f"https://{self.DOMAIN}"
 
     BACKEND_CORS_ORIGINS: Annotated[
@@ -83,7 +83,7 @@ class Settings(BaseSettings):
             self.EMAILS_FROM_NAME = self.PROJECT_NAME
         return self
 
-    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 1
 
     @computed_field  # type: ignore[misc]
     @property

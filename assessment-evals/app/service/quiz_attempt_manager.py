@@ -23,7 +23,7 @@ def create_new_quiz_attempt(*, db: Session, student_id: int, quiz_id: int, quiz_
         total_points=runtime_quiz["total_points"],
         time_start=datetime.now(),
     )
-    quiz_attempt_response = crud_answer_sheet.create_answer_sheet(db, answer_sheet)
+    quiz_attempt_response = crud_answer_sheet.create_answer_sheet(db_session=db, answer_sheet_obj_in=answer_sheet)
     return build_response_object(quiz_attempt=quiz_attempt_response, 
                                  runtime_quiz=runtime_quiz, 
                                  instructions=quiz_key_validated["instructions"])
@@ -31,6 +31,7 @@ def create_new_quiz_attempt(*, db: Session, student_id: int, quiz_id: int, quiz_
 
 def handle_in_progress_quiz_attempt(*, db: Session, attempt_sheet, student_id: int, quiz_key_validated) -> RuntimeQuizGenerated:
     if attempt_sheet.status == QuizAttemptStatus.completed:
+        print("Quiz Attempt Already Completed")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You have already attempted this quiz.")
     elif attempt_sheet.status == QuizAttemptStatus.in_progress:
         # Additional check to ensure the quiz attempt is still active
