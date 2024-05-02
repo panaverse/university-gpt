@@ -35,12 +35,18 @@ dependencies:
   date-fns:
     specifier: ^3.6.0
     version: 3.6.0
+  immer:
+    specifier: ^10.1.1
+    version: 10.1.1
   lucide-react:
     specifier: ^0.376.0
     version: 0.376.0(react@18.3.1)
   next:
     specifier: 14.2.3
     version: 14.2.3(react-dom@18.3.1)(react@18.3.1)
+  next-themes:
+    specifier: ^0.3.0
+    version: 0.3.0(react-dom@18.3.1)(react@18.3.1)
   react:
     specifier: ^18
     version: 18.3.1
@@ -50,6 +56,9 @@ dependencies:
   react-hook-form:
     specifier: ^7.51.3
     version: 7.51.3(react@18.3.1)
+  sonner:
+    specifier: ^1.4.41
+    version: 1.4.41(react-dom@18.3.1)(react@18.3.1)
   tailwind-merge:
     specifier: ^2.3.0
     version: 2.3.0
@@ -61,7 +70,7 @@ dependencies:
     version: 3.23.5
   zustand:
     specifier: ^4.5.2
-    version: 4.5.2(@types/react@18.3.1)(react@18.3.1)
+    version: 4.5.2(@types/react@18.3.1)(immer@10.1.1)(react@18.3.1)
 
 devDependencies:
   '@types/node':
@@ -2143,6 +2152,10 @@ packages:
     engines: {node: '>= 4'}
     dev: true
 
+  /immer@10.1.1:
+    resolution: {integrity: sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==}
+    dev: false
+
   /import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
@@ -2555,6 +2568,16 @@ packages:
   /natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
     dev: true
+
+  /next-themes@0.3.0(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-/QHIrsYpd6Kfk7xakK4svpDI5mmXP0gfvCoJdGpZQ2TOrQZmsW0QxjaiLn8wbIKjtm4BTSqLoix4lxYYOnLJ/w==}
+    peerDependencies:
+      react: ^16.8 || ^17 || ^18
+      react-dom: ^16.8 || ^17 || ^18
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    dev: false
 
   /next@14.2.3(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-dowFkFTR8v79NPJO4QsBUtxv0g9BrS/phluVpMAt2ku7H+cbcBJlopXjkWlwxrk/xGqMemr7JkGPGemPrLLX7A==}
@@ -3106,6 +3129,16 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /sonner@1.4.41(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-uG511ggnnsw6gcn/X+YKkWPo5ep9il9wYi3QJxHsYe7yTZ4+cOd1wuodOUmOpFuXL+/RE3R04LczdNCDygTDgQ==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    dev: false
+
   /source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
     engines: {node: '>=0.10.0'}
@@ -3556,7 +3589,7 @@ packages:
     resolution: {integrity: sha512-fkwiq0VIQTksNNA131rDOsVJcns0pfVUjHzLrNBiF/O/Xxb5lQyEXkhZWcJ7npWsYlvs+h0jFWXXy4X46Em1JA==}
     dev: false
 
-  /zustand@4.5.2(@types/react@18.3.1)(react@18.3.1):
+  /zustand@4.5.2(@types/react@18.3.1)(immer@10.1.1)(react@18.3.1):
     resolution: {integrity: sha512-2cN1tPkDVkwCy5ickKrI7vijSjPksFRfqS6237NzT0vqSsztTNnQdHw9mmN7uBdk3gceVXU0a+21jFzFzAc9+g==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
@@ -3572,6 +3605,7 @@ packages:
         optional: true
     dependencies:
       '@types/react': 18.3.1
+      immer: 10.1.1
       react: 18.3.1
       use-sync-external-store: 1.2.0(react@18.3.1)
     dev: false

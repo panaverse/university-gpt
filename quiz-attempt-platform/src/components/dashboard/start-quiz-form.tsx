@@ -32,7 +32,7 @@ export const StartQuizForm = () => {
   const router = useRouter();
   const { toast } = useToast();
     // Set the fetched quiz data in Zustand store
-    const { setQuizData, clearQuizData } = useQuizStore.getState();
+  const { setQuizData, clearQuizData } = useQuizStore.getState();
     
   const form = useForm<z.infer<typeof StartQuizSchema>>({
     resolver: zodResolver(StartQuizSchema),

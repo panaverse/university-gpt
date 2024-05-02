@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth, auth_user_info } from "@/lib/auth";
-import { StartQuizComponent } from "./components/start-quiz";
-import { QuizOverViewComponent } from "./components/quiz-overview";
-import { QuizHistoryResultsComponent } from "./components/quiz-history-results";
-import { QuizHeaderComponent } from "./components/header";
+import { StartQuizComponent } from "./_components/start-quiz";
+import { QuizOverViewComponent } from "./_components/quiz-overview";
+import { QuizHistoryResultsComponent } from "./_components/quiz-history-results";
+import { QuizHeaderComponent } from "./_components/header";
 
 const page = async () => {
   const session = await auth();
