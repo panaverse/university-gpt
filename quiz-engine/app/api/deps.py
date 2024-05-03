@@ -21,6 +21,12 @@ def get_course_for_quiz(quiz: QuizCreate):
     course_request = requests.get_course(quiz.course_id)
     return course_request
 
+def get_course_by_id(course_id: int):
+    course_request = requests.get_course(course_id)
+    return course_request
+
 CourseDep = Annotated[dict, Depends(get_course)]
 
 CourseQuizDep = Annotated[dict, Depends(get_course_for_quiz)]
+
+CourseByIdDep = Annotated[dict, Depends(get_course_by_id)]

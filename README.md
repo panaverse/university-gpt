@@ -6,6 +6,12 @@ University GPT is a conversational tool and a Generative AI app which personaliz
 
 The GUI will be built by using the OpenAI Assistant APIs and Conversational UI by using OpenAI GPTs. Both will be interacting with our University APIs. We will build both but first we will build the University Custom GPT.
 
+## Setup Instructions
+
+1. [Local Setup & Development Guide](/docs/2-development-guide.md)
+2 - [Demo Custom GPT Chat](https://chat.openai.com/share/1a330b4f-f872-422e-93d6-52258a43a122)
+
+
 ## Microservices Overview
 
 This repository contains the source code for the following microservices:

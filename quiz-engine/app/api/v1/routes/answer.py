@@ -9,6 +9,7 @@ from app.models.answer_models import (
     MCQOptionRead,
     MCQOptionUpdate,
 )
+from app.settings import GET_CUSTOM_GPT_SPEC
 
 
 router = APIRouter()
@@ -40,7 +41,7 @@ def call_get_mcq_options_by_question_id(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/mcq-option/all", response_model=list[MCQOptionRead])
+@router.get("/mcq-option/all", response_model=list[MCQOptionRead], include_in_schema=GET_CUSTOM_GPT_SPEC)
 def call_read_mcq_options(
     db: DBSessionDep,
     offset: int = Query(default=0, le=10),

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException, status
 
-from app.api.deps import DBSessionDep, CourseQuizDep
+from app.api.deps import DBSessionDep, CourseQuizDep, CourseByIdDep
 from app.core.config import logger_config
 from app.models.quiz_models import (
     QuizCreate,
@@ -49,7 +49,7 @@ def create_new_quiz(quiz: QuizCreate, db: DBSessionDep, course: CourseQuizDep):
 
 @router.get("/all/{course_id}", response_model=list[QuizReadWithTopics])
 def call_read_all_quizzes(
-    course_id: int,
+    course: CourseByIdDep,
     db: DBSessionDep,
     offset: int = Query(default=0, lte=10),
     limit: int = Query(default=10, lte=100),
@@ -71,6 +71,7 @@ def call_read_all_quizzes(
     logger.info(f"Reading all Quizzes: {__name__}")
 
     try:
+        course_id = course["id"]
         return quiz_engine.read_all_quizzes_for_course(
             db=db, course_id=course_id, offset=offset, limit=limit
         )
