@@ -5,7 +5,7 @@ import useResultStore from "@/stores/quiz-attempt-result";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function page() {
+export default function ResultPage() {
   const results = useResultStore((state) => state.results);
   const router = useRouter();
   // If Results are Null for 5 seconds, show error message
