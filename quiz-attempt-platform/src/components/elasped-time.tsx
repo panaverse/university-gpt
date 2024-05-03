@@ -75,7 +75,7 @@ const QuizTimer: React.FC<QuizTimerProps> = ({ timeStart, timeLimit }) => {
 
   return (
     <div>
-      <h1>Remaining Time: {remainingTime}</h1>
+      <p className="flex"> <b>Remaining Time:</b> {remainingTime}</p>
     </div>
   );
 };

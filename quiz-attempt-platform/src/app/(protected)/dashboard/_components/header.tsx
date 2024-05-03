@@ -3,45 +3,27 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PowerCircleIcon } from "lucide-react";
+import { AllRoles, navLinks } from "@/lib/nav-links";
 
 
-export const QuizHeaderComponent = ({email}:{email: string | undefined}) => {
+export const QuizHeaderComponent = ({email, userRole}:{email: string | undefined, userRole: AllRoles}) => {
   return (
-    <Suspense>
+    <Suspense fallback={<div>Loading...</div>}>
       <header className="flex items-center justify-between h-16 px-6 border-b">
         <div className="flex items-center gap-4">
           <Link
             className="flex items-center gap-2 text-lg font-semibold"
-            href="#"
+            href="/dashboard"
           >
             <BookIcon className="w-6 h-6" />
             <span>QuizPro</span>
           </Link>
-          <nav className="hidden md:flex gap-6 text-sm font-medium">
-            <Link
-              className="text-gray-900 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-300"
-              href="#"
-            >
-              Dashboard
-            </Link>
-            <Link
-              className="text-gray-900 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-300"
-              href="#"
-            >
-              Quizzes
-            </Link>
-            <Link
-              className="text-gray-900 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-300"
-              href="#"
-            >
-              Progress
-            </Link>
-            <Link
-              className="text-gray-900 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-300"
-              href="#"
-            >
-              Settings
-            </Link>
+          <nav className={`md:flex gap-6 text-sm font-medium`}>
+            {navLinks.filter(link => link.roles.includes(userRole)).map((link, index) => (
+              <Link key={index} href={link.href} className="text-gray-900 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-300">
+                {link.title}
+              </Link>
+            ))}
           </nav>
         </div>
         <div className="flex items-center gap-4">

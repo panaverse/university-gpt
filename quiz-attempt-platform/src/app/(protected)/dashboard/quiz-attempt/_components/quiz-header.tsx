@@ -15,13 +15,11 @@ export const QuizAttemptHeader: React.FC<QuizHeaderProps> = ({ title, remainingQ
       </h1>
       <div className="flex items-center justify-between mt-4 mb-6">
         <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
-          <span>Remaining Questions: {remainingQuestions}</span>
-          <span>•</span>
-          {/* <span>Time Elapsed: {elapsedTime}</span> */}
-          {/* <ElapsedTimeDisplay timeStart={timeStart} timeLimit={timeLimit} /> */}
+          <span className='flex'> <b>Questions Left: </b> {remainingQuestions}</span>
+          <span className='text-blue-500'>•</span>
           <QuizTimer timeLimit={timeLimit} timeStart={timeStart} />
-          <span>•</span>
-          <span>Question Score: {questionScore}</span>
+          <span className='text-blue-500'>•</span>
+          <span className='flex'><b className='hidden md:flex'> Question Score:</b> <b className='md:hidden flex'> Score:</b> {questionScore}</span>
         </div>
       </div>
     </div>

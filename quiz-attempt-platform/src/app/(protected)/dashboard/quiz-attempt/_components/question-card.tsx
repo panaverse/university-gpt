@@ -25,7 +25,7 @@ export const QuestionCard: React.FC<QuestionProps> = ({
       </h2>
       <div className="space-y-4">
         {options.map((option, index) => (
-          <div key={option.id} className="bg-gray-200 dark:bg-gray-700 ...">
+          <div key={option.id} className="bg-gray-200 p-1.5 dark:bg-gray-700 ...">
             <label className="flex items-center">
               <input
                 className="mr-2"

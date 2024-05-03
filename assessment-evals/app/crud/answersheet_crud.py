@@ -198,6 +198,16 @@ class CRUDQuizAnswerSheetEngine:
     
         return answer_sheet_obj_exec
         
+    # 
+    def all_quiz_attempts_for_student(self, db_session: Session, student_id: int):
+        """
+        Get All Quiz Attempts for a Student
+        """
+        quiz_attempts = db_session.exec(
+            select(AnswerSheet).where(AnswerSheet.student_id == student_id)
+        ).all()
+
+        return quiz_attempts
         
 
 

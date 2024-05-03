@@ -16,6 +16,7 @@ export const AttemptWindow = () => {
       submitAnswerAndUpdateQuestion: state.submitAnswerAndUpdateQuestion,
     }));
   const router = useRouter();
+  const finishQuiz = useQuizStore(state => state.finishQuiz);
 
   useEffect(() => {
     const unsubscribe = useQuizStore.subscribe((state) => {
@@ -77,6 +78,16 @@ export const AttemptWindow = () => {
       } else if (result.status === "error") {
         // Handle error, display message
         console.error(result.error);
+        // Check if error message is "Quiz Time has Ended or Invalid Quiz Attempt ID to finish the quiz
+        if (
+          result.error && result.error ===
+          "Quiz Time has Ended or Invalid Quiz Attempt ID to finish the quiz"
+        ) {
+          const data = await finishQuiz();
+          // @ts-ignore
+          useResultStore.getState().setResults(data); 
+          router.push("/dashboard/quiz-result");
+        }
       } else {
         console.log("Moving to the next question.");
       }

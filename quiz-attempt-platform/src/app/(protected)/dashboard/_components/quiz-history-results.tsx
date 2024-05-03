@@ -8,53 +8,55 @@ import {
   TableBody,
   Table,
 } from "@/components/ui/table";
+import { QuizAttemptType } from "@/global-actions/all-quizzes-attempt";
 
-export const QuizHistoryResultsComponent = () => {
+type AllQuizAttemptsType = QuizAttemptType[] | []
+
+interface QuizHistoryResultsComponentProps {
+  allQuizAttempts: AllQuizAttemptsType;
+}
+
+export const QuizHistoryResultsComponent: React.FC<QuizHistoryResultsComponentProps> = ({ allQuizAttempts }) => {
   return (
-    <Suspense>
-   <Card className="col-span-1 md:col-span-2 lg:col-span-3">
-          <CardHeader className="flex items-center justify-between pb-4">
-            <CardTitle>Recent Quiz Results</CardTitle>
-            <BarChartIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-          </CardHeader>
-          <CardContent>
+    <Suspense fallback={<div>Loading...</div>}>
+      <Card className="col-span-1 md:col-span-2 lg:col-span-3">
+        <CardHeader className="flex items-center justify-between pb-4">
+          <CardTitle>Recent Quiz Results</CardTitle>
+          <BarChartIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+        </CardHeader>
+        <CardContent>
+          {allQuizAttempts.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Quiz</TableHead>
-                  <TableHead>Score</TableHead>
+                  <TableHead>Score (Pts)</TableHead>
+                  <TableHead>Percentage</TableHead>
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell>Biology Quiz</TableCell>
-                  <TableCell>85%</TableCell>
-                  <TableCell>April 30, 2023</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Math Test</TableCell>
-                  <TableCell>92%</TableCell>
-                  <TableCell>April 25, 2023</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>English Essay</TableCell>
-                  <TableCell>88%</TableCell>
-                  <TableCell>April 20, 2023</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>History Exam</TableCell>
-                  <TableCell>90%</TableCell>
-                  <TableCell>April 15, 2023</TableCell>
-                </TableRow>
+                {allQuizAttempts.map(attempt => {
+                  const percentage = (attempt.attempt_score / attempt.total_points * 100).toFixed(1); // Calculate percentage and format to 1 decimal place
+                  return (
+                    <TableRow key={attempt.id}>
+                      <TableCell>{attempt.quiz_title}</TableCell>
+                      <TableCell>{`${attempt.attempt_score} / ${attempt.total_points}`}</TableCell>
+                      <TableCell>{`${percentage}%`}</TableCell>
+                      <TableCell>{new Date(attempt.time_finish).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
+          ) : (
+            <div className="text-lg">No Quiz Results Available.</div>
+          )}
+        </CardContent>
+      </Card>
     </Suspense>
   );
 };
-
 
 function BarChartIcon(props: any) {
   return (
