@@ -44,6 +44,14 @@ class CRUDQuizAnswerSlotEngine:
         """
         try:
             print("\n\n\n GRADING" "\n\n\n")
+            
+            if len(quiz_answer_slot.selected_options) == 0:
+                print("\n\n\n No Option Selected GRADE IS 0" "\n\n\n")
+                quiz_answer_slot.points_awarded = 0
+                db_session.add(quiz_answer_slot)
+                db_session.commit()
+                db_session.refresh(quiz_answer_slot)
+                return quiz_answer_slot
             # 1. Get Questions using question_id from question_engine
             question = get_question(
                 question_id=quiz_answer_slot.question_id
@@ -51,6 +59,7 @@ class CRUDQuizAnswerSlotEngine:
 
             # 2.1 for single_select_mcq match answer_id with question.mcq_options and update points_awarded
             if quiz_answer_slot.question_type == QuestionTypeEnum.single_select_mcq:
+                
                 # Get the correct answer
                 selected_option_id = quiz_answer_slot.selected_options[0].option_id
                 correct_option_id = next(

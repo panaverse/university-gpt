@@ -81,7 +81,6 @@ class CRUDQuizEngine:
 
                 print(
                     "\n----questions_result----\n",
-                    questions_result,
                     "\n\n\n",
                     all_questions,
                 )

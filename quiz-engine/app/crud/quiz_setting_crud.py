@@ -43,11 +43,11 @@ class CRUDQuizSetting:
             
             # Create a new QuizSetting
             # Convert start_time and end_time to offset-naive datetime objects if they are not None
-            if quiz_setting.start_time and quiz_setting.start_time.tzinfo:
-                quiz_setting.start_time = quiz_setting.start_time.replace(tzinfo=None)
+            # if quiz_setting.start_time and quiz_setting.start_time.tzinfo:
+            #     quiz_setting.start_time = quiz_setting.start_time.replace(tzinfo=None)
 
-            if quiz_setting.end_time and quiz_setting.end_time.tzinfo:
-                quiz_setting.end_time = quiz_setting.end_time.replace(tzinfo=None)
+            # if quiz_setting.end_time and quiz_setting.end_time.tzinfo:
+            #     quiz_setting.end_time = quiz_setting.end_time.replace(tzinfo=None)
 
             db_quiz_setting = QuizSetting.model_validate(quiz_setting)
 

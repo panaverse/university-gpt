@@ -29,12 +29,13 @@ export interface QuizData {
 interface QuizState {
   quizData: QuizData | null;
   currentQuestionIndex: number;
+  isLoading: boolean;  // Add loading state here
   setQuizData: (data: QuizData) => void;
-  // submitAnswerAndUpdateQuestion: () => Promise<void>;
   submitAnswerAndUpdateQuestion: () => Promise<{ status: string; data?: any; error?: string }>;
   finishQuiz: () => Promise<void>;
   moveToNextQuestion: () => void;
   clearQuizData: () => void;
+  setLoading: (loading: boolean) => void;  // Action to update loading state
 }
 
 export const useQuizStore = create<QuizState>()(
@@ -42,6 +43,7 @@ export const useQuizStore = create<QuizState>()(
     (set, get) => ({
       quizData: null,
       currentQuestionIndex: 0,
+      isLoading: false,  // Initial state
       setQuizData: (data) =>
         set(
           produce((draft) => {
@@ -65,19 +67,21 @@ export const useQuizStore = create<QuizState>()(
             question_type: currentQuestion.question_type,
             selected_options_ids: selectedOptionsIds,
           };
-
           try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/save-answer`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(requestBody),
             });
+            set({ isLoading: true });  // Set loading before processing
 
             if (!response.ok) {
               throw new Error("Failed to submit answer");
             }
 
-            toast("Answer submitted successfully");
+            toast("Answer submitted successfully", {
+              duration: 1000,
+            });
             // Move to the next question or finish if it was the last one
             if (currentQuestionIndex < quizData.quiz_questions.length - 1) {
               get().moveToNextQuestion();
@@ -88,9 +92,13 @@ export const useQuizStore = create<QuizState>()(
             }
           } catch (error: any) {
             console.error("Error submitting answer:", error);
-            toast("Failed to submit answer, please try again.");
+            toast("Failed to submit answer, please try again.", {
+              duration: 1000,
+            });
             return { status: "error", error: error.message }; // Ensure error cases return a consistent type
 
+          } finally {
+            set({ isLoading: false });  // Reset loading after processing
           }
         
       },
@@ -106,8 +114,9 @@ export const useQuizStore = create<QuizState>()(
         const { quizData } = get();
         if (quizData) {
           const requestBody = { quiz_answer_sheet_id: quizData.answer_sheet_id };
-
+          
           try {
+            set({ isLoading: true });
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/finish-quiz`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
@@ -119,7 +128,9 @@ export const useQuizStore = create<QuizState>()(
             }
 
             const data = await response.json();
-            toast("Quiz finished successfully!");
+            toast("Quiz finished successfully!", {
+              duration: 1000,
+            });
             // Handle redirection or data processing here if needed
             // Example: navigate('/results-page', { state: { resultData: data } });
             set(
@@ -131,7 +142,11 @@ export const useQuizStore = create<QuizState>()(
             return data;
           } catch (error) {
             console.error("[STORE]Error finishing quiz:", error);
-            toast("Error finishing quiz, please contact support.");
+            toast("Error finishing quiz, please contact support.", {
+              duration: 1000,
+            });
+          } finally {
+            set({ isLoading: false });
           }
         }
       },
@@ -142,7 +157,9 @@ export const useQuizStore = create<QuizState>()(
             draft.currentQuestionIndex = 0;
           })
         ),
-    }),
+        setLoading: (loading) => set({ isLoading: loading })  // Simple action to update loading state
+      }),
+
     { name: "quiz-attempt-store" }
   )
 );

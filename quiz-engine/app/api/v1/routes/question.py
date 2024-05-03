@@ -9,6 +9,7 @@ from app.models.question_models import (
     QuestionBankUpdate,
     QuestionBankRead,
 )
+from app.settings import GET_CUSTOM_GPT_SPEC
 
 
 router = APIRouter()
@@ -86,7 +87,7 @@ def call_read_questions_by_topic(topic_id: int, db: DBSessionDep):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/read/{question_type}", response_model=list[QuestionBankRead])
+@router.get("/read/{question_type}", response_model=list[QuestionBankRead], include_in_schema=GET_CUSTOM_GPT_SPEC)
 def call_read_questions_by_type(question_type: str, db: DBSessionDep):
     """
     Get all questions of a specific question type from the database.

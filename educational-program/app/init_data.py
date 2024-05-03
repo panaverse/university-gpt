@@ -43,17 +43,12 @@ program = Program(
 )
 
 # Course
-course_name = "Quarter 3: API Design, Development, and Deployment using FastAPI, Containers, and OpenAPI Specifications"
+course_name = "Quarter 1: TypeScript Mastery"
 course = Course(
     name=course_name,
-    description=""" An API-as-a-Product is a type of Software-as-a-Service that monetizes niche functionality, typically served over HTTP.
-    OpenAI APIs are themselves this kind of service. An application programming interface economy, or API economy, refers to the business structure
-    where APIs are the distribution channel for products and services. In this quarter we will learn to develop APIs not just as a backend for our
-    frontend but also as a product itself. In this model, the API is at the core of the business's value. We will be using Python-based FastAPI as
-    our core library and Pedantic, SQLAlchemy, and Postgresql databases for API development. Docker Containers will be our fundamental building block
-    for development, testing, and deployment. For local development, we will be using Docker Compose and DevPod which is Dev-Environments-As-Code,
-    for testing Pytest and Testcontainers, and for deployment Google Cloud Run, Azure Container Service, and Kubernetes. We will be using Terraform
-    as our Infrastructure as Code (IaC) tool. OpenAI Chat GPT 4, Google Gemini APIs, and Langchain will be used to build these API-as-a-Product. """,
+    description="""In the first quarter, we will learn the two most used programming languages in GenAI Application Development, 
+    TypeScript for User interfaces, and Python for Application Programming Interfaces (APIs). We will cover both functional and object-oriented paradigms. 
+    TypeScript programming will be taught onsite and Python programming online.""",
     program_id=program.id,
     program=program,
 )

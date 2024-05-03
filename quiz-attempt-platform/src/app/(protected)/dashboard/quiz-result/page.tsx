@@ -1,8 +1,11 @@
 "use client";
+import LoadingScreenComponent from "@/components/loading-screens";
+import { Button } from "@/components/ui/button";
 import useResultStore from "@/stores/quiz-attempt-result";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const ResultsPage = () => {
+export default function ResultPage() {
   const results = useResultStore((state) => state.results);
   const router = useRouter();
   // If Results are Null for 5 seconds, show error message
@@ -11,24 +14,24 @@ const ResultsPage = () => {
       if (typeof window !== "undefined") {
         router.push("/dashboard");
       }
-    }, 5000);
+    }, 3000);
 
-    return <div>Loading...</div>;
+    return <LoadingScreenComponent />;
   }
 
   return (
-    <QuizComponent
-      attempt_score={results.attempt_score}
-      total_points={results.total_points}
-      time_finish={results.time_finish}
-      time_start={results.time_start}
-    />
+    <>
+      <QuizResultComponent
+        attempt_score={results.attempt_score}
+        total_points={results.total_points}
+        time_finish={results.time_finish}
+        time_start={results.time_start}
+      />
+    </>
   );
-};
+}
 
-export default ResultsPage;
-
-function QuizComponent({
+function QuizResultComponent({
   time_start,
   time_finish,
   attempt_score,
@@ -44,9 +47,19 @@ function QuizComponent({
   const percentage = calculatePercentage(attempt_score, total_points);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex space-y-4 flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
+      <Button className="my-5" size={'sm'}>
+        <Link
+          className="flex items-center gap-2 text-lg font-semibold"
+          href="/dashboard"
+        >
+          <span>Go To Dashboard</span>
+        </Link>
+      </Button>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">Results</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 p-3 text-center">
+          Results
+        </h1>
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2 sm:col-span-1">
             <p className="text-gray-500 dark:text-gray-400 mb-1">

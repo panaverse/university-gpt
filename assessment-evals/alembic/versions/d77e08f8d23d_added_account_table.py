@@ -1,8 +1,8 @@
-"""Add DataLayer v1
+"""Added account table
 
-Revision ID: 4d181bc86132
+Revision ID: d77e08f8d23d
 Revises: 
-Create Date: 2024-04-28 02:15:55.082238
+Create Date: 2024-05-02 18:40:13.103431
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 import sqlmodel
 
 # revision identifiers, used by Alembic.
-revision: str = '4d181bc86132'
+revision: str = 'd77e08f8d23d'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,6 +29,7 @@ def upgrade() -> None:
     sa.Column('status', sa.Enum('to_attempt', 'in_progress', 'completed', name='quizattemptstatus'), nullable=True),
     sa.Column('total_points', sa.Integer(), nullable=False),
     sa.Column('attempt_score', sa.Float(), nullable=True),
+    sa.Column('quiz_title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('quiz_key', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),

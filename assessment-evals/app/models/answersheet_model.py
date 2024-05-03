@@ -18,6 +18,7 @@ class AnswerSheetBase(SQLModel):
 
     total_points: int
     attempt_score: float | None = Field(default=None)
+    quiz_title: str
 
     quiz_key: str | None = Field(
         max_length=160, nullable=True
@@ -37,6 +38,7 @@ class AnswerSheetCreate(SQLModel):
     time_start: datetime
     total_points: int
     quiz_key: str
+    quiz_title: str
 
 
 class AnswerSheetUpdate(SQLModel):

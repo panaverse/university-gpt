@@ -16,6 +16,30 @@ logger = logger_config(__name__)
 router = APIRouter()
 
 # ------------------------------
+# Get all Quiz Attempts for Student
+# ------------------------------
+
+@router.get("/all", response_model=list[AnswerSheetRead])
+def get_all_quiz_attempts_for_student(
+    db: DBSessionDep, student_data: GetCurrentStudentDep
+):
+    """
+    Get All Quiz Attempts for Student
+    """
+    try:
+        student_id = student_data["id"]
+        quiz_attempts = crud_answer_sheet.all_quiz_attempts_for_student(
+            db_session=db, student_id=student_id
+        )
+        return quiz_attempts
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Unexpected Error Occured When Fetching Quiz Attempts"
+        )
+
+
+# ------------------------------
 # Quiz Generation Endpoint
 # ------------------------------
 

@@ -30,29 +30,30 @@ logger = logger_config(__name__)
 logger.info("Seeding database")
 
 
-init_topic_name = "Learn Generative AI"
+init_topic_name = "Learn TypeScript in Baby Steps"
 init_course_id = 1
 
-init_sub_topic_name = "Poetry Project Creation"
+init_sub_topic_name = "Typescript Errors"
 
 # Topic & A SubTopic
 topic = Topic(
     title=init_topic_name,
-    description="""Learn Cloud Applied Generative AI Engineering (GenEng) using OpenAI, Gemini, Streamlit, Containers, Serverless,
-              Postgres, LangChain, Pinecone, and Next.js""",
+    description="""Learn TypeScript 5.0+ in Baby Steps. TypeScript (Which is a superset of JavaScript) is used for building user interfaces, 
+    and it is a relatively new programming language that is gaining popularity due to its strong typing system and its ability to be used with 
+    JavaScript, React, and Next.js.""",
     course_id=init_course_id
 )
 
 sub_topic = Topic(
     title= init_sub_topic_name,
-    description="Create Project and Manage Dependencies with Poetry",
+    description="Errors in Typescript are common and can be difficult to debug. This topic will help you understand the common errors in TypeScript and how to fix them.",
     parent_id=topic.id,
     parent_topic=topic,
     course_id=init_course_id,
 )
 
-sub_topic_content = """Poetry combines dependency management, environment management, and packaging into a single tool.
-                  This means you don’t have to juggle between multiple tools like pip, virtualenv, and setuptools."""
+sub_topic_content = """Syntax and Logical errors are common in TypeScript. The most common errors in TypeScript are these and here we will 
+                    learn to identify and fix them."""
 # Content
 content = Content(
     topic_id=sub_topic.id,
@@ -64,24 +65,24 @@ content = Content(
 
 # QUESTION 1
 mcq_option1 = MCQOption(
-    option_text="Poetry is a tool for dependency management and packaging in Python.",
-    is_correct=True,
-)
-mcq_option2 = MCQOption(
-    option_text="Poetry is a tool for dependency management and packaging in Typescript.",
+    option_text="NPM is a tool for dependency management and packaging in Python.",
     is_correct=False,
 )
+mcq_option2 = MCQOption(
+    option_text="NPM is a tool for dependency management and packaging in Typescript.",
+    is_correct=True,
+)
 mcq_option3 = MCQOption(
-    option_text="Poetry is a tool for dependency management and packaging in Java.",
+    option_text="NPM is a tool for dependency management and packaging in Java.",
     is_correct=False,
 )
 mcq_option4 = MCQOption(
-    option_text="Poetry is a tool for dependency management and packaging in C++.",
+    option_text="NPM is a tool for dependency management and packaging in C++.",
     is_correct=False,
 )
 
 question_bank1 = QuestionBank(
-    question_text="What is Poetry?",
+    question_text="What is NPM?",
     is_verified=True,
     points=1,
     difficulty="easy",
@@ -93,18 +94,18 @@ question_bank1 = QuestionBank(
 
 # QUESTION 2
 mcq_option2_1 = MCQOption(
-    option_text="Management and packaging in Python.", is_correct=True
+    option_text="Management and packaging in Javascript.", is_correct=True
 )
 mcq_option2_2 = MCQOption(
-    option_text="Virtual Environments Management.", is_correct=True
+    option_text="Virtual Environments Management.", is_correct=False
 )
 mcq_option2_3 = MCQOption(option_text="Deployment", is_correct=False)
 mcq_option2_4 = MCQOption(
-    option_text="Dependency management and packaging in C++.", is_correct=False
+    option_text="Dependency management and packaging in Typescript.", is_correct=True
 )
 
 question_bank2 = QuestionBank(
-    question_text="Features of Poetry Beneficial for Microservices",
+    question_text="Features of NPM Beneficial for Typescript Programming",
     is_verified=True,
     points=1,
     difficulty="easy",
@@ -115,15 +116,15 @@ question_bank2 = QuestionBank(
 )
 
 # QUESTION 3
-mcq_option3_1 = MCQOption(option_text="Use --name Flag", is_correct=True)
-mcq_option3_2 = MCQOption(option_text="Not Possible", is_correct=False)
+mcq_option3_1 = MCQOption(option_text=".js file has been generated but it is not valid.", is_correct=True)
+mcq_option3_2 = MCQOption(option_text=".js file is Not been generated.", is_correct=False)
 mcq_option3_3 = MCQOption(
-    option_text="Create Project & rename Package", is_correct=False
+    option_text=".js is not valid extension at all", is_correct=False
 )
-mcq_option3_4 = MCQOption(option_text="use --package Flag", is_correct=False)
+mcq_option3_4 = MCQOption(option_text="All of Above", is_correct=False)
 
 question_bank3 = QuestionBank(
-    question_text="How to create a different package name when creating project using Poetry?",
+    question_text="Syntax Error means that:",
     is_verified=True,
     points=1,
     difficulty="easy",
@@ -155,7 +156,7 @@ question_instance_3 = QuizQuestion(
 )
 
 quiz = Quiz(
-    quiz_title="Poetry Quiz",
+    quiz_title="Typescript Errors Quiz",
     difficulty_level="easy",
     random_flag=True,
     total_points=sum(
@@ -175,7 +176,7 @@ quiz_setting = QuizSetting(
     time_limit=time_limit_interval,
     start_time=start_time,
     end_time=end_time,
-    quiz_key="PoetryQuiz",
+    quiz_key="TSQ",
 )
 
 
