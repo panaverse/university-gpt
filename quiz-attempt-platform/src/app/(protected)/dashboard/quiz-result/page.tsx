@@ -47,17 +47,17 @@ function QuizResultComponent({
   const percentage = calculatePercentage(attempt_score, total_points);
 
   return (
-    <div className="flex space-y-4 flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
-      <Button className="my-5" size={'sm'}>
+    <div className="flex space-y-4 flex-col items-center justify-center h-screen  bg-gradient-to-r from-custom-purple to-custom-blue">
+      <Button className="my-5 text-sm" size={'lg'} variant={'outline'}>
         <Link
-          className="flex items-center gap-2 text-lg font-semibold"
+          className="flex items-center gap-2 text-sm font-semibold"
           href="/dashboard"
         >
-          <span>Go To Dashboard</span>
+          Go To Dashboard
         </Link>
       </Button>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 w-full max-w-md">
-        <h1 className="text-2xl md:text-3xl font-bold mb-4 p-3 text-center">
+        <h1 className="text-2xl font-bold mb-4 p-3 text-center">
           Results
         </h1>
         <div className="grid grid-cols-2 gap-4">
@@ -97,5 +97,6 @@ const calculateTimeTaken = (time_start: string, time_finish: string) => {
 };
 
 function calculatePercentage(attemptScore: any, totalScore: any) {
-  return (attemptScore / totalScore) * 100;
+  const percentage = (attemptScore / totalScore) * 100;
+  return (Math.round(percentage * 100) / 100).toFixed(2);
 }
