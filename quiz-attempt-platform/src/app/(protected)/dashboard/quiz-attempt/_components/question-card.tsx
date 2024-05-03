@@ -20,7 +20,7 @@ export const QuestionCard: React.FC<QuestionProps> = ({
 }) => {
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
         {question}
       </h2>
       <div className="space-y-4">

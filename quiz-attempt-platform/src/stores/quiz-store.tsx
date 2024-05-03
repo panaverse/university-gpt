@@ -79,7 +79,9 @@ export const useQuizStore = create<QuizState>()(
               throw new Error("Failed to submit answer");
             }
 
-            toast("Answer submitted successfully");
+            toast("Answer submitted successfully", {
+              duration: 1000,
+            });
             // Move to the next question or finish if it was the last one
             if (currentQuestionIndex < quizData.quiz_questions.length - 1) {
               get().moveToNextQuestion();
@@ -90,7 +92,9 @@ export const useQuizStore = create<QuizState>()(
             }
           } catch (error: any) {
             console.error("Error submitting answer:", error);
-            toast("Failed to submit answer, please try again.");
+            toast("Failed to submit answer, please try again.", {
+              duration: 1000,
+            });
             return { status: "error", error: error.message }; // Ensure error cases return a consistent type
 
           } finally {
@@ -124,7 +128,9 @@ export const useQuizStore = create<QuizState>()(
             }
 
             const data = await response.json();
-            toast("Quiz finished successfully!");
+            toast("Quiz finished successfully!", {
+              duration: 1000,
+            });
             // Handle redirection or data processing here if needed
             // Example: navigate('/results-page', { state: { resultData: data } });
             set(
@@ -136,7 +142,9 @@ export const useQuizStore = create<QuizState>()(
             return data;
           } catch (error) {
             console.error("[STORE]Error finishing quiz:", error);
-            toast("Error finishing quiz, please contact support.");
+            toast("Error finishing quiz, please contact support.", {
+              duration: 1000,
+            });
           } finally {
             set({ isLoading: false });
           }

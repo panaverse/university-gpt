@@ -7,6 +7,8 @@ import { useQuizStore } from "@/stores/quiz-store";
 import { produce } from "immer";
 import { useRouter } from "next/navigation";
 import useResultStore from "@/stores/quiz-attempt-result";
+import LoadingScreenComponent from "@/components/loading-screens";
+import { devLog } from "@/lib/utils";
 
 export const AttemptWindow = () => {
   const { quizData, currentQuestionIndex, submitAnswerAndUpdateQuestion } =
@@ -24,15 +26,15 @@ export const AttemptWindow = () => {
         const options =
           state.quizData.quiz_questions[state.currentQuestionIndex]
             .selectedOptions;
-        console.log(`Current selected options state: ${options}`);
+        devLog(`Current selected options state: ${options}`);
       }
     });
     return () => unsubscribe(); // Cleanup subscription when component unmounts or dependencies change
   }, [currentQuestionIndex]); // Re-subscribe when currentQuestionIndex changes
 
   if (!quizData?.quiz_questions?.length) {
-    console.log("No quiz data found", quizData);
-    return <div>Loading...</div>;
+    devLog("No quiz data found", quizData);
+    return <LoadingScreenComponent />
   }
 
   const question = quizData.quiz_questions[currentQuestionIndex];
@@ -74,7 +76,7 @@ export const AttemptWindow = () => {
         const data = result.data;
         useResultStore.getState().setResults(data);
         router.push("/dashboard/quiz-result");
-        console.log("Quiz Finished Redirecting.");
+        devLog("Quiz Finished Redirecting.");
       } else if (result.status === "error") {
         // Handle error, display message
         console.error(result.error);
@@ -89,7 +91,7 @@ export const AttemptWindow = () => {
           router.push("/dashboard/quiz-result");
         }
       } else {
-        console.log("Moving to the next question.");
+        devLog("Moving to the next question.");
       }
     } catch (error) {
       console.error(

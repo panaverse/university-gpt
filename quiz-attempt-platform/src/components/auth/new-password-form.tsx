@@ -57,6 +57,7 @@ export const NewPasswordForm = ({resetToken}:{resetToken: string}) => {
               title: "Reset Password Request Failed",
               description: data.error,
               variant: "destructive",
+              duration: 2000,
               action: (
                 <ToastAction altText="Dismiss">Dismiss</ToastAction>
                )
@@ -70,6 +71,7 @@ export const NewPasswordForm = ({resetToken}:{resetToken: string}) => {
             toast({
               title: "Password Updated Successfully",
               description: data.success,
+              duration: 2000,
               action: (
                <ToastAction altText="Close">Close</ToastAction>
               ),

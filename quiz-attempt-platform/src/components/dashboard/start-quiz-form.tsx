@@ -56,6 +56,7 @@ export const StartQuizForm = () => {
                 title: "Reset Password Request Failed",
                 description: data.error,
                 variant: "destructive",
+                duration: 2000,
                 action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
             });
             }
@@ -68,6 +69,7 @@ export const StartQuizForm = () => {
               toast({
                   title: "Quiz Attempt Started!",
                   description: data.success,
+                  duration: 2000,
                   action: <ToastAction altText="Close">Close</ToastAction>,
               });
               router.push(DEFAULT_QUIZ_ATTEMPT_REDIRECT);

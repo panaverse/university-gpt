@@ -64,12 +64,14 @@ export const RegisterForm = () => {
             title: "Signup Failed",
             description: data?.error,
             variant: "destructive",
+            duration: 2000,
           })
         }
         if (data?.success) {
           toast({
             title: "Signup Success",
             description: "Please Login To Continue",
+            duration: 2000,
             action: (
               <Link href={redirect_uri ? `/login${queryParams}` : "/login"}><ToastAction altText="Login to Continue!">Login Now</ToastAction></Link> 
             ),

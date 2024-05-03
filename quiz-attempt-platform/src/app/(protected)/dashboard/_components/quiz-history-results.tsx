@@ -8,15 +8,33 @@ import {
   TableBody,
   Table,
 } from "@/components/ui/table";
-import { QuizAttemptType } from "@/global-actions/all-quizzes-attempt";
+import { allAttemptedQuizzes } from "@/global-actions/all-quizzes-attempt";
 
-type AllQuizAttemptsType = QuizAttemptType[] | []
+export const QuizHistoryResultsComponent = async ({
+  token,
+}: {
+  token: string;
+}) => {
+  const allQuizAttempts = await allAttemptedQuizzes({
+    token: token,
+  });
 
-interface QuizHistoryResultsComponentProps {
-  allQuizAttempts: AllQuizAttemptsType;
-}
+  if (!allQuizAttempts) {
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Card className="col-span-1 md:col-span-2 lg:col-span-3">
+          <CardHeader className="flex items-center justify-between pb-4">
+            <CardTitle>Recent Quiz Results</CardTitle>
+            <BarChartIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg">Sleeping!!!</div>
+          </CardContent>
+        </Card>
+      </Suspense>
+    );
+  }
 
-export const QuizHistoryResultsComponent: React.FC<QuizHistoryResultsComponentProps> = ({ allQuizAttempts }) => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <Card className="col-span-1 md:col-span-2 lg:col-span-3">
@@ -36,14 +54,19 @@ export const QuizHistoryResultsComponent: React.FC<QuizHistoryResultsComponentPr
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allQuizAttempts.map(attempt => {
-                  const percentage = (attempt.attempt_score / attempt.total_points * 100).toFixed(1); // Calculate percentage and format to 1 decimal place
+                {allQuizAttempts.map((attempt) => {
+                  const percentage = (
+                    (attempt.attempt_score / attempt.total_points) *
+                    100
+                  ).toFixed(1); // Calculate percentage and format to 1 decimal place
                   return (
                     <TableRow key={attempt.id}>
                       <TableCell>{attempt.quiz_title}</TableCell>
                       <TableCell>{`${attempt.attempt_score} / ${attempt.total_points}`}</TableCell>
                       <TableCell>{`${percentage}%`}</TableCell>
-                      <TableCell>{new Date(attempt.time_finish).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        {new Date(attempt.time_finish).toLocaleDateString()}
+                      </TableCell>
                     </TableRow>
                   );
                 })}

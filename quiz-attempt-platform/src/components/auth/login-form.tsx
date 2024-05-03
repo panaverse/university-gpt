@@ -76,8 +76,9 @@ export const LoginForm = () => {
             toast({
               title: "Login Failed",
               description: data.message ? data.message : "Request Failed, Try Again",
+              duration: 2000,
               action: (
-                <ToastAction altText="Dismiss">Dismiss</ToastAction>
+                <ToastAction altText="Dismiss" >Dismiss</ToastAction>
                )
             })
             form.reset();
@@ -89,6 +90,7 @@ export const LoginForm = () => {
             toast({
               title: "Login Success",
               description: data.message ? data.message : "Welcome to Cax AI",
+              duration: 2000,
               action: (
                <ToastAction altText="Close">Close</ToastAction>
               ),

@@ -10,7 +10,7 @@ interface QuizHeaderProps {
   
 export const QuizAttemptHeader: React.FC<QuizHeaderProps> = ({ title, remainingQuestions, questionScore, timeLimit, timeStart }) => (
     <div className="mb-auto">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+      <h1 className="text-3xl py-4 font-bold text-gray-900 dark:text-gray-100">
         Quiz: {title}
       </h1>
       <div className="flex items-center justify-between mt-4 mb-6">
