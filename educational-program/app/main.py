@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app import settings
 from app.core.config import logger_config
 from app.api.v1 import api as v1_api
+from app.api.deps import LoginForAccessTokenDep
 
 logger = logger_config(__name__)
 
@@ -46,3 +47,8 @@ def redirect_to_docs():
 @app.get(f"{settings.API_V1_STR}/container", tags=["Health"])
 def read_root():
     return {"Container 1": "Educational Program!!!", "Port": "8000"}
+
+
+@app.post("/auth/login", tags=["Wrapper Auth"])
+def login_for_access_token(form_data: LoginForAccessTokenDep):
+    return form_data

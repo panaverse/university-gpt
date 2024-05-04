@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
 
 from app.core.db_eng import tests_engine as engine
-from app.api.deps import get_session
+from app.api.deps import get_session, get_current_admin_dep
 from app.tests_pre_start import init_test_db
 from app.main import app
 from app.models.course_models import Course
@@ -35,6 +35,10 @@ def client() -> Generator[TestClient, None, None]:
         def get_session_override():  
                 yield session
         
+        def get_admin_overide():
+            pass
+        
+        app.dependency_overrides[get_current_admin_dep] = get_admin_overide
         app.dependency_overrides[get_session] = get_session_override 
         with TestClient(app) as c:
             print("Setting up Test Client")

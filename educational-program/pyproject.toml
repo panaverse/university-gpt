@@ -16,6 +16,8 @@ psycopg2 = "^2.9.9"
 tenacity = "^8.2.3"
 pytest = "^8.1.2"
 httpx = "^0.27.0"
+requests = "^2.31.0"
+python-multipart = "^0.0.9"
 
 
 [build-system]

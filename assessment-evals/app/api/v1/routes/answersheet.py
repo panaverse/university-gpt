@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks, status
-
-from app.api.deps import DBSessionDep, GetCurrentStudentDep
+from fastapi import APIRouter, HTTPException, BackgroundTasks, status, Depends
+from typing import Annotated, Optional, List
+from app.api.deps import DBSessionDep, GetCurrentStudentDep, oauth2_scheme
 
 from app.core.config import logger_config
 from app.core.requests import validate_quiz_key
@@ -45,7 +45,9 @@ def get_all_quiz_attempts_for_student(
 
 @router.post("/attempt", response_model=RuntimeQuizGenerated)
 def generate_runtime_quiz_for_student(
-    attempt_ids: AttemptQuizRequest, db: DBSessionDep, student_data: GetCurrentStudentDep
+    attempt_ids: AttemptQuizRequest, 
+    db: DBSessionDep, 
+    student_data: GetCurrentStudentDep
 ):
     """
     Take Quiz ID and Generate Quiz For Student

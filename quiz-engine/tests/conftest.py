@@ -6,7 +6,7 @@ from sqlmodel import Session, delete, SQLModel
 import requests
 
 from app.core.db_eng import tests_engine as engine
-from app.api.deps import get_session, get_course_for_quiz, get_course
+from app.api.deps import get_session, get_course_for_quiz, get_course, get_current_admin_dep, get_course_by_id
 from app.tests_pre_start import init_test_db
 from app.main import app
 from app.models.topic_models import Topic
@@ -55,9 +55,15 @@ def client() -> Generator[TestClient, None, None]:
         def get_course_for_quiz_override():
             return mock_course
         
+        def get_admin_overide():
+            pass
+        
         app.dependency_overrides[get_session] = get_session_override 
-        app.dependency_overrides[get_course_for_quiz] = get_session_override 
-        app.dependency_overrides[get_course] = get_session_override 
+        app.dependency_overrides[get_course_for_quiz] = get_course_for_quiz_override 
+        app.dependency_overrides[get_course] = get_course_for_quiz_override 
+        app.dependency_overrides[get_course_by_id] = get_course_for_quiz_override
+        app.dependency_overrides[get_current_admin_dep] = get_admin_overide
+        
         with TestClient(app) as c:
             print("Setting up Test Client")
             yield c
