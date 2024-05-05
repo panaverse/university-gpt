@@ -3,13 +3,6 @@ from requests import get, post
 from app import settings
 from app.core.utils import load_error_json
 
-def get_course(course_id: int, token: str):
-    course_request = get(f"{settings.EDUCATIONAL_PROGRAM_URL}/api/v1/course/{course_id}",
-                            headers={"Authorization": f"Bearer {token}"}
-                            )
-    if course_request.status_code == 200:
-        return course_request.json()
-    raise HTTPException(status_code=course_request.status_code, detail=load_error_json(course_request))
 
 def get_current_user(token: str):
     url = f"{settings.AUTH_SERVER_URL}/api/v1/users/me"

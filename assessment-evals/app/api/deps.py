@@ -12,12 +12,9 @@ def get_session():
 
 DBSessionDep = Annotated[Session, Depends(get_session)]
 
-def get_course(course_id):
-    course_request = requests.get_course(course_id)
-    return course_request
-
-
-CourseDep = Annotated[dict, Depends(get_course)]
+#####################
+# Dependency Injection for Current Student
+#####################
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 def get_current_student_dep(token: Annotated[str | None, Depends(oauth2_scheme)]):
@@ -30,3 +27,14 @@ def get_login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, D
     return requests.login_for_access_token(form_data)
 
 LoginForAccessTokenDep = Annotated[dict, Depends(get_login_for_access_token)]
+
+#####################
+# Dependency Injection for Current Student
+#####################
+
+def get_course(course_id, token: Annotated[str | None, Depends(oauth2_scheme)]):
+    course_request = requests.get_course(course_id, token)
+    return course_request
+
+
+CourseDep = Annotated[dict, Depends(get_course)]

@@ -7,6 +7,8 @@ from app import settings
 from app.core.config import logger_config
 from app.api.v1 import api as v1_api
 from app.settings import GET_CUSTOM_GPT_SPEC
+from app.api.deps import LoginForAccessTokenDep
+
 logger = logger_config(__name__)
 
 @asynccontextmanager
@@ -48,3 +50,7 @@ def redirect_to_docs():
 @app.get(f"{settings.API_V1_STR}/container", tags=["Health"], include_in_schema=GET_CUSTOM_GPT_SPEC)
 def read_root():
     return {"Container": "Topic & Question Bank Running", "Port": "8002"}
+
+@app.post("/auth/login", tags=["Wrapper Auth"])
+def login_for_access_token(form_data: LoginForAccessTokenDep):
+    return form_data
