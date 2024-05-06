@@ -48,9 +48,9 @@ export const startQuizAction = async (values: z.infer<typeof StartQuizSchema>) =
     console.log('error', error);
     return { error: error.detail };
   }
+  console.log('get_quiz_attempt', get_quiz_attempt.status, get_quiz_attempt.statusText);
 
   const quizData = await get_quiz_attempt.json();
-  console.log("\n\n\nquizData \n\n\n", quizData);
 
   return { success: "Best of Luck for your Quiz!", data: quizData };
 };

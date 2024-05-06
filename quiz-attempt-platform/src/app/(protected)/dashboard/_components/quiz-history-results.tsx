@@ -8,16 +8,14 @@ import {
   TableBody,
   Table,
 } from "@/components/ui/table";
-import { allAttemptedQuizzes } from "@/global-actions/all-quizzes-attempt";
+import { AllQuizAttempted } from "@/global-actions/all-quizzes-attempt";
 
 export const QuizHistoryResultsComponent = async ({
-  token,
+  allQuizAttempts,
 }: {
-  token: string;
+  allQuizAttempts: AllQuizAttempted;
 }) => {
-  const allQuizAttempts = await allAttemptedQuizzes({
-    token: token,
-  });
+
 
   if (!allQuizAttempts) {
     return (

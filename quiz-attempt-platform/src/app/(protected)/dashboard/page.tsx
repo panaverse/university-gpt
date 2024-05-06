@@ -5,7 +5,7 @@ import { QuizOverViewComponent } from "./_components/quiz-overview";
 import { QuizHistoryResultsComponent } from "./_components/quiz-history-results";
 import { QuizHeaderComponent } from "./_components/header";
 import { AllRoles } from "@/lib/nav-links";
-import {toast} from "sonner"
+import { allAttemptedQuizzes } from "@/global-actions/all-quizzes-attempt";
 
 type TempCode = {
   code: string;
@@ -40,14 +40,16 @@ const page = async ({
   const redirect_uri = searchParams.redirect_uri;
   const state = searchParams.state;
 
-  if (redirect_uri && state && session) {
+  if (redirect_uri && state && session && user_info?.is_superuser === true) {
     // Check if the user is logged in and is_superuser
-    if (user_info?.role == "admin") {
       const user_id = user_info?.id as number;
       const tempCode = await getTempCode(user_id);
       redirect(redirect_uri + `?code=${tempCode.code}` + `&state=${state}`);
-    }
   }
+
+  const allQuizAttempts = await allAttemptedQuizzes({
+    token: session.access_token,
+  });
 
   return (
     <>
@@ -58,7 +60,7 @@ const page = async ({
       <main className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         <StartQuizComponent />
         <QuizOverViewComponent />
-        <QuizHistoryResultsComponent token={session.access_token} />
+        {allQuizAttempts && <QuizHistoryResultsComponent allQuizAttempts={allQuizAttempts} />}
       </main>
     </>
   );

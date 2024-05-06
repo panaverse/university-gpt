@@ -53,7 +53,7 @@ export const StartQuizForm = () => {
             if (data?.error) {
             form.reset();
             toast({
-                title: "Reset Password Request Failed",
+                title: "Quiz Attempt Failed",
                 description: data.error,
                 variant: "destructive",
                 duration: 2000,

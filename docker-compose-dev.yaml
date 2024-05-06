@@ -5,6 +5,7 @@ services:
     build:
       context: ./educational-program
       dockerfile: Dockerfile.dev
+    container_name: EducationalProgramCont
     env_file: "./educational-program/.env"
     ports:
       - "8000:8000"
@@ -15,6 +16,7 @@ services:
       - bash
       - -c
       - |
+        poetry install
         alembic upgrade head
         python app/init_data.py
         uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -32,6 +34,7 @@ services:
       context: ./user-management
       dockerfile: Dockerfile.dev
     env_file: "./user-management/.env"
+    container_name: UserManagementCont
     ports:
       - "8001:8001"
     volumes:
@@ -42,6 +45,7 @@ services:
       - -c
       - |
         ls
+        poetry install
         uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
     networks:
       - university-gpt-net
@@ -57,6 +61,7 @@ services:
       context: ./quiz-engine
       dockerfile: Dockerfile.dev
     env_file: "./quiz-engine/.env"
+    container_name: QuizEngineCont
     ports:
       - "8002:8002"
     volumes:
@@ -66,6 +71,7 @@ services:
       - bash
       - -c
       - |
+        poetry install
         alembic upgrade head
         ls
         python app/init_data.py
@@ -93,6 +99,7 @@ services:
       - bash
       - -c
       - |
+        poetry install
         alembic upgrade head
         ls
         python app/init_data.py
@@ -197,5 +204,7 @@ volumes:
     driver: local
   postgres_auth_dev_db:
     driver: local
+
+
 networks:
   university-gpt-net: # Define the custom network

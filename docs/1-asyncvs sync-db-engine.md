@@ -1,3 +1,5 @@
+## The Decision Process To Choose From SQLAlchemy Async Engine and Simple Engine when using SQLModel.
+
 Initially we created this quiz-api fully using SQLAlchemy ASYNC Engine. On top of engine we
 were using SQLModel for all the ORM & Data sanitization needs.
 
@@ -33,6 +35,10 @@ Results: - Async Query was taking about 1.4 second & Sync Query took 2.1 Seconds
 
 Using SQLModel with Async Engine:
 https://github.com/tiangolo/sqlmodel/issues/626
+
+## Takeaway
+
+-> We are using SQLModel `create_engine` that's a wrapper above SQLAlchemy Sync Engine.
 
 -> For Best Async Engine + Session Configuration refer to quiz-gpt branch.
 
