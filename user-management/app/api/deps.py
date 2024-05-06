@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Security
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import ValidationError
@@ -54,3 +54,43 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
             status_code=400, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+
+def verify_superuser(session: SessionDep, user_id: int) -> User:
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    
+    if not user.is_superuser:
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have enough privileges"
+        )
+    return user
+
+VerifySuperUserDep = Annotated[User, Depends(verify_superuser)]
+
+def temp_code_verify(session: SessionDep, token: str = Security(reusable_oauth2)) -> User:
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+    except (JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    user = session.get(User, token_data.sub)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    if not user.is_superuser:
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have enough privileges"
+        )
+    return user
+
+

@@ -39,7 +39,7 @@ export const QuizAttemptFooter: React.FC<QuizFooterProps> = ({
       <div className="flex space-x-4">
         {isLastQuestion && (
           <Button onClick={onFinish} variant="outline" disabled={isLoading}>
-            Finish
+            Save & Finish
           </Button>
         )}
         {!isLastQuestion && (

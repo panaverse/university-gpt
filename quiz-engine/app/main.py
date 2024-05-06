@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
 
 def get_servers():
     if GET_CUSTOM_GPT_SPEC is False:
-        return [{"url": "https://bug-accurate-heron.ngrok-free.app", "description": "Dep Test Server"}]
+        return [{"url": "https://uni-quiz-engine-z7mvcqfx7a-uc.a.run.app", "description": "Dep Test Server"}]
     return [{"url": "http://localhost:8002", "description": "Development Server"},]
 
 app = FastAPI(

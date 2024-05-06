@@ -39,7 +39,7 @@ def get_all_universities(
     db: DBSessionDep,
     page: int = Query(1, description="Page number", ge=1),
     per_page: int = Query(10, description="Items per page", ge=1, le=100)
-) -> list[UniversityRead]:
+):
     """
     Get All Universities
 
@@ -49,7 +49,7 @@ def get_all_universities(
         limit: int: Limit for pagination
 
     (Returns):
-        list[UniversityRead]: List of all Universities (Id and timestamps included)
+        PaginatedUniversityRead
     """
     try:
         # Calculate the offset to skip the appropriate number of items
@@ -62,7 +62,8 @@ def get_all_universities(
         previous_page = f"?page={page - 1}&per_page={per_page}" if page > 1 else None
 
         # Return data in paginated format
-        paginated_data = {"count": count_recs, "next": next_page, "previous": previous_page, "all_records": all_records}
+        # paginated_data = {"count": count_recs, "next": next_page, "previous": previous_page, "all_records": all_records}
+        paginated_data = PaginatedUniversityRead(count=count_recs, next=next_page, previous=previous_page, all_records=all_records)
 
         return paginated_data
     except HTTPException as http_exception:

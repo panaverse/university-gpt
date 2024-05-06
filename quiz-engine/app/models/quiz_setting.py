@@ -8,9 +8,9 @@ from app.models.quiz_models import Quiz
 example_quiz_setting_input = {
     "quiz_id": 1,
     "instructions": "Read the questions carefully.",
-    "time_limit": "P3D",
+    "time_limit": "PT50M",
     "start_time": "2023-02-26T14:56:46.277Z",
-    "end_time": "2025-02-26T14:56:46.277Z",
+    "end_time": "2025-02-29T14:56:46.277Z",
     "quiz_key": "BAT_Q1TS278",
 }
 
@@ -29,8 +29,8 @@ class QuizSettingBase(SQLModel):
     quiz_id: int = Field(foreign_key="quiz.id")
     instructions: str = Field(default=None)
     time_limit: timedelta = Field()
-    start_time: datetime | None = Field(default=None)
-    end_time: datetime | None = Field(default=None)
+    start_time: datetime
+    end_time: datetime 
     quiz_key: str = Field(max_length=160)
 
 
@@ -43,6 +43,9 @@ class QuizSetting(BaseIdModel, QuizSettingBase, table=True):
 
 class QuizSettingCreate(QuizSettingBase):
     pass
+
+    class Config:
+        json_schema_extra = {"example": example_quiz_setting_input}
 
 
 class QuizSettingRead(QuizSettingBase):

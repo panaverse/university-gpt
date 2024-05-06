@@ -59,7 +59,8 @@ def get_all_programs(
         previous_page = f"?page={page - 1}&per_page={per_page}" if page > 1 else None
 
         # Return data in paginated format
-        paginated_data = {"count": count_recs, "next": next_page, "previous": previous_page, "all_records": all_records}
+        # paginated_data = {"count": count_recs, "next": next_page, "previous": previous_page, "all_records": all_records}
+        paginated_data = PaginatedProgramRead(count=count_recs, next=next_page, previous=previous_page, all_records=all_records)
 
         return paginated_data
     
