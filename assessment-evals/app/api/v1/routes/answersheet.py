@@ -1,6 +1,5 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks, status, Depends
-from typing import Annotated, Optional, List
-from app.api.deps import DBSessionDep, GetCurrentStudentDep, oauth2_scheme
+from fastapi import APIRouter, HTTPException, BackgroundTasks, status
+from app.api.deps import DBSessionDep, GetCurrentStudentDep
 
 from app.core.config import logger_config
 from app.core.requests import validate_quiz_key
@@ -114,8 +113,6 @@ def get_quiz_attempt_by_id(
 
 
 # ~ Update Quiz Attempt - Finish Quiz
-
-
 @router.patch("/{answer_sheet_id}/finish")
 def update_quiz_attempt(answer_sheet_id: int, db_session: DBSessionDep, student_data: GetCurrentStudentDep):
     """
@@ -136,8 +133,6 @@ def update_quiz_attempt(answer_sheet_id: int, db_session: DBSessionDep, student_
 # # ---------------------
 # # QuizAnswerSlot
 # # ---------------------
-
-
 @router.post("/answer_slot/save", response_model=AnswerSlotRead)
 def save_quiz_answer_slot(
     background_tasks: BackgroundTasks,
@@ -161,10 +156,15 @@ def save_quiz_answer_slot(
         if not quiz_attempt:
             raise ValueError("Quiz Time has Ended or Invalid Quiz Attempt ID")
 
+        # 1.5: Validate if Quiz Question being attempted is valid Quiz Question and not attemted before
+        
+        
         # 2. Save Quiz Answer Slot
         quiz_answer_slot_response = crud_answer_slot.create_quiz_answer_slot(
             db_session, quiz_answer_slot
         )
+        
+        
 
         # 2.1 RUN A BACKGROUND TASK TO UPDATE THE POINTS AWARDED
         background_tasks.add_task(

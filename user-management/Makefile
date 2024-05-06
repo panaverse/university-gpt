@@ -6,4 +6,4 @@ dev:
 
 
 dep:
-	gcloud run deploy uni-user-management --source . --port 8001 --env-vars-file .env.gcp.yaml --allow-unauthenticated --region us-central1 --min-instances 1
+	gcloud run deploy uni-user-management --source . --port 8000 --env-vars-file .env.gcp.yaml --allow-unauthenticated --region us-central1 --min-instances 1

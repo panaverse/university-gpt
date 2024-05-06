@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app import crud
-from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
+from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser, VerifySuperUserDep, temp_code_verify
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
@@ -89,11 +89,11 @@ def tokens_manager_oauth_codeflow(
 
     # Initial token generation flow
     elif grant_type == "authorization_code":
-        #  TODO: OAUTH Temp Code Flow
-        raise credentials_exception
-        # user_id = await get_current_user_dep(code) 
-        # if not user_id:
-        #     raise credentials_exception
+        if not code:
+            raise credentials_exception
+        user = temp_code_verify(session, token=code)
+        if not user:
+            raise credentials_exception
     else:
         raise credentials_exception
 
@@ -114,6 +114,22 @@ def tokens_manager_oauth_codeflow(
     print("\n\n token_data \n\n ", token_data)
     return token_data
     
+@router.get("/oauth/temp-code")
+def get_temp_code(user_id: int, super_user: VerifySuperUserDep):
+    """
+    Get Temp Code against user_id to implentent OAuth2 for Custom Gpt
+
+    Args:
+        user_id 
+
+    Returns:
+        code (str): Temp Code
+    """
+    access_token_expires = timedelta(minutes=3)
+    code = security.create_access_token(
+            super_user.id, expires_delta=access_token_expires
+        ),
+    return {"code": code[0]}
 
 
 @router.post("/login/test-token", response_model=UserPublic)

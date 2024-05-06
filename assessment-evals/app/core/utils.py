@@ -9,7 +9,7 @@ def parse_cors(v: Any) -> list[str] | str:
     raise ValueError(v)
 
 
-def load_error_json(error_message: str) -> str:
+def load_error_json(error_message) -> str:
     details = json.loads(error_message.text)
     error_details = details.get("detail")
     return error_details

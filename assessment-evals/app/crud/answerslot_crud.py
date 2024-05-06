@@ -1,11 +1,38 @@
-from sqlmodel import Session
-
+from sqlmodel import Session, select
+from fastapi import HTTPException
 from app.models.base import QuestionTypeEnum
 
 from app.models.answerslot_model import  AnswerSlot, AnswerSlotOption, AnswerSlotCreate
 from app.core.requests import get_question
 
 class CRUDQuizAnswerSlotEngine:
+    # 0. Validate if Quiz Question being attempted is valid Quiz Question and not attemted before
+            # Check if answersheet_id and quesion_id are already in the database
+    def validate_quiz_question_attempt(
+        self, db_session: Session, answersheet_id: int, question_id: int
+    ):
+        """
+        Validate if Quiz Question being attempted is valid Quiz Question and not attemted before
+        """
+        try:
+            db_quiz_answer_slot = db_session.exec(
+                select(AnswerSlot).where(
+                    AnswerSlot.quiz_answer_sheet_id == answersheet_id,
+                    AnswerSlot.question_id == question_id,
+                )
+            ).one_or_none()
+
+            if db_quiz_answer_slot:
+                raise ValueError("Question Already Attempted")
+
+            return True
+        except ValueError as e:
+            db_session.rollback()
+            raise e
+        except Exception as e:
+            db_session.rollback()
+            raise e
+
     # 1. Create Quiz Answer Slot
     def create_quiz_answer_slot(
         self, db_session: Session, quiz_answer_slot: AnswerSlotCreate
@@ -14,6 +41,14 @@ class CRUDQuizAnswerSlotEngine:
         Create a Quiz Answer Slot Entry in the Database whenever a student answers a question
         """
         try:
+            
+            # validate_quiz_question_attempt
+            self.validate_quiz_question_attempt(
+                db_session=db_session,
+                answersheet_id=quiz_answer_slot.quiz_answer_sheet_id,
+                question_id=quiz_answer_slot.question_id,
+            )
+            
             if quiz_answer_slot.selected_options_ids is None:
                 raise ValueError("Select MCQ Option to Save It")
 
@@ -31,6 +66,9 @@ class CRUDQuizAnswerSlotEngine:
             db_session.refresh(db_quiz_answer_slot)
 
             return db_quiz_answer_slot
+        except ValueError as e:
+            db_session.rollback()
+            raise e
         except Exception as e:
             db_session.rollback()
             raise e

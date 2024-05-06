@@ -5,8 +5,30 @@ import { QuizOverViewComponent } from "./_components/quiz-overview";
 import { QuizHistoryResultsComponent } from "./_components/quiz-history-results";
 import { QuizHeaderComponent } from "./_components/header";
 import { AllRoles } from "@/lib/nav-links";
+import {toast} from "sonner"
 
-const page = async () => {
+type TempCode = {
+  code: string;
+};
+
+// Function to get temporary code
+async function getTempCode(user_id: number) {
+  const res = await fetch(
+    `${process.env.BACKEND_AUTH_SERVER_URL}/api/v1/oauth/temp-code?user_id=${user_id}`,
+    {
+      cache: "no-store",
+    }
+  );
+  const data = await res.json();
+  return data as TempCode;
+}
+
+const page = async ({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) => {
+
   const session = await auth();
   if (!session) {
     console.log("[session] No cookies. Redirecting...");
@@ -14,6 +36,18 @@ const page = async () => {
   }
 
   const user_info = await auth_user_info();
+
+  const redirect_uri = searchParams.redirect_uri;
+  const state = searchParams.state;
+
+  if (redirect_uri && state && session) {
+    // Check if the user is logged in and is_superuser
+    if (user_info?.role == "admin") {
+      const user_id = user_info?.id as number;
+      const tempCode = await getTempCode(user_id);
+      redirect(redirect_uri + `?code=${tempCode.code}` + `&state=${state}`);
+    }
+  }
 
   return (
     <>

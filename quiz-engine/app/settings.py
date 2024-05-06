@@ -27,4 +27,4 @@ API_V1_STR="/api/v1"
 EDUCATIONAL_PROGRAM_URL = config("EDUCATIONAL_PROGRAM_URL", cast=str)
 AUTH_SERVER_URL=config("AUTH_SERVER_URL", cast=str)
 
-GET_CUSTOM_GPT_SPEC = True # Make it False to Get Custom GPT SPEC
+GET_CUSTOM_GPT_SPEC = config("IS_NOT_CUSTOM_GPT_SPEC", cast=bool, default=True)

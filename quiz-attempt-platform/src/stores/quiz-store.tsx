@@ -53,27 +53,27 @@ export const useQuizStore = create<QuizState>()(
         ),
       submitAnswerAndUpdateQuestion: async () => {
         const { quizData, currentQuestionIndex } = get();
-
+        
         if (!quizData || !quizData.quiz_questions[currentQuestionIndex]) {
           return { status: "no-quiz", error: "No quiz or question data available." };  // Handling undefined quiz data
         }
-      
+        
+        try {
+          set({ isLoading: true });  // Set loading before processing
           const currentQuestion = quizData.quiz_questions[currentQuestionIndex];
           const selectedOptionsIds = currentQuestion.selectedOptions || [];
-
+          
           const requestBody = {
             quiz_answer_sheet_id: quizData.answer_sheet_id,
             question_id: currentQuestion.id,
             question_type: currentQuestion.question_type,
             selected_options_ids: selectedOptionsIds,
           };
-          try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/save-answer`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(requestBody),
             });
-            set({ isLoading: true });  // Set loading before processing
 
             if (!response.ok) {
               throw new Error("Failed to submit answer");
@@ -113,10 +113,10 @@ export const useQuizStore = create<QuizState>()(
       finishQuiz: async () => {
         const { quizData } = get();
         if (quizData) {
-          const requestBody = { quiz_answer_sheet_id: quizData.answer_sheet_id };
           
           try {
             set({ isLoading: true });
+            const requestBody = { quiz_answer_sheet_id: quizData.answer_sheet_id };
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/finish-quiz`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
