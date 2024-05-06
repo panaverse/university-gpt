@@ -6,6 +6,10 @@ This is a SuperAdmin Authenticated GPT that will
 - Manage QuestionBank Engine (Add Questions for any Topic)
 - Manage Quiz Engine (Create Quiz, add or mute questions in quiz, manage quiz settings and keys)
 
+Note: We can not use NGROCK on edge as now it shows the Warning Page before accessing API. This means the GPT actions will fail.
+
+Alternatives: Quick deploy on Google Cloud Run or use any other API testing tool.
+
 ## GPT Setup Guide:
 
 ### Title: 
