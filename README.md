@@ -12,8 +12,9 @@ As First part of this project we have developed Quiz API following Microservices
 
 ## Setup Instructions
 
-1. [Local Setup & Development Guide](/docs/2-development-guide.md)
-2 - [Demo Custom GPT Chat](https://chat.openai.com/share/1a330b4f-f872-422e-93d6-52258a43a122)
+1. [Local Setup & Development Guide](/docs/2-development-setup.md)
+
+2. [Authenticated Quiz Engine Custom GPT Chat](https://chat.openai.com/share/9a687a27-e0ad-4302-b426-88dafe3dbe2f)
 
 ## Microservices Overview
 
