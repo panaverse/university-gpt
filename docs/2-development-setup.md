@@ -2,15 +2,15 @@
 
 #### Note: We will use docker compose and devcontainers to setup and run this project locally.
 
-1. Clone the repo
-2. In each microservice rename .env.example to env and add any missing env variables only. 
+Step 1. Clone the repo
+Step 2. In each microservice rename .env.example to env and add any missing env variables only.
 
-Now We have 2 options to Run the Project
+Step 3: Now We have 2 compose files to Run the Project
 
 A: docker-compose.yml: Use Compose and then start containers manually in devcontainers (recommended)
 
 - Run docker compose up --build
-- Using devcontainer remote explrer open each microservice in seperate window and run `make dev` or copy dev comand from Makefile. 
+- Using devcontainer remote explorer open each microservice in separate window and run `make dev` or copy dev command from Makefile.
 
 B. Using Compose
 
@@ -35,3 +35,16 @@ To Attempt quizzes from Frontend
 2. pnpm install
 3. pnpm build
 
+## Open Running Microservices in Browser:
+
+- http://localhost:8000/docs
+- http://localhost:8001/docs
+- http://localhost:8002/docs
+- http://localhost:8003/docs
+- http://localhost:3000/
+
+The Default Super Admin Credentials are:
+- EMAIL: mr.junaid@gmail.com
+- PASSWORD: changethis
+
+You can change them in user-management/.env file and signup as regular user/student. More SuperAdmins can be added by 1st superadmin only.
