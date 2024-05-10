@@ -163,6 +163,26 @@ services:
     networks:
       - university-gpt-net
 
+  pgadmin:
+    image: dpage/pgadmin4:8.6
+    restart: always
+    container_name: PgAdmin4Cont
+    ports:
+      - "8010:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=SuperSecret
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres_test_db
+      - postgres_edu_dev_db
+      - postgres_qse_dev_db
+      - postgres_answer_dev_db
+      - postgres_auth_dev_db
+    networks:
+      - university-gpt-net
+
 
 volumes:
   postgres_test_db:
@@ -174,6 +194,8 @@ volumes:
   postgres_answer_dev_db:
     driver: local
   postgres_auth_dev_db:
+    driver: local
+  pgadmin:
     driver: local
 
 

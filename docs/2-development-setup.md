@@ -48,4 +48,9 @@ The Default Super Admin Credentials are:
 - EMAIL: mr.junaid@gmail.com
 - PASSWORD: changethis
 
+- PGADMIN: http://localhost:8010/
+    Credentials:
+      - EMAIL=user@domain.com
+      - PASSWORD=SuperSecret
+
 You can change them in user-management/.env file and signup as regular user/student. More SuperAdmins can be added by 1st superadmin only.
