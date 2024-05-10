@@ -9,7 +9,7 @@ Step 3: Now We have 2 compose files to Run the Project
 
 A: docker-compose.yml: Use Compose and then start containers manually in devcontainers (recommended)
 
-- Run docker compose up --build
+- Run `docker compose up --build`
 - Using devcontainer remote explorer open each microservice in separate window and run `make dev` or copy dev command from Makefile.
 
 B. Using Compose
@@ -19,6 +19,7 @@ You can also spin up everything using the other docker-compose-yml file.
 - docker-compose-dev-yaml file
 
 Use it to run compose and everything will be auto started.
+`docker compose -f docker-compose-dev.yaml up --build`
 NOTE: Review is pending to sync this file with the other compose file
 
 - During Development: We have used the 1st option.

@@ -8,5 +8,13 @@
     "postCreateCommand": "poetry install && alembic upgrade head && python app/init_data.py  && python -c 'print(\" CONTAINER STARTED - Start RUN FASTAPI SERVER NOW...\")'"  ,
     "forwardPorts": [
         "8003:8003"
-    ]
-} 
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-vscode.makefile-tools"
+            ]
+        }
+    }
+}

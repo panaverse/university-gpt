@@ -20,6 +20,8 @@ As First part of this project we have developed Quiz API following Microservices
 
 This repository contains the source code for the following microservices:
 
+![Microservices Image](docs/media/microservices.png)
+
 ### 1. Assessment Evals
 
 - Folder Name: assessment-evals
@@ -29,7 +31,7 @@ This repository contains the source code for the following microservices:
 ### 2. Quiz Management
 
 - Folder Name: quiz-management
-- Description: This service oversees the management of quizzes, including their creation, configuration, and association with questions from the Question Bank service. 
+- Description: This service oversees the management of quizzes, including their creation, configuration, and association with questions from the Question Bank service.
 It's central repository for storing and managing questions and their respective answers. It provides functionalities for adding, updating, and retrieving questions.
 It also handles the lifecycle of quizzes, such as activation and deactivation.
 - Purpose: To provide a platform for creating and managing quizzes efficiently, allowing instructors to configure and administer quizzes seamlessly.
@@ -46,7 +48,7 @@ It also handles the lifecycle of quizzes, such as activation and deactivation.
 - Description: User Management service handles user registrations, authentication, and role management across the system. It ensures secure access to the platform and assigns appropriate roles to users.
 - Purpose: To manage user accounts and access permissions, providing a secure and personalized experience for students, instructors, and administrators.
 
-### 5- Quiz Attempt Platform 
+### 5- Quiz Attempt Platform
 
 - Frontend GUI for students to actively participate in quiz attempts and facilitates as Login Window for Instructors Custom GPT.
 

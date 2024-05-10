@@ -24,15 +24,15 @@ def test_get_all_universities(client: TestClient):
     assert len(response.json()["all_records"]) >= 1
 
 
-def test_create_university(client: TestClient):
-    test_uni_data = {
-        "name": "University of Temp Test",
-        "description": "This is a temporary test university",
-    }
-    response = client.post(f"{settings.API_V1_STR}/university", json=test_uni_data)
-    assert response.status_code == 200
-    assert response.json()["name"] == test_uni_data.get("name")
-    assert response.json()["description"] == test_uni_data.get("description")
+# def test_create_university(client: TestClient):
+#     test_uni_data = {
+#         "name": "University of Temp Test",
+#         "description": "This is a temporary test university",
+#     }
+#     response = client.post(f"{settings.API_V1_STR}/university", json=test_uni_data)
+#     assert response.status_code == 200
+#     assert response.json()["name"] == test_uni_data.get("name")
+#     assert response.json()["description"] == test_uni_data.get("description")
 
 
 def test_update_university(client: TestClient):

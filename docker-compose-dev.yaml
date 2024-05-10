@@ -90,6 +90,7 @@ services:
       context: ./assessment-evals
       dockerfile: Dockerfile.dev
     env_file: "./assessment-evals/.env"
+    container_name: AssessmentEvalsCont
     ports:
       - "8003:8003"
     volumes:
